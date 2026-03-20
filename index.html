@@ -14,15 +14,11 @@
     />
     <link
       rel="stylesheet"
-      type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
-      /* ══════════════════════════════════════
-   DESIGN SYSTEM — GREEN × NEON PINK
-══════════════════════════════════════ */
       :root {
         --bg: #070c07;
         --s1: #0d140d;
@@ -39,7 +35,7 @@
         --pk15: rgba(255, 45, 120, 0.15);
         --pk35: rgba(255, 45, 120, 0.35);
         --r: 6px;
-        --nav: 52px;
+        --nav: 64px;
         --fd: "Bebas Neue", sans-serif;
         --fb: "DM Sans", sans-serif;
         --fm: "Space Mono", monospace;
@@ -53,6 +49,7 @@
       }
       html {
         -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
       }
       body {
         font-family: var(--fb);
@@ -64,12 +61,11 @@
         user-select: none;
       }
       input,
-      textarea {
+      textarea,
+      button {
         -webkit-user-select: text;
         user-select: text;
       }
-
-      /* ── PAGES ── */
       .pg {
         display: none !important;
       }
@@ -81,37 +77,36 @@
         flex-direction: column;
       }
 
-      /* ══ NAV ══ */
+      /* NAV */
       nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.25rem;
+        padding: 0 1.5rem;
         height: var(--nav);
         background: var(--s1);
         border-bottom: 1px solid var(--b1);
         position: sticky;
         top: 0;
         z-index: 2000;
+        padding: 0 1.75rem;
       }
       .nlogo {
         display: flex;
         flex-direction: column;
-        line-height: 1;
-        gap: 3px;
+        gap: 2px;
         cursor: pointer;
       }
       .nlogo-t {
         font-family: var(--fd);
-        font-weight: 400;
-        font-size: 1.3rem;
+        font-size: 1.55rem;
         color: var(--pk);
         letter-spacing: 3px;
-        text-transform: uppercase;
+        line-height: 1;
       }
       .nlogo-s {
         font-family: var(--fm);
-        font-size: 0.44rem;
+        font-size: 0.45rem;
         color: var(--mu);
         letter-spacing: 1.5px;
         text-transform: uppercase;
@@ -120,7 +115,7 @@
         display: flex;
       }
       .ntab {
-        padding: 0 1rem;
+        padding: 0 1.1rem;
         height: var(--nav);
         display: flex;
         align-items: center;
@@ -147,13 +142,10 @@
         border-bottom-color: var(--pk);
       }
 
-      /* ══════════════════════════
-   FEED PAGE
-══════════════════════════ */
+      /* FEED TOOLBAR */
       #pg-feed {
         height: calc(100vh - var(--nav));
       }
-
       .toolbar {
         padding: 0.5rem 1rem;
         background: var(--s1);
@@ -187,12 +179,10 @@
       }
       .fsel:focus {
         border-color: var(--pk);
-        box-shadow: 0 0 0 3px var(--pk15);
       }
       .fsel option {
         background: var(--bg);
       }
-
       .vtog {
         margin-left: auto;
         display: flex;
@@ -212,7 +202,6 @@
           background 0.15s,
           color 0.15s;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
       .vbtn.on {
         background: var(--pk);
@@ -228,6 +217,7 @@
         color: var(--pk);
       }
 
+      /* MAP */
       #map-wrap {
         flex: 1;
         display: flex;
@@ -235,10 +225,7 @@
       }
       #map {
         flex: 1;
-        width: 100%;
       }
-
-      /* CartoDB Voyager — keep natural color, just mild desaturation */
       .leaflet-container {
         background: #e8e0d8;
       }
@@ -250,39 +237,6 @@
         color: var(--tx) !important;
         border-color: var(--b2) !important;
       }
-
-      /* Pins */
-      .dpin {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: var(--s1);
-        border: 1.5px solid var(--pk35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow:
-          0 0 8px rgba(255, 45, 120, 0.2),
-          0 1px 4px rgba(0, 0, 0, 0.4);
-        transition:
-          transform 0.12s,
-          border-color 0.12s,
-          box-shadow 0.12s;
-      }
-      .dpin:hover {
-        transform: scale(1.18);
-        border-color: var(--pk);
-        box-shadow: 0 0 16px rgba(255, 45, 120, 0.5);
-      }
-      .dpin svg {
-        width: 13px;
-        height: 13px;
-        stroke: var(--tx);
-        fill: none;
-      }
-
-      /* Popup */
       .leaflet-popup-content-wrapper {
         background: var(--s1) !important;
         border: 1px solid var(--b2) !important;
@@ -291,7 +245,7 @@
         box-shadow:
           0 0 0 1px var(--pk35),
           0 14px 40px rgba(0, 0, 0, 0.85) !important;
-        min-width: 230px;
+        min-width: 215px;
       }
       .leaflet-popup-content {
         margin: 0 !important;
@@ -307,7 +261,33 @@
         font-size: 16px !important;
         z-index: 10;
       }
-
+      .dpin {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--s1);
+        border: 1.5px solid var(--pk35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 0 8px rgba(255, 45, 120, 0.2);
+        transition:
+          transform 0.12s,
+          border-color 0.12s,
+          box-shadow 0.12s;
+      }
+      .dpin:hover {
+        transform: scale(1.18);
+        border-color: var(--pk);
+        box-shadow: 0 0 16px rgba(255, 45, 120, 0.45);
+      }
+      .dpin svg {
+        width: 13px;
+        height: 13px;
+        stroke: var(--tx);
+        fill: none;
+      }
       .pu-img {
         border-radius: var(--r) var(--r) 0 0;
         overflow: hidden;
@@ -324,87 +304,80 @@
         display: block;
       }
       .pu-img svg {
-        width: 26px;
-        height: 26px;
-        opacity: 0.18;
+        width: 22px;
+        height: 22px;
+        opacity: 0.15;
         stroke: var(--mu);
         fill: none;
       }
       .pu-body {
-        padding: 0.7rem 0.85rem 0.8rem;
+        padding: 0.65rem 0.85rem 0.75rem;
       }
       .pu-loc {
         font-family: var(--fd);
-        font-weight: 700;
-        font-size: 0.82rem;
+        font-size: 1rem;
         color: var(--tx);
-        line-height: 1.3;
-        margin-bottom: 0.12rem;
+        line-height: 1.2;
+        margin-bottom: 0.1rem;
+        letter-spacing: 0.5px;
       }
       .pu-area {
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.54rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.38rem;
+        margin-bottom: 0.3rem;
       }
       .pu-cats {
         display: flex;
-        gap: 0.3rem;
+        gap: 0.25rem;
         flex-wrap: wrap;
-        margin-top: 0.35rem;
+        margin-top: 0.28rem;
       }
       .pu-cat {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.2rem;
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.14rem 0.4rem;
+        padding: 0.1rem 0.35rem;
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.52rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .pu-cat svg {
-        width: 9px;
-        height: 9px;
+        width: 8px;
+        height: 8px;
         stroke: var(--mu);
         fill: none;
-      }
-      .pu-notes {
-        font-size: 0.74rem;
-        color: var(--mu);
-        margin-top: 0.35rem;
-        line-height: 1.4;
       }
       .pu-meta {
         display: flex;
         justify-content: space-between;
-        margin-top: 0.5rem;
+        margin-top: 0.4rem;
       }
       .pu-by {
-        font-size: 0.68rem;
+        font-size: 0.64rem;
         color: var(--mu);
       }
       .pu-date {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.52rem;
         color: var(--fa);
       }
       .pu-link {
         display: block;
-        margin-top: 0.6rem;
-        padding: 0.38rem;
+        margin-top: 0.5rem;
+        padding: 0.32rem;
         text-align: center;
         border: 1px solid var(--b2);
         border-radius: var(--r);
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.54rem;
         color: var(--mu);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         cursor: pointer;
         transition:
           border-color 0.15s,
@@ -417,39 +390,108 @@
         color: var(--pk);
       }
 
-      /* List */
+      /* DISPATCH WALL */
+      #list-wrap {
+        flex: 1;
+        overflow: hidden;
+        display: none;
+        flex-direction: column;
+      }
+      #list-wrap.on {
+        display: flex;
+      }
+      /* CHRONOLOGICAL LIST */
       #list-wrap {
         flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
         display: none;
+        flex-direction: column;
       }
       #list-wrap.on {
-        display: block;
+        display: flex;
       }
-      .li {
-        padding: 0.65rem 0.9rem 2rem;
+      .clist {
+        padding: 0.75rem 1rem 3rem;
+        max-width: 100%;
       }
+
+      .clist-group {
+        margin-bottom: 1.5rem;
+      }
+      .clist-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.65rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--b1);
+      }
+      .clist-heading-label {
+        font-family: var(--fd);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .clist-heading.today .clist-heading-label {
+        font-size: 1.6rem;
+        color: var(--pk);
+        text-shadow: 0 0 18px rgba(255, 45, 120, 0.3);
+      }
+      .clist-heading.yesterday .clist-heading-label {
+        font-size: 1.3rem;
+        color: var(--tx);
+      }
+      .clist-heading.this-week .clist-heading-label {
+        font-size: 1.1rem;
+        color: var(--tx);
+      }
+      .clist-heading.older .clist-heading-label {
+        font-size: 0.95rem;
+        color: var(--mu);
+      }
+      .clist-heading-count {
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        color: var(--fa);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
       .lcard {
         background: var(--s1);
         border: 1px solid var(--b1);
-        border-radius: var(--r);
-        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        margin-bottom: 0.45rem;
         display: flex;
         overflow: hidden;
         cursor: pointer;
-        transition: border-color 0.15s;
+        transition:
+          border-color 0.15s,
+          background 0.1s;
+        position: relative;
       }
       .lcard:hover {
         border-color: var(--b2);
+        background: var(--s2);
+      }
+      .lcard.sev-severe,
+      .lcard.sev-blocking {
+        border-left: 3px solid var(--pk);
+      }
+      .lcard.sev-moderate {
+        border-left: 3px solid #c88c14;
+      }
+      .lcard.sev-minor {
+        border-left: 3px solid #2a6e2a;
       }
       .lcard-thumb {
-        width: 84px;
+        width: 80px;
         flex-shrink: 0;
         background: var(--s3);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 84px;
+        min-height: 80px;
       }
       .lcard-thumb img {
         width: 100%;
@@ -458,74 +500,78 @@
         display: block;
       }
       .lcard-thumb svg {
-        width: 26px;
-        height: 26px;
-        opacity: 0.18;
-        stroke: var(--mu);
+        width: 22px;
+        height: 22px;
+        stroke: var(--fa);
         fill: none;
+        opacity: 0.35;
       }
       .lcard-body {
-        padding: 0.6rem 0.8rem;
+        padding: 0.55rem 0.8rem;
         flex: 1;
         min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
       .lcard-loc {
         font-family: var(--fd);
-        font-weight: 700;
-        font-size: 0.8rem;
+        font-size: 1rem;
         color: var(--tx);
-        line-height: 1.25;
+        line-height: 1.15;
+        letter-spacing: 0.5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin-bottom: 0.08rem;
       }
       .lcard-area {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.54rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-top: 0.1rem;
+        margin-bottom: 0.28rem;
       }
       .lcard-chips {
         display: flex;
-        gap: 0.25rem;
-        margin-top: 0.3rem;
+        gap: 0.22rem;
         flex-wrap: wrap;
+        margin-bottom: 0.28rem;
       }
       .chip {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.18rem;
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.13rem 0.38rem;
+        padding: 0.1rem 0.32rem;
         font-family: var(--fm);
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .chip svg {
-        width: 9px;
-        height: 9px;
+        width: 8px;
+        height: 8px;
         stroke: var(--mu);
         fill: none;
       }
       .lcard-foot {
         display: flex;
         justify-content: space-between;
-        margin-top: 0.36rem;
+        align-items: center;
       }
       .lcard-by {
-        font-size: 0.66rem;
+        font-size: 0.64rem;
         color: var(--mu);
       }
-      .lcard-date {
+      .lcard-time {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.5rem;
         color: var(--fa);
       }
-      .lempty {
+      .list-empty {
         text-align: center;
         padding: 3rem 1rem;
         font-family: var(--fm);
@@ -533,15 +579,12 @@
         color: var(--fa);
       }
 
-      /* ══════════════════════════
-   DETAIL PAGE
-══════════════════════════ */
+      /* DETAIL */
       #pg-detail {
-        max-width: 640px;
+        max-width: 960px;
         margin: 0 auto;
-        padding: 1.5rem 1.25rem 5rem;
+        padding: 1.5rem 1.5rem 5rem;
       }
-
       .back-btn {
         display: flex;
         align-items: center;
@@ -567,7 +610,6 @@
         stroke: currentColor;
         fill: none;
       }
-
       .det-photos {
         display: grid;
         gap: 3px;
@@ -616,141 +658,166 @@
         stroke: var(--mu);
         fill: none;
       }
-
       .det-id-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.54rem;
         color: var(--fa);
         background: var(--s2);
         border: 1px solid var(--b1);
         border-radius: 3px;
-        padding: 0.22rem 0.6rem;
-        margin-bottom: 0.7rem;
+        padding: 0.18rem 0.58rem;
+        margin-bottom: 0.65rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
       }
       .det-id-badge span {
         color: var(--mu);
       }
-
       .det-area {
         font-family: var(--fm);
         font-size: 0.62rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.28rem;
       }
       .det-loc {
         font-family: var(--fd);
-        font-weight: 900;
-        font-size: 1.55rem;
+        font-size: clamp(1.5rem, 5vw, 2.8rem);
         color: var(--tx);
-        line-height: 1.15;
+        line-height: 1.05;
+        margin-bottom: 0.3rem;
+        letter-spacing: 1.5px;
+      }
+      .det-timestamp {
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        color: var(--fa);
         margin-bottom: 1.1rem;
       }
+      .det-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 0.8rem;
+      }
+      @media (max-width: 780px) {
+        .det-two-col {
+          grid-template-columns: 1fr;
+          gap: 0.7rem;
+        }
+      }
       .det-sec {
-        margin-bottom: 1rem;
+        margin-bottom: 0.9rem;
       }
       .det-sec-label {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.54rem;
         color: var(--fa);
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        margin-bottom: 0.42rem;
+        margin-bottom: 0.4rem;
       }
       .det-cats {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4rem;
+        gap: 0.36rem;
       }
       .det-cat {
         display: flex;
         align-items: center;
-        gap: 0.38rem;
+        gap: 0.32rem;
         border: 1px solid var(--b2);
         border-radius: var(--r);
-        padding: 0.32rem 0.7rem;
+        padding: 0.28rem 0.62rem;
         font-family: var(--fm);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--mu);
         text-transform: uppercase;
         background: var(--s2);
       }
       .det-cat svg {
-        width: 12px;
-        height: 12px;
+        width: 11px;
+        height: 11px;
         stroke: var(--mu);
         fill: none;
       }
       .det-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.35rem;
+        gap: 0.3rem;
       }
       .det-tag {
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.26rem 0.62rem;
+        padding: 0.22rem 0.58rem;
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.56rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .det-notes {
-        font-size: 0.88rem;
+        font-size: 0.86rem;
         color: var(--mu);
         line-height: 1.7;
         background: var(--s2);
         border: 1px solid var(--b1);
         border-radius: var(--r);
-        padding: 0.82rem 1rem;
+        padding: 0.78rem 0.95rem;
       }
       .det-divider {
         height: 1px;
         background: var(--b1);
-        margin: 1.1rem 0;
+        margin: 1rem 0;
       }
       .det-meta-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
       .det-reporter {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         color: var(--tx);
       }
       .det-date {
         font-family: var(--fm);
-        font-size: 0.62rem;
+        font-size: 0.58rem;
         color: var(--fa);
       }
-
-      /* ══════════════════════════
-   REPORT PAGE
-══════════════════════════ */
-      #pg-report {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 2rem 1.25rem 5rem;
+      #det-mini-map {
+        width: 100%;
+        height: 210px;
+        border-radius: var(--r);
+        overflow: hidden;
+        margin-top: 1.2rem;
+        border: 1px solid var(--b1);
       }
 
+      /* REPORT PAGE */
+      #pg-report {
+        padding: 1.5rem 1.25rem 5rem;
+      }
+      .rp-outer {
+        max-width: 960px;
+        margin: 0 auto;
+        width: 100%;
+      }
       .rp-head {
         margin-bottom: 2rem;
       }
       .rp-t {
         font-family: var(--fd);
-        font-weight: 400;
-        font-size: 3rem;
+        font-size: clamp(2rem, 8vw, 3.2rem);
         color: var(--pk);
         letter-spacing: 3px;
         text-transform: uppercase;
         line-height: 1;
-        text-shadow: 0 0 28px rgba(255, 45, 120, 0.3);
+        text-shadow: 0 0 28px rgba(255, 45, 120, 0.28);
       }
       .rp-s {
         font-family: var(--fm);
@@ -758,102 +825,42 @@
         color: var(--mu);
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin-top: 0.38rem;
+        margin-top: 0.35rem;
       }
       .rp-ctx {
-        margin-top: 0.9rem;
+        margin-top: 0.85rem;
         font-size: 0.86rem;
         color: var(--mu);
         line-height: 1.7;
         border-left: 2px solid var(--pk35);
         padding-left: 0.85rem;
+        max-width: 520px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+      }
+      .form-col {
+        display: flex;
+        flex-direction: column;
+      }
+      .form-full {
+        grid-column: 1/-1;
+      }
+      @media (max-width: 780px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .form-full {
+          grid-column: 1;
+        }
       }
       .rp-divider {
         height: 1px;
         background: var(--b1);
-        margin: 1.6rem 0;
+        margin: 1.5rem 0;
       }
-
-      .step {
-        margin-bottom: 0.3rem;
-      }
-      .step-hd {
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
-        padding: 0.85rem 1rem;
-        background: var(--s1);
-        border: 1px solid var(--b1);
-        border-radius: var(--r);
-        cursor: pointer;
-        transition: border-color 0.15s;
-      }
-      .step-hd:hover {
-        border-color: var(--b2);
-      }
-      .step.open .step-hd {
-        border-color: var(--pk35);
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-      }
-      .step-n {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: var(--pk10);
-        border: 1px solid var(--pk35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--fm);
-        font-size: 0.58rem;
-        color: var(--pk);
-        flex-shrink: 0;
-        transition: background 0.2s;
-      }
-      .step.done .step-n {
-        background: var(--pk);
-        color: #fff;
-        border-color: var(--pk);
-      }
-      .step-title {
-        font-family: var(--fm);
-        font-size: 0.68rem;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: var(--tx);
-        flex: 1;
-      }
-      .step-ck {
-        font-size: 0.75rem;
-        color: var(--pk);
-        display: none;
-      }
-      .step.done .step-ck {
-        display: block;
-      }
-      .step-arr {
-        font-size: 0.65rem;
-        color: var(--mu);
-        transition: transform 0.25s;
-      }
-      .step.open .step-arr {
-        transform: rotate(180deg);
-      }
-
-      .step-bd {
-        display: none;
-        padding: 1rem;
-        background: var(--s1);
-        border: 1px solid var(--pk35);
-        border-top: none;
-        border-bottom-left-radius: var(--r);
-        border-bottom-right-radius: var(--r);
-      }
-      .step.open .step-bd {
-        display: block;
-      }
-
       .fl-label {
         font-family: var(--fm);
         font-size: 0.6rem;
@@ -875,7 +882,6 @@
         font-size: 0.54rem;
         margin-left: 0.3rem;
       }
-
       input[type="text"],
       textarea {
         width: 100%;
@@ -898,25 +904,110 @@
       }
       textarea {
         resize: vertical;
-        min-height: 70px;
+        min-height: 80px;
       }
       .r2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
       }
+      @media (max-width: 480px) {
+        .r2 {
+          grid-template-columns: 1fr;
+        }
+      }
 
+      /* Location search */
+      .loc-search-wrap {
+        position: relative;
+      }
+      .loc-maps-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        margin-top: 0.5rem;
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--mu);
+        background: var(--s2);
+        border: 1px solid var(--b2);
+        border-radius: var(--r);
+        padding: 0.3rem 0.72rem;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+      .loc-maps-btn:hover {
+        border-color: var(--pk35);
+        color: var(--pk);
+      }
+      .loc-maps-btn svg {
+        width: 10px;
+        height: 10px;
+        stroke: currentColor;
+        fill: none;
+      }
+      .loc-results {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 500;
+        background: var(--s1);
+        border: 1px solid var(--b2);
+        border-radius: var(--r);
+        max-height: 195px;
+        overflow-y: auto;
+        display: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      }
+      .loc-results.open {
+        display: block;
+      }
+      .loc-result-item {
+        padding: 0.52rem 0.78rem;
+        font-size: 0.82rem;
+        color: var(--tx);
+        cursor: pointer;
+        border-bottom: 1px solid var(--b1);
+        transition: background 0.1s;
+      }
+      .loc-result-item:last-child {
+        border-bottom: none;
+      }
+      .loc-result-item:hover {
+        background: var(--s2);
+      }
+      .loc-result-item small {
+        display: block;
+        font-family: var(--fm);
+        font-size: 0.52rem;
+        color: var(--mu);
+        margin-top: 0.12rem;
+      }
+      .loc-searching {
+        padding: 0.52rem 0.78rem;
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        color: var(--fa);
+        text-transform: uppercase;
+      }
+
+      /* Tags */
       .trow {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-top: 0.4rem;
+        gap: 0.32rem;
+        margin-top: 0.38rem;
       }
       .tag {
-        padding: 0.27rem 0.68rem;
+        padding: 0.25rem 0.65rem;
         border-radius: 3px;
         border: 1px solid var(--b1);
-        font-size: 0.67rem;
+        font-size: 0.65rem;
         cursor: pointer;
         background: var(--s2);
         color: var(--mu);
@@ -936,16 +1027,22 @@
         border-color: var(--pk35);
       }
 
+      /* Cat cards */
       .cgrid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.45rem;
-        margin-top: 0.4rem;
+        gap: 0.4rem;
+        margin-top: 0.38rem;
+      }
+      @media (max-width: 360px) {
+        .cgrid {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
       .ccard {
         border: 1px solid var(--b1);
         border-radius: var(--r);
-        padding: 0.7rem 0.4rem 0.6rem;
+        padding: 0.62rem 0.35rem 0.52rem;
         text-align: center;
         cursor: pointer;
         background: var(--s2);
@@ -963,11 +1060,11 @@
       .ccard-ico {
         display: flex;
         justify-content: center;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.26rem;
       }
       .ccard-ico svg {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
         stroke: var(--mu);
         fill: none;
       }
@@ -976,20 +1073,21 @@
       }
       .ccard-lbl {
         font-family: var(--fm);
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         color: var(--mu);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.35px;
         line-height: 1.3;
       }
       .ccard.on .ccard-lbl {
         color: var(--pk);
       }
 
+      /* Upload */
       .uparea {
         border: 1.5px dashed var(--b2);
         border-radius: var(--r);
-        padding: 1.8rem 1rem;
+        padding: 1.5rem 1rem;
         text-align: center;
         cursor: pointer;
         transition:
@@ -1014,30 +1112,35 @@
         height: 100%;
       }
       .uparea-ico {
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.35rem;
         display: flex;
         justify-content: center;
       }
       .uparea-ico svg {
-        width: 28px;
-        height: 28px;
-        opacity: 0.3;
+        width: 26px;
+        height: 26px;
+        opacity: 0.25;
         stroke: var(--mu);
         fill: none;
       }
       .uparea p {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         color: var(--mu);
       }
       .uparea small {
-        font-size: 0.66rem;
+        font-size: 0.62rem;
         color: var(--fa);
       }
       .pgrid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.4rem;
-        margin-top: 0.6rem;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.32rem;
+        margin-top: 0.5rem;
+      }
+      @media (max-width: 480px) {
+        .pgrid {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
       .pitem {
         position: relative;
@@ -1054,61 +1157,37 @@
       }
       .prm {
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: 3px;
+        right: 3px;
         background: rgba(0, 0, 0, 0.8);
         border: none;
         border-radius: 50%;
-        width: 19px;
-        height: 19px;
+        width: 17px;
+        height: 17px;
         color: #fff;
-        font-size: 0.65rem;
+        font-size: 0.58rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       .upcount {
-        font-size: 0.62rem;
+        font-size: 0.58rem;
         color: var(--fa);
-        margin-top: 0.35rem;
+        margin-top: 0.28rem;
         text-align: right;
         font-family: var(--fm);
       }
 
-      .next-btn {
-        width: 100%;
-        margin-top: 1rem;
-        padding: 0.68rem;
-        background: var(--s3);
-        color: var(--tx);
-        border: 1px solid var(--b2);
-        border-radius: var(--r);
-        font-family: var(--fm);
-        font-size: 0.68rem;
-        letter-spacing: 1px;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-      .next-btn:hover {
-        border-color: var(--pk35);
-        background: var(--s2);
-      }
-
       .sub-btn {
-        width: 100%;
-        margin-top: 1.5rem;
-        padding: 0.85rem;
+        margin-top: 1.8rem;
+        padding: 0.82rem 3rem;
         background: var(--pk);
         color: #fff;
         border: none;
         border-radius: var(--r);
         font-family: var(--fd);
-        font-size: 1.4rem;
-        font-weight: 400;
+        font-size: 1.5rem;
         letter-spacing: 3px;
         cursor: pointer;
         text-transform: uppercase;
@@ -1116,6 +1195,8 @@
         transition:
           box-shadow 0.15s,
           transform 0.1s;
+        display: block;
+        min-width: 180px;
       }
       .sub-btn:hover {
         box-shadow: 0 0 32px rgba(255, 45, 120, 0.55);
@@ -1123,14 +1204,20 @@
       .sub-btn:active {
         transform: scale(0.98);
       }
+      @media (max-width: 480px) {
+        .sub-btn {
+          width: 100%;
+          padding: 0.82rem;
+        }
+      }
       .anon {
-        font-size: 0.62rem;
+        font-size: 0.6rem;
         color: var(--fa);
-        text-align: center;
-        margin-top: 0.7rem;
+        margin-top: 0.65rem;
         font-family: var(--fm);
       }
 
+      /* Success */
       .succ {
         display: none;
         text-align: center;
@@ -1141,16 +1228,22 @@
       }
       .succ h2 {
         font-family: var(--fd);
-        font-size: 1.8rem;
+        font-size: 2.5rem;
         color: var(--pk);
         margin-bottom: 0.5rem;
-        letter-spacing: 3px;
+        letter-spacing: 4px;
         text-shadow: 0 0 24px rgba(255, 45, 120, 0.4);
       }
       .succ p {
         color: var(--mu);
         font-size: 0.86rem;
         line-height: 1.7;
+      }
+      .succ-id {
+        font-family: var(--fm);
+        font-size: 0.6rem;
+        color: var(--fa);
+        margin-top: 0.6rem;
       }
       .ragain {
         margin-top: 1.5rem;
@@ -1173,38 +1266,14 @@
         border-color: var(--pk35);
         color: var(--tx);
       }
-
-      /* Toastify override */
       .toastify {
         font-family: var(--fm) !important;
-        font-size: 0.72rem !important;
+        font-size: 0.7rem !important;
         border-radius: var(--r) !important;
-      }
-      .toastify.on {
-        box-shadow: none !important;
-      }
-
-      @media (max-width: 480px) {
-        .r2 {
-          grid-template-columns: 1fr;
-        }
-        .cgrid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .pgrid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .rp-t {
-          font-size: 1.7rem;
-        }
-        .det-loc {
-          font-size: 1.25rem;
-        }
       }
     </style>
   </head>
   <body>
-    <!-- ══ NAV ══ -->
     <nav>
       <div class="nlogo" onclick="goPage('pg-feed')">
         <div class="nlogo-t">DumpSpot</div>
@@ -1220,7 +1289,7 @@
       </div>
     </nav>
 
-    <!-- ══ FEED PAGE ══ -->
+    <!-- FEED -->
     <div id="pg-feed" class="pg on">
       <div class="toolbar">
         <span class="fl">Filter</span>
@@ -1238,20 +1307,20 @@
             Map
           </button>
           <button class="vbtn" id="btn-list" onclick="setView('list')">
-            List
+            Wall
           </button>
         </div>
         <div class="cnt"><b id="cnt-n">0</b> spots</div>
       </div>
       <div id="map-wrap"><div id="map"></div></div>
-      <div id="list-wrap"><div class="li" id="list-inner"></div></div>
+      <div id="list-wrap">
+        <div class="clist" id="clist"></div>
+      </div>
     </div>
 
-    <!-- ══ DETAIL PAGE ══ -->
+    <!-- DETAIL -->
     <div id="pg-detail" class="pg">
-      <div
-        style="max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem"
-      >
+      <div class="rp-outer" style="padding: 1.5rem 1.25rem 5rem">
         <button class="back-btn" onclick="goBack()">
           <svg viewBox="0 0 12 12" stroke-width="1.5">
             <path d="M8 2L4 6l4 4" />
@@ -1259,179 +1328,199 @@
           Back to feed
         </button>
         <div id="det-content"></div>
+        <div id="det-mini-map" style="display: none; margin-top: 1.2rem"></div>
       </div>
     </div>
 
-    <!-- ══ REPORT PAGE ══ -->
+    <!-- REPORT -->
     <div id="pg-report" class="pg">
-      <div
-        id="form-screen"
-        style="max-width: 600px; margin: 0 auto; padding: 2rem 1.25rem 5rem"
-      >
-        <!-- Header -->
-        <div class="rp-head">
-          <div class="rp-t">DumpSpot</div>
-          <div class="rp-s">post your dump here</div>
-          <p class="rp-ctx">
-            See garbage piling up on your street? Drop a pin.<br />
-            No login, no hassle — a name, a place, a photo.
-          </p>
-        </div>
-
-        <!-- ── YOUR NAME ── -->
-        <label class="fl-label">Your name <span class="req">*</span></label>
-        <input
-          type="text"
-          id="rname"
-          placeholder="What to call you"
-          maxlength="60"
-        />
-
-        <!-- ── LOCATION ── -->
-        <label class="fl-label"
-          >State <span class="req">*</span> &amp; Area
-          <span class="req">*</span></label
-        >
-        <div class="r2">
-          <input type="text" id="rstate" placeholder="State" maxlength="50" />
-          <input
-            type="text"
-            id="rarea"
-            placeholder="District / Area"
-            maxlength="60"
-          />
-        </div>
-
-        <label class="fl-label"
-          >Specific location <span class="req">*</span></label
-        >
-        <input
-          type="text"
-          id="rspec"
-          placeholder="e.g. Near SBI ATM, MG Road junction"
-          maxlength="120"
-        />
-
-        <div class="rp-divider"></div>
-
-        <!-- ── SITE TYPE ── -->
-        <label class="fl-label"
-          >Type of site <span class="opt">optional</span></label
-        >
-        <div class="trow">
-          <div class="tag" data-g="type">Road</div>
-          <div class="tag" data-g="type">Footpath</div>
-          <div class="tag" data-g="type">Nala / Drain</div>
-          <div class="tag" data-g="type">Open plot</div>
-          <div class="tag" data-g="type">Park</div>
-          <div class="tag" data-g="type">Market</div>
-          <div class="tag" data-g="type">Near school</div>
-          <div class="tag" data-g="type">Near hospital</div>
-        </div>
-
-        <!-- ── GARBAGE CATEGORY ── -->
-        <label class="fl-label" style="margin-top: 1.4rem"
-          >Garbage category <span class="opt">optional</span></label
-        >
-        <div class="cgrid" id="cgrid"></div>
-
-        <!-- ── SEVERITY ── -->
-        <label class="fl-label" style="margin-top: 1.4rem"
-          >Severity <span class="opt">optional</span></label
-        >
-        <div class="trow">
-          <div class="tag" data-g="sev">Minor</div>
-          <div class="tag" data-g="sev">Moderate</div>
-          <div class="tag" data-g="sev">Severe</div>
-          <div class="tag" data-g="sev">Blocking road</div>
-        </div>
-
-        <div class="rp-divider"></div>
-
-        <!-- ── NOTES ── -->
-        <label class="fl-label">Notes <span class="opt">optional</span></label>
-        <textarea
-          id="rnotes"
-          placeholder="Smell, duration, any hazard…"
-        ></textarea>
-
-        <!-- ── PHOTOS ── -->
-        <label class="fl-label" style="margin-top: 1.4rem"
-          >Photos <span class="req">*</span></label
-        >
-        <div class="uparea" id="uparea">
-          <input type="file" id="photo-input" accept="image/*" multiple />
-          <div class="uparea-ico">
-            <svg viewBox="0 0 24 24" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="3" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
+      <div class="rp-outer">
+        <div id="form-screen">
+          <div class="rp-head">
+            <div class="rp-t">DumpSpot</div>
+            <div class="rp-s">post your dump here</div>
+            <p class="rp-ctx">
+              See garbage piling up on your street? Drop a pin.<br />No login,
+              no hassle — a name, a place, a photo.
+            </p>
           </div>
-          <p>Tap or drag to add photos</p>
-          <small>1 to 6 · JPG PNG WEBP</small>
+
+          <div class="form-grid">
+            <!-- LEFT -->
+            <div class="form-col">
+              <label class="fl-label"
+                >Your name <span class="req">*</span></label
+              >
+              <input
+                type="text"
+                id="rname"
+                placeholder="What to call you"
+                maxlength="60"
+              />
+
+              <label class="fl-label"
+                >State <span class="req">*</span> &amp; Area
+                <span class="req">*</span></label
+              >
+              <div class="r2">
+                <input
+                  type="text"
+                  id="rstate"
+                  placeholder="State"
+                  maxlength="50"
+                />
+                <input
+                  type="text"
+                  id="rarea"
+                  placeholder="District / Area"
+                  maxlength="60"
+                />
+              </div>
+
+              <label class="fl-label"
+                >Specific location <span class="req">*</span></label
+              >
+              <div class="loc-search-wrap">
+                <input
+                  type="text"
+                  id="rspec"
+                  placeholder="Search or type your location"
+                  maxlength="200"
+                  autocomplete="off"
+                  oninput="onLocInput(this.value)"
+                />
+                <div class="loc-results" id="loc-results"></div>
+              </div>
+              <button class="loc-maps-btn" onclick="openGoogleMaps()">
+                <svg viewBox="0 0 24 24" stroke-width="1.5">
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                  />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+                Open in Google Maps instead
+              </button>
+
+              <label class="fl-label" style="margin-top: 1.4rem"
+                >Notes <span class="opt">optional</span></label
+              >
+              <textarea
+                id="rnotes"
+                placeholder="Smell, duration, any hazard to public…"
+              ></textarea>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="form-col">
+              <label class="fl-label"
+                >Type of site <span class="opt">optional</span></label
+              >
+              <div class="trow">
+                <div class="tag" data-g="type">Road</div>
+                <div class="tag" data-g="type">Footpath</div>
+                <div class="tag" data-g="type">Nala / Drain</div>
+                <div class="tag" data-g="type">Open plot</div>
+                <div class="tag" data-g="type">Park</div>
+                <div class="tag" data-g="type">Market</div>
+                <div class="tag" data-g="type">Near school</div>
+                <div class="tag" data-g="type">Near hospital</div>
+              </div>
+
+              <label class="fl-label" style="margin-top: 1.2rem"
+                >Garbage category <span class="opt">optional</span></label
+              >
+              <div class="cgrid" id="cgrid"></div>
+
+              <label class="fl-label" style="margin-top: 1.2rem"
+                >Severity <span class="opt">optional</span></label
+              >
+              <div class="trow">
+                <div class="tag" data-g="sev">Minor</div>
+                <div class="tag" data-g="sev">Moderate</div>
+                <div class="tag" data-g="sev">Severe</div>
+                <div class="tag" data-g="sev">Blocking road</div>
+              </div>
+            </div>
+
+            <!-- PHOTOS full width -->
+            <div class="form-full">
+              <div class="rp-divider"></div>
+              <label class="fl-label">Photos <span class="req">*</span></label>
+              <div class="uparea" id="uparea">
+                <input type="file" id="photo-input" accept="image/*" multiple />
+                <div class="uparea-ico">
+                  <svg viewBox="0 0 24 24" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
+                <p>Tap or drag photos here</p>
+                <small>1 to 6 · JPG PNG WEBP</small>
+              </div>
+              <div id="pgrid" class="pgrid" style="display: none"></div>
+              <div id="upcount" class="upcount"></div>
+              <button class="sub-btn" onclick="submitReport()">Submit</button>
+              <p class="anon">No account needed · anonymous beyond your name</p>
+            </div>
+          </div>
         </div>
-        <div id="pgrid" class="pgrid" style="display: none"></div>
-        <div id="upcount" class="upcount"></div>
 
-        <button class="sub-btn" onclick="submitReport()">Submit Report</button>
-        <p class="anon">No account needed · anonymous beyond your name</p>
-      </div>
-
-      <div class="succ" id="succ">
-        <svg
-          style="width: 40px; height: 40px; margin-bottom: 1rem; opacity: 0.5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--pk)"
-          stroke-width="1.5"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 12l3 3 5-5" />
-        </svg>
-        <h2>Pinned.</h2>
-        <p>
-          Your report is live on the map.<br />Share DumpSpot — more eyes, more
-          pressure.
-        </p>
-        <button class="ragain" onclick="resetForm()">
-          Report another spot
-        </button>
+        <div class="succ" id="succ">
+          <svg
+            style="
+              width: 44px;
+              height: 44px;
+              margin-bottom: 1rem;
+              opacity: 0.42;
+            "
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--pk)"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12l3 3 5-5" />
+          </svg>
+          <h2>Pinned.</h2>
+          <p>
+            Your report is live on the map.<br />Share DumpSpot — more eyes,
+            more pressure.
+          </p>
+          <div class="succ-id" id="succ-id"></div>
+          <button class="ragain" onclick="resetForm()">
+            Report another spot
+          </button>
+        </div>
       </div>
     </div>
 
     <script>
-      // ══════════════════════════════════════
-      // SILENT LOG (console only, no toasts)
-      // ══════════════════════════════════════
-      function log(msg, isErr) {
-        console[isErr ? "error" : "log"](isErr ? "[ERR]" : "[OK]", msg);
-      }
+      document.addEventListener("contextmenu", (e) => e.preventDefault());
+      document.addEventListener("keydown", (e) => {
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          ["u", "s", "a"].includes(e.key.toLowerCase())
+        )
+          e.preventDefault();
+        if (e.key === "F12") e.preventDefault();
+      });
 
-      // ══════════════════════════════════════
-      // WELCOME TOAST
-      // Shows once per browser session.
-      // Stored in sessionStorage so it won't
-      // reappear on normal refresh.
-      // Clears on hard refresh (Ctrl+Shift+R)
-      // because sessionStorage is wiped.
-      // ══════════════════════════════════════
+      const log = (m, err) =>
+        console[err ? "error" : "log"](err ? "[ERR]" : "[OK]", m);
+
       function maybeShowWelcome() {
-        const KEY = "ds_welcomed";
-        if (sessionStorage.getItem(KEY)) return;
-        sessionStorage.setItem(KEY, "1");
-
-        const greetings = [
+        if (sessionStorage.getItem("ds_welcomed")) return;
+        sessionStorage.setItem("ds_welcomed", "1");
+        const msgs = [
           "Welcome back. Have a great day ahead 🌱",
           "Good to see you. Stay aware, stay vocal 📍",
           "Hey there. Every report matters 💚",
           "Welcome to DumpSpot. Let's clean this up 🗺️",
         ];
-        const msg = greetings[Math.floor(Math.random() * greetings.length)];
-
         setTimeout(() => {
           Toastify({
-            text: msg,
+            text: msgs[Math.floor(Math.random() * msgs.length)],
             duration: 3500,
             gravity: "bottom",
             position: "center",
@@ -1440,19 +1529,16 @@
               background: "#0d140d",
               border: "1px solid #2e452e",
               color: "#ddeedd",
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.72rem",
-              letterSpacing: "0.3px",
+              fontFamily: "'Space Mono',monospace",
+              fontSize: ".72rem",
+              letterSpacing: ".3px",
               borderRadius: "6px",
-              padding: "0.65rem 1.1rem",
+              padding: ".65rem 1.1rem",
             },
           }).showToast();
-        }, 600);
+        }, 700);
       }
 
-      // ══════════════════════════════════════
-      // SVG ICONS
-      // ══════════════════════════════════════
       const ICONS = {
         bin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`,
         flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c0 0-4 4-4 8a4 4 0 008 0c0-2-1-4-1-4s-1 3-3 3-2-2-2-2 2-1 2-5z"/></svg>`,
@@ -1460,10 +1546,9 @@
         brick: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="5" rx="1"/><rect x="2" y="12" width="9" height="5" rx="1"/><rect x="13" y="12" width="9" height="5" rx="1"/></svg>`,
         bolt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>`,
         cross: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="2" width="6" height="20" rx="1"/><rect x="2" y="9" width="20" height="6" rx="1"/></svg>`,
-        bone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h10M5 7v10M19 7v10M7 19h10"/></svg>`,
+        bone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="9" cy="4.5" rx="1.8" ry="2.2"/><ellipse cx="15" cy="4.5" rx="1.8" ry="2.2"/><ellipse cx="5.5" cy="9.5" rx="1.5" ry="1.8"/><ellipse cx="18.5" cy="9.5" rx="1.5" ry="1.8"/><path d="M12 22c-2.8 0-6-2.5-6-6 0-2 1.5-3.5 3-4.5 1-.7 2-1 3-1s2 .3 3 1c1.5 1 3 2.5 3 4.5 0 3.5-3.2 6-6 6z"/></svg>`,
         photo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
       };
-
       const CATS = [
         { key: "Plastic waste", icon: "bin", label: "Plastic" },
         { key: "Food waste", icon: "bin", label: "Food waste" },
@@ -1475,7 +1560,6 @@
         { key: "Animal waste", icon: "bone", label: "Animal" },
         { key: "Mixed / general", icon: "bin", label: "Mixed" },
       ];
-
       function catIcon(key) {
         const c = CATS.find((x) => x.key === key);
         return c ? ICONS[c.icon] : ICONS.bin;
@@ -1484,28 +1568,36 @@
         return !cats || !cats.length ? ICONS.bin : catIcon(cats[0]);
       }
 
-      // ══════════════════════════════════════
-      // ID GENERATOR
-      // Each report gets a human-readable ID:
-      // DS-YYYYMMDD-XXXX  (prefix + date + 4-char random hex)
-      // This will map to the Supabase row ID later
-      // ══════════════════════════════════════
-      function genReportId() {
+      function genId() {
         const d = new Date();
-        const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-        const rand = Math.floor(Math.random() * 0xffff)
+        const dt = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+        const tm = `${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}${String(d.getSeconds()).padStart(2, "0")}`;
+        const r = Math.floor(Math.random() * 0xffff)
           .toString(16)
           .toUpperCase()
           .padStart(4, "0");
-        return `DS-${date}-${rand}`;
+        return `DS-${dt}-${tm}-${r}`;
+      }
+      function fmtTs(iso) {
+        const d = new Date(iso);
+        return (
+          d.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }) +
+          " · " +
+          d.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+        );
       }
 
-      // ══════════════════════════════════════
-      // SEED DATA
-      // ══════════════════════════════════════
       const SEED = [
         {
-          id: "DS-20260318-A1B2",
+          id: "DS-20260318-183042-A1B2",
           reporter: "Arjun M.",
           state: "Maharashtra",
           area: "Pune",
@@ -1517,10 +1609,10 @@
           photos: [],
           lat: 18.5204,
           lng: 73.8567,
-          date: "2026-03-18",
+          ts: "2026-03-18T18:30:42",
         },
         {
-          id: "DS-20260317-C3D4",
+          id: "DS-20260317-091514-C3D4",
           reporter: "Divya K.",
           state: "Karnataka",
           area: "Bengaluru",
@@ -1532,10 +1624,10 @@
           photos: [],
           lat: 12.9352,
           lng: 77.6245,
-          date: "2026-03-17",
+          ts: "2026-03-17T09:15:14",
         },
         {
-          id: "DS-20260319-E5F6",
+          id: "DS-20260319-143220-E5F6",
           reporter: "Ravi T.",
           state: "Tamil Nadu",
           area: "Chennai",
@@ -1547,10 +1639,10 @@
           photos: [],
           lat: 13.085,
           lng: 80.2101,
-          date: "2026-03-19",
+          ts: "2026-03-19T14:32:20",
         },
         {
-          id: "DS-20260315-G7H8",
+          id: "DS-20260315-074533-G7H8",
           reporter: "Sneha P.",
           state: "Delhi",
           area: "Shahdara",
@@ -1562,10 +1654,10 @@
           photos: [],
           lat: 28.6729,
           lng: 77.2946,
-          date: "2026-03-15",
+          ts: "2026-03-15T07:45:33",
         },
         {
-          id: "DS-20260320-I9J0",
+          id: "DS-20260320-112045-I9J0",
           reporter: "Mohan R.",
           state: "Telangana",
           area: "Hyderabad",
@@ -1577,10 +1669,10 @@
           photos: [],
           lat: 17.4435,
           lng: 78.4685,
-          date: "2026-03-20",
+          ts: "2026-03-20T11:20:45",
         },
         {
-          id: "DS-20260316-K1L2",
+          id: "DS-20260316-200318-K1L2",
           reporter: "Priya S.",
           state: "West Bengal",
           area: "Kolkata",
@@ -1592,10 +1684,10 @@
           photos: [],
           lat: 22.5497,
           lng: 88.3554,
-          date: "2026-03-16",
+          ts: "2026-03-16T20:03:18",
         },
         {
-          id: "DS-20260320-M3N4",
+          id: "DS-20260320-083001-M3N4",
           reporter: "Kiran B.",
           state: "Rajasthan",
           area: "Jaipur",
@@ -1607,10 +1699,10 @@
           photos: [],
           lat: 26.9124,
           lng: 75.7873,
-          date: "2026-03-20",
+          ts: "2026-03-20T08:30:01",
         },
         {
-          id: "DS-20260319-O5P6",
+          id: "DS-20260319-163455-O5P6",
           reporter: "Meena T.",
           state: "Gujarat",
           area: "Ahmedabad",
@@ -1622,114 +1714,60 @@
           photos: [],
           lat: 22.995,
           lng: 72.6031,
-          date: "2026-03-19",
+          ts: "2026-03-19T16:34:55",
         },
       ];
-
-      let reports = [...SEED];
-      let map,
+      let reports = [...SEED],
+        map,
         mLayer,
+        detMap = null,
         curView = "map",
         prevPage = "pg-feed";
-
-      // ══════════════════════════════════════
-      // PAGE ROUTING — the fix
-      // Using explicit display style instead
-      // of relying purely on class toggling
-      // ══════════════════════════════════════
       const PAGES = ["pg-feed", "pg-detail", "pg-report"];
 
       function goPage(id, from) {
-        log("goPage → " + id);
-
-        // Validate target exists
-        const target = document.getElementById(id);
-        if (!target) {
-          log("goPage: element #" + id + " not found", true);
-          return;
-        }
-
-        // Hide all pages
-        PAGES.forEach((pid) => {
-          const el = document.getElementById(pid);
-          if (!el) return;
-          el.classList.remove("on");
-        });
-
-        // Show target
-        target.classList.add("on");
-
-        // Nav tab highlighting
+        PAGES.forEach((p) => document.getElementById(p).classList.remove("on"));
         document
           .querySelectorAll(".ntab")
           .forEach((t) => t.classList.remove("on"));
-        if (id === "pg-feed") {
-          const t = document.getElementById("ntab-feed");
-          if (t) t.classList.add("on");
-        }
-        if (id === "pg-report") {
-          const t = document.getElementById("ntab-report");
-          if (t) t.classList.add("on");
-        }
-
+        document.getElementById(id).classList.add("on");
+        if (id === "pg-feed")
+          document.getElementById("ntab-feed").classList.add("on");
+        if (id === "pg-report")
+          document.getElementById("ntab-report").classList.add("on");
         if (from) prevPage = from;
-
-        if (id === "pg-feed" && map) {
-          setTimeout(() => {
-            map.invalidateSize();
-            log("map resized");
-          }, 80);
-        }
+        if (id === "pg-feed" && map) setTimeout(() => map.invalidateSize(), 80);
         window.scrollTo(0, 0);
       }
-
       function goBack() {
-        log("goBack → " + prevPage);
         goPage(prevPage || "pg-feed");
       }
-
       function openDetail(id) {
-        log("openDetail → " + id);
         const r = reports.find((x) => x.id === id);
-        if (!r) {
-          log("openDetail: report " + id + " not found", true);
-          return;
-        }
+        if (!r) return;
         prevPage = "pg-feed";
         renderDetail(r);
         goPage("pg-detail");
       }
 
-      // ══════════════════════════════════════
-      // MAP INIT — CartoDB Voyager (English)
-      // ══════════════════════════════════════
       function initMap() {
-        log("initMap start");
-        try {
-          map = L.map("map", {
-            zoomControl: true,
-            scrollWheelZoom: true,
-          }).setView([20.5937, 78.9629], 5);
-          L.tileLayer(
-            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-            {
-              attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-              subdomains: "abcd",
-              maxZoom: 19,
-            },
-          ).addTo(map);
-          mLayer = L.layerGroup().addTo(map);
-          log("map tiles loaded (CartoDB Voyager, English)");
-          buildCatFilter();
-          buildStateFilter();
-          applyFilters();
-          log("initMap done");
-        } catch (e) {
-          log("initMap failed: " + e.message, true);
-        }
+        map = L.map("map", {
+          zoomControl: true,
+          scrollWheelZoom: true,
+        }).setView([20.5937, 78.9629], 5);
+        L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+          {
+            attribution: "© OpenStreetMap © CARTO",
+            subdomains: "abcd",
+            maxZoom: 19,
+          },
+        ).addTo(map);
+        mLayer = L.layerGroup().addTo(map);
+        buildCatFilter();
+        buildStateFilter();
+        applyFilters();
       }
-
       function makePinIcon(cats) {
         return L.divIcon({
           className: "",
@@ -1739,23 +1777,20 @@
           popupAnchor: [0, -30],
         });
       }
-
       function renderMarkers(data) {
         mLayer.clearLayers();
-        log("renderMarkers: " + data.length + " pins");
         data.forEach((r) => {
           const m = L.marker([r.lat, r.lng], {
             icon: makePinIcon(r.cats),
           }).addTo(mLayer);
-          m.bindPopup(buildPopupHTML(r), { maxWidth: 270, minWidth: 225 });
+          m.bindPopup(buildPopHTML(r), { maxWidth: 260, minWidth: 210 });
           m.on("popupopen", () => {
             const btn = document.getElementById("pu-btn-" + r.id);
             if (btn) btn.onclick = () => openDetail(r.id);
           });
         });
       }
-
-      function buildPopupHTML(r) {
+      function buildPopHTML(r) {
         const imgEl =
           r.photos && r.photos.length
             ? `<div class="pu-img"><img src="${r.photos[0]}"></div>`
@@ -1765,64 +1800,118 @@
             (c) => `<span class="pu-cat">${catIcon(c)}<span>${c}</span></span>`,
           )
           .join("");
-        return `<div>
-    ${imgEl}
-    <div class="pu-body">
-      <div class="pu-loc">${r.specific}</div>
-      <div class="pu-area">${r.area}, ${r.state}</div>
-      ${cats ? `<div class="pu-cats">${cats}</div>` : ""}
-      ${r.notes ? `<div class="pu-notes">${r.notes}</div>` : ""}
-      <div class="pu-meta">
-        <span class="pu-by">by ${r.reporter}</span>
-        <span class="pu-date">${r.date}</span>
+        return `<div>${imgEl}<div class="pu-body"><div class="pu-loc">${r.specific}</div><div class="pu-area">${r.area}, ${r.state}</div>${cats ? `<div class="pu-cats">${cats}</div>` : ""}${r.notes ? `<div style="font-size:.72rem;color:var(--mu);margin-top:.28rem;line-height:1.4;">${r.notes}</div>` : ""}<div class="pu-meta"><span class="pu-by">by ${r.reporter}</span><span class="pu-date">${fmtTs(r.ts)}</span></div><button class="pu-link" id="pu-btn-${r.id}">View full report →</button></div></div>`;
+      }
+
+      function sevClass(sev) {
+        if (!sev || !sev.length) return "sev-none";
+        const s = sev[0].toLowerCase();
+        if (s.includes("block")) return "sev-blocking";
+        if (s.includes("severe")) return "sev-severe";
+        if (s.includes("moderate")) return "sev-moderate";
+        return "sev-minor";
+      }
+
+      function groupByTime(data) {
+        const now = new Date();
+        const todayStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
+        const yestStart = new Date(todayStart - 86400000);
+        const weekStart = new Date(todayStart - 6 * 86400000);
+
+        const groups = { today: [], yesterday: [], thisWeek: [], older: {} };
+        data.forEach((r) => {
+          const d = new Date(r.ts);
+          if (d >= todayStart) groups.today.push(r);
+          else if (d >= yestStart) groups.yesterday.push(r);
+          else if (d >= weekStart) groups.thisWeek.push(r);
+          else {
+            const key = d.toLocaleDateString("en-IN", {
+              month: "long",
+              year: "numeric",
+            });
+            if (!groups.older[key]) groups.older[key] = [];
+            groups.older[key].push(r);
+          }
+        });
+        return groups;
+      }
+
+      function renderLCard(r) {
+        const sc = sevClass(r.sev);
+        const thumb =
+          r.photos && r.photos.length
+            ? `<img src="${r.photos[0]}" alt="">`
+            : `${pinIcon(r.cats)}`;
+        const chips = (r.cats || [])
+          .map(
+            (c) => `<span class="chip">${catIcon(c)}<span>${c}</span></span>`,
+          )
+          .join("");
+        const timeStr = new Date(r.ts).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+        return `<div class="lcard ${sc}" onclick="openDetail('${r.id}')">
+    <div class="lcard-thumb">${thumb}</div>
+    <div class="lcard-body">
+      <div class="lcard-loc">${r.specific}</div>
+      <div class="lcard-area">${r.area}, ${r.state}</div>
+      ${chips ? `<div class="lcard-chips">${chips}</div>` : ""}
+      <div class="lcard-foot">
+        <span class="lcard-by">by ${r.reporter}</span>
+        <span class="lcard-time">${timeStr}</span>
       </div>
-      <button class="pu-link" id="pu-btn-${r.id}">View full report →</button>
     </div>
   </div>`;
       }
 
-      // ══════════════════════════════════════
-      // LIST
-      // ══════════════════════════════════════
-      function renderList(data) {
-        const el = document.getElementById("list-inner");
-        if (!data.length) {
-          el.innerHTML =
-            '<div class="lempty">No spots match this filter.</div>';
-          return;
-        }
-        el.innerHTML = data
-          .map((r) => {
-            const thumb =
-              r.photos && r.photos.length
-                ? `<img src="${r.photos[0]}">`
-                : pinIcon(r.cats);
-            const chips = (r.cats || [])
-              .map(
-                (c) =>
-                  `<span class="chip">${catIcon(c)}<span>${c}</span></span>`,
-              )
-              .join("");
-            return `<div class="lcard" onclick="openDetail('${r.id}')">
-      <div class="lcard-thumb">${thumb}</div>
-      <div class="lcard-body">
-        <div class="lcard-loc">${r.specific}</div>
-        <div class="lcard-area">${r.area}, ${r.state}</div>
-        <div class="lcard-chips">${chips}</div>
-        <div class="lcard-foot">
-          <span class="lcard-by">by ${r.reporter}</span>
-          <span class="lcard-date">${r.date}</span>
-        </div>
-      </div>
-    </div>`;
-          })
-          .join("");
-        log("renderList: " + data.length + " cards");
+      function renderGroup(label, items, cls) {
+        if (!items || !items.length) return "";
+        const sorted = [...items].sort(
+          (a, b) => new Date(b.ts) - new Date(a.ts),
+        );
+        return `<div class="clist-group">
+    <div class="clist-heading ${cls}">
+      <span class="clist-heading-label">${label}</span>
+      <span class="clist-heading-count">${items.length} report${items.length > 1 ? "s" : ""}</span>
+    </div>
+    ${sorted.map(renderLCard).join("")}
+  </div>`;
       }
 
-      // ══════════════════════════════════════
-      // FILTERS
-      // ══════════════════════════════════════
+      function renderWall(data) {
+        const el = document.getElementById("clist");
+        if (!data.length) {
+          el.innerHTML =
+            '<div class="list-empty">No spots match this filter.</div>';
+          return;
+        }
+        const g = groupByTime(data);
+        let html = "";
+        // Priority: today → yesterday → this week → older months
+        if (g.today.length) html += renderGroup("Today", g.today, "today");
+        else if (g.yesterday.length)
+          html += renderGroup("Yesterday", g.yesterday, "yesterday");
+        // Always show yesterday if today shown too
+        if (g.today.length && g.yesterday.length)
+          html += renderGroup("Yesterday", g.yesterday, "yesterday");
+        if (g.thisWeek.length)
+          html += renderGroup("This week", g.thisWeek, "this-week");
+        // Older: group by month
+        const monthKeys = Object.keys(g.older).sort((a, b) => {
+          return new Date("01 " + b) - new Date("01 " + a);
+        });
+        monthKeys.forEach((k) => {
+          html += renderGroup(k, g.older[k], "older");
+        });
+        el.innerHTML = html;
+      }
+
       function buildStateFilter() {
         const el = document.getElementById("fs-state");
         [...new Set(reports.map((r) => r.state))].sort().forEach((s) => {
@@ -1831,9 +1920,7 @@
           o.textContent = s;
           el.appendChild(o);
         });
-        log("state filter built");
       }
-
       function buildCatFilter() {
         const el = document.getElementById("fs-cat");
         CATS.forEach((c) => {
@@ -1842,22 +1929,11 @@
           o.textContent = c.label;
           el.appendChild(o);
         });
-        // Build category cards in report form
-        const grid = document.getElementById("cgrid");
-        if (grid) {
-          grid.innerHTML = CATS.map(
-            (c) =>
-              `<div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')">
-        <div class="ccard-ico">${ICONS[c.icon]}</div>
-        <div class="ccard-lbl">${c.label}</div>
-      </div>`,
-          ).join("");
-          log("cat cards built: " + CATS.length);
-        } else {
-          log("cgrid element not found", true);
-        }
+        document.getElementById("cgrid").innerHTML = CATS.map(
+          (c) =>
+            `<div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')"><div class="ccard-ico">${ICONS[c.icon]}</div><div class="ccard-lbl">${c.label}</div></div>`,
+        ).join("");
       }
-
       function applyFilters() {
         const state = document.getElementById("fs-state").value;
         const cat = document.getElementById("fs-cat").value;
@@ -1888,13 +1964,9 @@
         });
         document.getElementById("cnt-n").textContent = filtered.length;
         renderMarkers(filtered);
-        renderList(filtered);
-        log("filters applied → " + filtered.length + " results");
+        renderWall(filtered);
       }
 
-      // ══════════════════════════════════════
-      // VIEW TOGGLE
-      // ══════════════════════════════════════
       function setView(v) {
         curView = v;
         document.getElementById("map-wrap").style.display =
@@ -1907,9 +1979,7 @@
           .getElementById("btn-list")
           .classList.toggle("on", v === "list");
         if (v === "map" && map) setTimeout(() => map.invalidateSize(), 60);
-        log("view → " + v);
       }
-
       function sizeViews() {
         const tb = document.querySelector(".toolbar");
         const h = window.innerHeight - 52 - (tb ? tb.offsetHeight : 40);
@@ -1919,11 +1989,8 @@
         if (lw) lw.style.height = h + "px";
       }
 
-      // ══════════════════════════════════════
-      // DETAIL RENDER
-      // ══════════════════════════════════════
       function renderDetail(r) {
-        log("renderDetail: " + r.id);
+        // Photos
         let photos = "";
         if (r.photos && r.photos.length) {
           const n = Math.min(r.photos.length, 6);
@@ -1935,6 +2002,8 @@
         } else {
           photos = `<div class="det-nophoto">${ICONS.photo}</div>`;
         }
+
+        // Matches report page form layout: left col = location/notes, right col = categories/tags
         const cats = (r.cats || [])
           .map(
             (c) => `<div class="det-cat">${catIcon(c)}<span>${c}</span></div>`,
@@ -1952,145 +2021,177 @@
     <div class="det-id-badge">Report ID <span>${r.id}</span></div>
     <div class="det-area">${r.area}, ${r.state}</div>
     <div class="det-loc">${r.specific}</div>
-    ${cats ? `<div class="det-sec"><div class="det-sec-label">Category</div><div class="det-cats">${cats}</div></div>` : ""}
-    ${types ? `<div class="det-sec"><div class="det-sec-label">Site type</div><div class="det-tags">${types}</div></div>` : ""}
-    ${sevs ? `<div class="det-sec"><div class="det-sec-label">Severity</div><div class="det-tags">${sevs}</div></div>` : ""}
-    ${r.notes ? `<div class="det-sec"><div class="det-sec-label">Notes</div><div class="det-notes">${r.notes}</div></div>` : ""}
-    <div class="det-divider"></div>
-    <div class="det-meta-row">
-      <span class="det-reporter">Reported by ${r.reporter}</span>
-      <span class="det-date">${r.date}</span>
+    <div class="det-timestamp">Submitted ${fmtTs(r.ts)}</div>
+
+    <div class="det-two-col">
+      <!-- LEFT: mirrors report form left col -->
+      <div>
+        <div class="det-sec">
+          <div class="det-sec-label">Reporter</div>
+          <div style="font-size:.88rem;color:var(--tx);">${r.reporter}</div>
+        </div>
+        ${r.notes ? `<div class="det-sec"><div class="det-sec-label">Notes</div><div class="det-notes">${r.notes}</div></div>` : ""}
+      </div>
+      <!-- RIGHT: mirrors report form right col -->
+      <div>
+        ${cats ? `<div class="det-sec"><div class="det-sec-label">Garbage category</div><div class="det-cats">${cats}</div></div>` : ""}
+        ${types ? `<div class="det-sec"><div class="det-sec-label">Type of site</div><div class="det-tags">${types}</div></div>` : ""}
+        ${sevs ? `<div class="det-sec"><div class="det-sec-label">Severity</div><div class="det-tags">${sevs}</div></div>` : ""}
+      </div>
     </div>`;
+
+        // Mini map — highlight the area
+        const mm = document.getElementById("det-mini-map");
+        mm.innerHTML = "";
+        mm.style.display = "block";
+        if (detMap) {
+          try {
+            detMap.remove();
+          } catch (e) {}
+          detMap = null;
+        }
+        setTimeout(() => {
+          detMap = L.map("det-mini-map", {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            touchZoom: false,
+            doubleClickZoom: false,
+          }).setView([r.lat, r.lng], 14);
+          L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+            { subdomains: "abcd", maxZoom: 19 },
+          ).addTo(detMap);
+          // Highlight circle for the area
+          L.circle([r.lat, r.lng], {
+            radius: 400,
+            color: "#ff2d78",
+            fillColor: "#ff2d78",
+            fillOpacity: 0.08,
+            weight: 1.5,
+            opacity: 0.6,
+          }).addTo(detMap);
+          L.marker([r.lat, r.lng], { icon: makePinIcon(r.cats) }).addTo(detMap);
+          detMap.invalidateSize();
+        }, 80);
       }
 
-      // ══════════════════════════════════════
-      // REPORT — STEPS
-      // ══════════════════════════════════════
-      function toggleStep(id) {
-        document.getElementById(id).classList.toggle("open");
-        log("toggleStep: " + id);
-      }
-      function nextStep(cur, nxt) {
-        log("nextStep: " + cur + " → " + nxt);
-        document.getElementById(cur).classList.add("done");
-        document.getElementById(cur).classList.remove("open");
-        const nxtEl = document.getElementById(nxt);
-        if (!nxtEl) {
-          log("nextStep: #" + nxt + " not found", true);
+      let locTimer = null,
+        locLat = null,
+        locLng = null;
+      function onLocInput(val) {
+        clearTimeout(locTimer);
+        const box = document.getElementById("loc-results");
+        if (val.length < 3) {
+          box.classList.remove("open");
+          box.innerHTML = "";
           return;
         }
-        nxtEl.classList.add("open");
-        nxtEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        box.innerHTML = '<div class="loc-searching">Searching…</div>';
+        box.classList.add("open");
+        locTimer = setTimeout(() => searchLoc(val), 500);
       }
+      async function searchLoc(q) {
+        const box = document.getElementById("loc-results");
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=5&accept-language=en`,
+          );
+          const data = await res.json();
+          if (!data.length) {
+            box.innerHTML =
+              '<div class="loc-searching">No results. Type your location manually.</div>';
+            return;
+          }
+          box.innerHTML = data
+            .map(
+              (item) =>
+                `<div class="loc-result-item" onclick="pickLoc('${item.display_name.replace(/'/g, "\\'")}',${item.lat},${item.lon})">${item.display_name.split(",")[0]}<small>${item.display_name}</small></div>`,
+            )
+            .join("");
+        } catch (e) {
+          box.innerHTML =
+            '<div class="loc-searching">Search unavailable. Type manually.</div>';
+        }
+      }
+      function pickLoc(name, lat, lng) {
+        document.getElementById("rspec").value = name;
+        locLat = parseFloat(lat);
+        locLng = parseFloat(lng);
+        const box = document.getElementById("loc-results");
+        box.classList.remove("open");
+        box.innerHTML = "";
+      }
+      function openGoogleMaps() {
+        window.open("https://www.google.com/maps", "_blank");
+      }
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".loc-search-wrap")) {
+          const box = document.getElementById("loc-results");
+          if (box) box.classList.remove("open");
+        }
+      });
 
-      // ══════════════════════════════════════
-      // REPORT — TAGS & CATS
-      // ══════════════════════════════════════
       const selTags = { type: [], sev: [] };
       const selCats = [];
-
       document.addEventListener("DOMContentLoaded", () => {
-        log("DOMContentLoaded — binding tags");
         document.querySelectorAll(".tag").forEach((t) => {
           t.addEventListener("click", () => {
             const g = t.dataset.g;
             t.classList.toggle("on");
             const v = t.textContent.trim();
-            if (t.classList.contains("on")) {
-              selTags[g].push(v);
-            } else {
-              selTags[g] = selTags[g].filter((x) => x !== v);
-            }
-            log(
-              "tag toggled: [" +
-                g +
-                "] " +
-                v +
-                " → " +
-                JSON.stringify(selTags[g]),
-            );
+            if (t.classList.contains("on")) selTags[g].push(v);
+            else selTags[g] = selTags[g].filter((x) => x !== v);
           });
         });
       });
-
       function toggleCat(el, key) {
         el.classList.toggle("on");
-        if (el.classList.contains("on")) {
-          selCats.push(key);
-        } else {
+        if (el.classList.contains("on")) selCats.push(key);
+        else {
           const i = selCats.indexOf(key);
           if (i > -1) selCats.splice(i, 1);
         }
-        log("cat toggled: " + key + " → " + JSON.stringify(selCats));
       }
 
-      // ══════════════════════════════════════
-      // REPORT — UPLOAD
-      // ══════════════════════════════════════
       const upFiles = [];
-
       function initUpload() {
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (!upArea || !upInput) {
-          log("upload elements not found", true);
-          return;
-        }
-
-        upArea.addEventListener("dragover", (e) => {
+        const ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        ua.addEventListener("dragover", (e) => {
           e.preventDefault();
-          upArea.classList.add("drag");
+          ua.classList.add("drag");
         });
-        upArea.addEventListener("dragleave", () =>
-          upArea.classList.remove("drag"),
-        );
-        upArea.addEventListener("drop", (e) => {
+        ua.addEventListener("dragleave", () => ua.classList.remove("drag"));
+        ua.addEventListener("drop", (e) => {
           e.preventDefault();
-          upArea.classList.remove("drag");
+          ua.classList.remove("drag");
           addFiles([...e.dataTransfer.files]);
         });
-        upInput.addEventListener("change", () => {
-          log("photo-input change: " + upInput.files.length + " file(s)");
-          addFiles([...upInput.files]);
-          upInput.value = "";
+        ui.addEventListener("change", () => {
+          addFiles([...ui.files]);
+          ui.value = "";
         });
-        log("upload listeners attached");
       }
-
       function addFiles(fs) {
-        let added = 0;
         fs.forEach((f) => {
-          if (upFiles.length >= 6) {
-            log("max 6 photos reached", true);
-            return;
-          }
-          if (!f.type.startsWith("image/")) {
-            log("skipped non-image: " + f.name, true);
-            return;
-          }
-          upFiles.push(f);
-          added++;
+          if (upFiles.length < 6 && f.type.startsWith("image/"))
+            upFiles.push(f);
         });
-        log("addFiles: +" + added + ", total=" + upFiles.length);
         renderPreviews();
       }
-
       function renderPreviews() {
-        const pGrid = document.getElementById("pgrid");
-        const upCnt = document.getElementById("upcount");
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (!pGrid) {
-          log("pgrid not found", true);
-          return;
-        }
-        pGrid.innerHTML = "";
+        const pg = document.getElementById("pgrid"),
+          uc = document.getElementById("upcount"),
+          ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        pg.innerHTML = "";
         if (!upFiles.length) {
-          pGrid.style.display = "none";
-          upCnt.textContent = "";
+          pg.style.display = "none";
+          uc.textContent = "";
           return;
         }
-        pGrid.style.display = "grid";
+        pg.style.display = "grid";
         upFiles.forEach((f, i) => {
           const d = document.createElement("div");
           d.className = "pitem";
@@ -2101,56 +2202,52 @@
           btn.textContent = "✕";
           btn.onclick = () => {
             upFiles.splice(i, 1);
-            log("removed photo " + i);
             renderPreviews();
           };
           d.appendChild(img);
           d.appendChild(btn);
-          pGrid.appendChild(d);
+          pg.appendChild(d);
         });
-        upCnt.textContent = `${upFiles.length}/6 photo${upFiles.length > 1 ? "s" : ""}`;
+        uc.textContent = `${upFiles.length}/6 photo${upFiles.length > 1 ? "s" : ""}`;
         const full = upFiles.length >= 6;
-        upInput.disabled = full;
-        upArea.style.opacity = full ? "0.5" : "1";
-        upArea.style.pointerEvents = full ? "none" : "";
+        ui.disabled = full;
+        ua.style.opacity = full ? "0.5" : "1";
+        ua.style.pointerEvents = full ? "none" : "";
       }
 
-      // ══════════════════════════════════════
-      // REPORT — SUBMIT
-      // ══════════════════════════════════════
+      function toast(msg, err) {
+        Toastify({
+          text: msg,
+          duration: 3000,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: err ? "#3a0a18" : "#0d140d",
+            border: err ? "1px solid #ff2d78" : "1px solid #2e452e",
+            color: err ? "#ff6a9a" : "#ddeedd",
+            fontFamily: "'Space Mono',monospace",
+            fontSize: ".7rem",
+            borderRadius: "6px",
+          },
+        }).showToast();
+      }
+
       function submitReport() {
-        log("submitReport called");
         const name = document.getElementById("rname").value.trim();
         const state = document.getElementById("rstate").value.trim();
         const area = document.getElementById("rarea").value.trim();
         const specific = document.getElementById("rspec").value.trim();
-
-        if (!name) {
-          log("validation: name missing", true);
-          return;
-        }
-        if (!state) {
-          log("validation: state missing", true);
-          return;
-        }
-        if (!area) {
-          log("validation: area missing", true);
-          return;
-        }
-        if (!specific) {
-          log("validation: specific location missing", true);
+        if (!name || !state || !area || !specific) {
+          toast("Fill in name, state, area and location.", true);
           return;
         }
         if (!upFiles.length) {
-          log("validation: no photos attached", true);
+          toast("Add at least one photo.", true);
           return;
         }
-
-        const reportId = genReportId();
-        log("generated ID: " + reportId);
-
+        const id = genId();
         const r = {
-          id: reportId,
+          id,
           reporter: name,
           state,
           area,
@@ -2160,41 +2257,25 @@
           sev: [...selTags.sev],
           notes: document.getElementById("rnotes").value.trim(),
           photos: upFiles.map((f) => URL.createObjectURL(f)),
-          lat: 20.5937 + (Math.random() - 0.5) * 14,
-          lng: 78.9629 + (Math.random() - 0.5) * 14,
-          date: new Date().toISOString().split("T")[0],
+          lat: locLat !== null ? locLat : 20.5937 + (Math.random() - 0.5) * 14,
+          lng: locLng !== null ? locLng : 78.9629 + (Math.random() - 0.5) * 14,
+          ts: new Date().toISOString(),
         };
-
-        log(
-          "report object: " +
-            JSON.stringify({
-              id: r.id,
-              state: r.state,
-              area: r.area,
-              cats: r.cats,
-            }),
-        );
         reports.push(r);
-
-        // Update state filter if new
-        const stateEl = document.getElementById("fs-state");
-        if (![...stateEl.options].find((o) => o.value === state)) {
+        const sel = document.getElementById("fs-state");
+        if (![...sel.options].find((o) => o.value === state)) {
           const o = document.createElement("option");
           o.value = state;
           o.textContent = state;
-          stateEl.appendChild(o);
-          log("new state added to filter: " + state);
+          sel.appendChild(o);
         }
-
         applyFilters();
-        log("report submitted: " + reportId);
-
         document.getElementById("form-screen").style.display = "none";
         document.getElementById("succ").classList.add("on");
+        document.getElementById("succ-id").textContent = "ID: " + id;
       }
 
       function resetForm() {
-        log("resetForm");
         ["rname", "rstate", "rarea", "rspec", "rnotes"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.value = "";
@@ -2208,34 +2289,20 @@
         Object.keys(selTags).forEach((k) => (selTags[k] = []));
         selCats.length = 0;
         upFiles.length = 0;
+        locLat = null;
+        locLng = null;
         renderPreviews();
         document.getElementById("form-screen").style.display = "";
         document.getElementById("succ").classList.remove("on");
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (upInput) upInput.disabled = false;
-        if (upArea) {
-          upArea.style.opacity = "1";
-          upArea.style.pointerEvents = "";
+        const ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        if (ui) ui.disabled = false;
+        if (ua) {
+          ua.style.opacity = "1";
+          ua.style.pointerEvents = "";
         }
       }
 
-      // ══════════════════════════════════════
-      // ANTI-COPY
-      // ══════════════════════════════════════
-      document.addEventListener("contextmenu", (e) => e.preventDefault());
-      document.addEventListener("keydown", (e) => {
-        if (
-          (e.ctrlKey || e.metaKey) &&
-          ["u", "s", "a"].includes(e.key.toLowerCase())
-        )
-          e.preventDefault();
-        if (e.key === "F12") e.preventDefault();
-      });
-
-      // ══════════════════════════════════════
-      // BOOT
-      // ══════════════════════════════════════
       window.addEventListener("load", () => {
         sizeViews();
         initMap();
