@@ -12,17 +12,15 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
-    />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
-      /* ══════════════════════════════════════
-   DESIGN SYSTEM — GREEN × NEON PINK
-══════════════════════════════════════ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
       :root {
         --bg: #070c07;
         --s1: #0d140d;
@@ -36,23 +34,12 @@
         --fa: #2e422e;
         --pk: #ff2d78;
         --pk10: rgba(255, 45, 120, 0.1);
-        --pk15: rgba(255, 45, 120, 0.15);
+        --pk20: rgba(255, 45, 120, 0.2);
         --pk35: rgba(255, 45, 120, 0.35);
         --r: 6px;
-        --nav: 52px;
         --fd: "Unbounded", sans-serif;
         --fb: "DM Sans", sans-serif;
         --fm: "Space Mono", monospace;
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        -webkit-text-size-adjust: 100%;
       }
       body {
         font-family: var(--fb);
@@ -60,34 +47,15 @@
         color: var(--tx);
         min-height: 100vh;
         overflow-x: hidden;
-        -webkit-user-select: none;
-        user-select: none;
-      }
-      input,
-      textarea {
-        -webkit-user-select: text;
-        user-select: text;
       }
 
-      /* ── PAGES ── */
-      .pg {
-        display: none !important;
-      }
-      .pg.on {
-        display: block !important;
-      }
-      #pg-feed.on {
-        display: flex !important;
-        flex-direction: column;
-      }
-
-      /* ══ NAV ══ */
+      /* ── NAV ── */
       nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0 1.25rem;
-        height: var(--nav);
+        height: 52px;
         background: var(--s1);
         border-bottom: 1px solid var(--b1);
         position: sticky;
@@ -97,9 +65,9 @@
       .nlogo {
         display: flex;
         flex-direction: column;
+        justify-content: center;
         line-height: 1;
         gap: 3px;
-        cursor: pointer;
       }
       .nlogo-t {
         font-family: var(--fd);
@@ -121,7 +89,7 @@
       }
       .ntab {
         padding: 0 1rem;
-        height: var(--nav);
+        height: 52px;
         display: flex;
         align-items: center;
         font-family: var(--fm);
@@ -147,11 +115,21 @@
         border-bottom-color: var(--pk);
       }
 
+      /* ── PAGE SHELL ── */
+      .pg {
+        display: none;
+      }
+      .pg.on {
+        display: block;
+      }
+
       /* ══════════════════════════
    FEED PAGE
 ══════════════════════════ */
       #pg-feed {
-        height: calc(100vh - var(--nav));
+        height: calc(100vh - 52px);
+        display: flex;
+        flex-direction: column;
       }
 
       .toolbar {
@@ -187,12 +165,10 @@
       }
       .fsel:focus {
         border-color: var(--pk);
-        box-shadow: 0 0 0 3px var(--pk15);
       }
       .fsel option {
         background: var(--bg);
       }
-
       .vtog {
         margin-left: auto;
         display: flex;
@@ -228,6 +204,7 @@
         color: var(--pk);
       }
 
+      /* Map */
       #map-wrap {
         flex: 1;
         display: flex;
@@ -235,26 +212,23 @@
       }
       #map {
         flex: 1;
-        width: 100%;
       }
-
-      /* CartoDB Voyager — keep natural color, just mild desaturation */
       .leaflet-container {
-        background: #e8e0d8;
+        background: #040804;
       }
       .leaflet-tile {
-        filter: saturate(0.55) brightness(0.92);
+        filter: grayscale(1) brightness(0.22) contrast(1.3);
       }
       .leaflet-control-zoom a {
-        background: var(--s1) !important;
+        background: var(--s2) !important;
         color: var(--tx) !important;
         border-color: var(--b2) !important;
       }
 
-      /* Pins */
+      /* Pin */
       .dpin {
-        width: 28px;
-        height: 28px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         background: var(--s1);
         border: 1.5px solid var(--pk35);
@@ -262,36 +236,32 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow:
-          0 0 8px rgba(255, 45, 120, 0.2),
-          0 1px 4px rgba(0, 0, 0, 0.4);
         transition:
           transform 0.12s,
           border-color 0.12s,
           box-shadow 0.12s;
+        box-shadow: 0 0 10px rgba(255, 45, 120, 0.2);
       }
       .dpin:hover {
         transform: scale(1.18);
         border-color: var(--pk);
-        box-shadow: 0 0 16px rgba(255, 45, 120, 0.5);
+        box-shadow: 0 0 18px rgba(255, 45, 120, 0.4);
       }
       .dpin svg {
-        width: 13px;
-        height: 13px;
-        stroke: var(--tx);
-        fill: none;
+        width: 15px;
+        height: 15px;
       }
 
       /* Popup */
       .leaflet-popup-content-wrapper {
-        background: var(--s1) !important;
-        border: 1px solid var(--b2) !important;
+        background: var(--s2) !important;
+        border: 1px solid var(--b3) !important;
         border-radius: var(--r) !important;
         padding: 0 !important;
         box-shadow:
           0 0 0 1px var(--pk35),
-          0 14px 40px rgba(0, 0, 0, 0.85) !important;
-        min-width: 230px;
+          0 14px 40px rgba(0, 0, 0, 0.9) !important;
+        min-width: 220px;
       }
       .leaflet-popup-content {
         margin: 0 !important;
@@ -307,11 +277,10 @@
         font-size: 16px !important;
         z-index: 10;
       }
-
       .pu-img {
         border-radius: var(--r) var(--r) 0 0;
         overflow: hidden;
-        aspect-ratio: 16/7;
+        aspect-ratio: 16/8;
         background: var(--s3);
         display: flex;
         align-items: center;
@@ -324,11 +293,9 @@
         display: block;
       }
       .pu-img svg {
-        width: 26px;
-        height: 26px;
-        opacity: 0.18;
-        stroke: var(--mu);
-        fill: none;
+        width: 32px;
+        height: 32px;
+        opacity: 0.25;
       }
       .pu-body {
         padding: 0.7rem 0.85rem 0.8rem;
@@ -347,34 +314,33 @@
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.38rem;
+        margin-bottom: 0.4rem;
       }
       .pu-cats {
         display: flex;
-        gap: 0.3rem;
+        gap: 0.35rem;
         flex-wrap: wrap;
         margin-top: 0.35rem;
       }
       .pu-cat {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.28rem;
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.14rem 0.4rem;
+        padding: 0.15rem 0.42rem;
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.57rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .pu-cat svg {
-        width: 9px;
-        height: 9px;
-        stroke: var(--mu);
-        fill: none;
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
       }
       .pu-notes {
-        font-size: 0.74rem;
+        font-size: 0.75rem;
         color: var(--mu);
         margin-top: 0.35rem;
         line-height: 1.4;
@@ -396,12 +362,12 @@
       .pu-link {
         display: block;
         margin-top: 0.6rem;
-        padding: 0.38rem;
+        padding: 0.4rem;
         text-align: center;
         border: 1px solid var(--b2);
         border-radius: var(--r);
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.6rem;
         color: var(--mu);
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -427,7 +393,7 @@
         display: block;
       }
       .li {
-        padding: 0.65rem 0.9rem 2rem;
+        padding: 0.6rem 0.9rem 2rem;
       }
       .lcard {
         background: var(--s1);
@@ -443,13 +409,12 @@
         border-color: var(--b2);
       }
       .lcard-thumb {
-        width: 84px;
+        width: 80px;
         flex-shrink: 0;
         background: var(--s3);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 84px;
       }
       .lcard-thumb img {
         width: 100%;
@@ -458,11 +423,9 @@
         display: block;
       }
       .lcard-thumb svg {
-        width: 26px;
-        height: 26px;
-        opacity: 0.18;
-        stroke: var(--mu);
-        fill: none;
+        width: 28px;
+        height: 28px;
+        opacity: 0.2;
       }
       .lcard-body {
         padding: 0.6rem 0.8rem;
@@ -490,7 +453,7 @@
       .lcard-chips {
         display: flex;
         gap: 0.25rem;
-        margin-top: 0.3rem;
+        margin-top: 0.32rem;
         flex-wrap: wrap;
       }
       .chip {
@@ -501,20 +464,19 @@
         border-radius: 3px;
         padding: 0.13rem 0.38rem;
         font-family: var(--fm);
-        font-size: 0.55rem;
+        font-size: 0.56rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .chip svg {
         width: 9px;
         height: 9px;
-        stroke: var(--mu);
-        fill: none;
+        flex-shrink: 0;
       }
       .lcard-foot {
         display: flex;
         justify-content: space-between;
-        margin-top: 0.36rem;
+        margin-top: 0.38rem;
       }
       .lcard-by {
         font-size: 0.66rem;
@@ -541,7 +503,6 @@
         margin: 0 auto;
         padding: 1.5rem 1.25rem 5rem;
       }
-
       .back-btn {
         display: flex;
         align-items: center;
@@ -564,8 +525,6 @@
       .back-btn svg {
         width: 12px;
         height: 12px;
-        stroke: currentColor;
-        fill: none;
       }
 
       .det-photos {
@@ -573,7 +532,7 @@
         gap: 3px;
         border-radius: var(--r);
         overflow: hidden;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.25rem;
       }
       .det-photos.n1 {
         grid-template-columns: 1fr;
@@ -583,6 +542,7 @@
       }
       .det-photos.n3 {
         grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
       }
       .det-photos.n3 .dp0 {
         grid-column: 1/3;
@@ -602,38 +562,17 @@
       .det-nophoto {
         width: 100%;
         aspect-ratio: 16/7;
-        background: var(--s2);
+        background: var(--s3);
         border-radius: var(--r);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.25rem;
       }
       .det-nophoto svg {
-        width: 44px;
-        height: 44px;
-        opacity: 0.1;
-        stroke: var(--mu);
-        fill: none;
-      }
-
-      .det-id-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: var(--fm);
-        font-size: 0.58rem;
-        color: var(--fa);
-        background: var(--s2);
-        border: 1px solid var(--b1);
-        border-radius: 3px;
-        padding: 0.22rem 0.6rem;
-        margin-bottom: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .det-id-badge span {
-        color: var(--mu);
+        width: 48px;
+        height: 48px;
+        opacity: 0.15;
       }
 
       .det-area {
@@ -642,26 +581,27 @@
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.4rem;
       }
       .det-loc {
         font-family: var(--fd);
         font-weight: 900;
-        font-size: 1.55rem;
+        font-size: 1.6rem;
         color: var(--tx);
         line-height: 1.15;
-        margin-bottom: 1.1rem;
-      }
-      .det-sec {
         margin-bottom: 1rem;
+      }
+
+      .det-sec {
+        margin-bottom: 1.1rem;
       }
       .det-sec-label {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.58rem;
         color: var(--fa);
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        margin-bottom: 0.42rem;
+        margin-bottom: 0.45rem;
       }
       .det-cats {
         display: flex;
@@ -671,21 +611,21 @@
       .det-cat {
         display: flex;
         align-items: center;
-        gap: 0.38rem;
+        gap: 0.4rem;
         border: 1px solid var(--b2);
         border-radius: var(--r);
-        padding: 0.32rem 0.7rem;
+        padding: 0.35rem 0.7rem;
         font-family: var(--fm);
-        font-size: 0.6rem;
+        font-size: 0.62rem;
         color: var(--mu);
         text-transform: uppercase;
+        letter-spacing: 0.3px;
         background: var(--s2);
       }
       .det-cat svg {
-        width: 12px;
-        height: 12px;
-        stroke: var(--mu);
-        fill: none;
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
       }
       .det-tags {
         display: flex;
@@ -695,20 +635,20 @@
       .det-tag {
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.26rem 0.62rem;
+        padding: 0.28rem 0.65rem;
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.6rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .det-notes {
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         color: var(--mu);
         line-height: 1.7;
         background: var(--s2);
         border: 1px solid var(--b1);
         border-radius: var(--r);
-        padding: 0.82rem 1rem;
+        padding: 0.85rem 1rem;
       }
       .det-divider {
         height: 1px;
@@ -738,7 +678,6 @@
         margin: 0 auto;
         padding: 2rem 1.25rem 5rem;
       }
-
       .rp-head {
         margin-bottom: 2rem;
       }
@@ -769,6 +708,7 @@
         padding-left: 0.85rem;
       }
 
+      /* Steps */
       .step {
         margin-bottom: 0.3rem;
       }
@@ -782,6 +722,7 @@
         border-radius: var(--r);
         cursor: pointer;
         transition: border-color 0.15s;
+        user-select: none;
       }
       .step-hd:hover {
         border-color: var(--b2);
@@ -830,12 +771,11 @@
       .step-arr {
         font-size: 0.65rem;
         color: var(--mu);
-        transition: transform 0.25s;
+        transition: transform 0.2s;
       }
       .step.open .step-arr {
         transform: rotate(180deg);
       }
-
       .step-bd {
         display: none;
         padding: 1rem;
@@ -889,7 +829,7 @@
       input[type="text"]:focus,
       textarea:focus {
         border-color: var(--pk);
-        box-shadow: 0 0 0 3px var(--pk15);
+        box-shadow: 0 0 0 3px var(--pk10);
       }
       textarea {
         resize: vertical;
@@ -901,36 +841,7 @@
         gap: 0.5rem;
       }
 
-      .trow {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-top: 0.4rem;
-      }
-      .tag {
-        padding: 0.27rem 0.68rem;
-        border-radius: 3px;
-        border: 1px solid var(--b1);
-        font-size: 0.67rem;
-        cursor: pointer;
-        background: var(--s2);
-        color: var(--mu);
-        transition:
-          border-color 0.12s,
-          color 0.12s,
-          background 0.12s;
-        font-family: var(--fm);
-      }
-      .tag:hover {
-        border-color: var(--b2);
-        color: var(--tx);
-      }
-      .tag.on {
-        background: var(--pk10);
-        color: var(--pk);
-        border-color: var(--pk35);
-      }
-
+      /* Cat cards */
       .cgrid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -947,6 +858,7 @@
         transition:
           border-color 0.15s,
           background 0.15s;
+        user-select: none;
       }
       .ccard:hover {
         border-color: var(--b2);
@@ -963,11 +875,6 @@
       .ccard-ico svg {
         width: 22px;
         height: 22px;
-        stroke: var(--mu);
-        fill: none;
-      }
-      .ccard.on .ccard-ico svg {
-        stroke: var(--pk);
       }
       .ccard-lbl {
         font-family: var(--fm);
@@ -981,6 +888,36 @@
         color: var(--pk);
       }
 
+      /* Tags */
+      .trow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.4rem;
+      }
+      .tag {
+        padding: 0.27rem 0.68rem;
+        border-radius: 3px;
+        border: 1px solid var(--b1);
+        font-size: 0.67rem;
+        cursor: pointer;
+        background: var(--s2);
+        color: var(--mu);
+        transition: all 0.12s;
+        user-select: none;
+        font-family: var(--fm);
+      }
+      .tag:hover {
+        border-color: var(--b2);
+        color: var(--tx);
+      }
+      .tag.on {
+        background: var(--pk10);
+        color: var(--pk);
+        border-color: var(--pk35);
+      }
+
+      /* Upload */
       .uparea {
         border: 1.5px dashed var(--b2);
         border-radius: var(--r);
@@ -997,7 +934,7 @@
       .uparea:hover,
       .uparea.drag {
         border-color: var(--pk35);
-        background: #0c160c;
+        background: #0e160e;
         box-shadow: 0 0 0 3px var(--pk10);
       }
       .uparea input[type="file"] {
@@ -1016,9 +953,7 @@
       .uparea-ico svg {
         width: 28px;
         height: 28px;
-        opacity: 0.3;
-        stroke: var(--mu);
-        fill: none;
+        opacity: 0.35;
       }
       .uparea p {
         font-size: 0.82rem;
@@ -1116,7 +1051,7 @@
         box-shadow: 0 0 32px rgba(255, 45, 120, 0.55);
       }
       .sub-btn:active {
-        transform: scale(0.98);
+        transform: scale(0.99);
       }
       .anon {
         font-size: 0.62rem;
@@ -1126,6 +1061,7 @@
         font-family: var(--fm);
       }
 
+      /* Success */
       .succ {
         display: none;
         text-align: center;
@@ -1140,7 +1076,7 @@
         color: var(--pk);
         margin-bottom: 0.5rem;
         letter-spacing: 3px;
-        text-shadow: 0 0 24px rgba(255, 45, 120, 0.4);
+        text-shadow: 0 0 24px rgba(255, 45, 120, 0.45);
       }
       .succ p {
         color: var(--mu);
@@ -1169,21 +1105,14 @@
         color: var(--tx);
       }
 
-      /* Toastify override */
-      .toastify {
-        font-family: var(--fm) !important;
-        font-size: 0.7rem !important;
-        border-radius: var(--r) !important;
-      }
-
       @media (max-width: 480px) {
         .r2 {
           grid-template-columns: 1fr;
         }
-        .cgrid {
+        .pgrid {
           grid-template-columns: repeat(2, 1fr);
         }
-        .pgrid {
+        .cgrid {
           grid-template-columns: repeat(2, 1fr);
         }
         .rp-t {
@@ -1196,23 +1125,18 @@
     </style>
   </head>
   <body>
-    <!-- ══ NAV ══ -->
     <nav>
-      <div class="nlogo" onclick="goPage('pg-feed')">
+      <div class="nlogo">
         <div class="nlogo-t">DumpSpot</div>
         <div class="nlogo-s">post your dump here</div>
       </div>
       <div class="ntabs">
-        <button class="ntab on" id="ntab-feed" onclick="goPage('pg-feed')">
-          Feed
-        </button>
-        <button class="ntab" id="ntab-report" onclick="goPage('pg-report')">
-          + Report
-        </button>
+        <button class="ntab on" onclick="goPage('pg-feed')">Feed</button>
+        <button class="ntab" onclick="goPage('pg-report')">+ Report</button>
       </div>
     </nav>
 
-    <!-- ══ FEED PAGE ══ -->
+    <!-- ══ FEED ══ -->
     <div id="pg-feed" class="pg on">
       <div class="toolbar">
         <span class="fl">Filter</span>
@@ -1239,33 +1163,31 @@
       <div id="list-wrap"><div class="li" id="list-inner"></div></div>
     </div>
 
-    <!-- ══ DETAIL PAGE ══ -->
+    <!-- ══ DETAIL ══ -->
     <div id="pg-detail" class="pg">
-      <div
-        style="max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem"
-      >
-        <button class="back-btn" onclick="goBack()">
-          <svg viewBox="0 0 12 12" stroke-width="1.5">
-            <path d="M8 2L4 6l4 4" />
-          </svg>
-          Back to feed
-        </button>
-        <div id="det-content"></div>
-      </div>
+      <button class="back-btn" onclick="goBack()">
+        <svg
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M8 2L4 6l4 4" />
+        </svg>
+        Back to feed
+      </button>
+      <div id="det-content"></div>
     </div>
 
-    <!-- ══ REPORT PAGE ══ -->
+    <!-- ══ REPORT ══ -->
     <div id="pg-report" class="pg">
-      <div
-        id="form-screen"
-        style="max-width: 600px; margin: 0 auto; padding: 2rem 1.25rem 5rem"
-      >
+      <div id="form-screen">
         <div class="rp-head">
           <div class="rp-t">DumpSpot</div>
           <div class="rp-s">post your dump here</div>
           <p class="rp-ctx">
-            See garbage piling up on your street? Drop a pin.<br />
-            No login, no hassle — a name, a place, a photo.
+            See garbage piling up on your street? Drop a pin.<br />No login, no
+            hassle — a name, a place, a photo.
           </p>
         </div>
 
@@ -1273,7 +1195,7 @@
         <div class="step open" id="s1">
           <div class="step-hd" onclick="toggleStep('s1')">
             <div class="step-n">1</div>
-            <div class="step-title">Who &amp; Where</div>
+            <div class="step-title">Who & Where</div>
             <div class="step-ck">✓</div>
             <div class="step-arr">▾</div>
           </div>
@@ -1286,7 +1208,7 @@
               maxlength="60"
             />
             <label class="fl-label"
-              >State <span class="req">*</span> &amp; Area
+              >State <span class="req">*</span> & Area
               <span class="req">*</span></label
             >
             <div class="r2">
@@ -1340,10 +1262,12 @@
               <div class="tag" data-g="type">Near school</div>
               <div class="tag" data-g="type">Near hospital</div>
             </div>
+
             <label class="fl-label" style="margin-top: 1rem"
               >Garbage category <span class="opt">optional</span></label
             >
             <div class="cgrid" id="cgrid"></div>
+
             <label class="fl-label" style="margin-top: 1rem"
               >Severity <span class="opt">optional</span></label
             >
@@ -1353,6 +1277,7 @@
               <div class="tag" data-g="sev">Severe</div>
               <div class="tag" data-g="sev">Blocking road</div>
             </div>
+
             <label class="fl-label" style="margin-top: 1rem"
               >Notes <span class="opt">optional</span></label
             >
@@ -1378,7 +1303,12 @@
             <div class="uparea" id="uparea">
               <input type="file" id="photo-input" accept="image/*" multiple />
               <div class="uparea-ico">
-                <svg viewBox="0 0 24 24" stroke-width="1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="3" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <path d="M21 15l-5-5L5 21" />
@@ -1398,7 +1328,7 @@
 
       <div class="succ" id="succ">
         <svg
-          style="width: 40px; height: 40px; margin-bottom: 1rem; opacity: 0.5"
+          style="width: 40px; height: 40px; margin-bottom: 1rem; opacity: 0.6"
           viewBox="0 0 24 24"
           fill="none"
           stroke="var(--pk)"
@@ -1419,31 +1349,9 @@
     </div>
 
     <script>
-      // ══════════════════════════════════════
-      // TOAST + LOG UTILITY
-      // Every important action is both logged
-      // to console AND shown as a toast
-      // ══════════════════════════════════════
-      function log(msg, isErr) {
-        const prefix = isErr ? "[ERR]" : "[OK]";
-        console[isErr ? "error" : "log"](prefix, msg);
-        Toastify({
-          text: msg,
-          duration: isErr ? 4000 : 2200,
-          gravity: "bottom",
-          position: "right",
-          stopOnFocus: true,
-          style: {
-            background: isErr ? "#3a0a18" : "#0d1a0d",
-            border: isErr ? "1px solid #ff2d78" : "1px solid #243624",
-            color: isErr ? "#ff6a9a" : "#7aaa7a",
-          },
-        }).showToast();
-      }
-
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       // SVG ICONS
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       const ICONS = {
         bin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`,
         flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c0 0-4 4-4 8a4 4 0 008 0c0-2-1-4-1-4s-1 3-3 3-2-2-2-2 2-1 2-5z"/></svg>`,
@@ -1472,31 +1380,25 @@
         return c ? ICONS[c.icon] : ICONS.bin;
       }
       function pinIcon(cats) {
-        return !cats || !cats.length ? ICONS.bin : catIcon(cats[0]);
+        if (!cats || !cats.length) return ICONS.bin;
+        return catIcon(cats[0]);
       }
 
-      // ══════════════════════════════════════
-      // ID GENERATOR
-      // Each report gets a human-readable ID:
-      // DS-YYYYMMDD-XXXX  (prefix + date + 4-char random hex)
-      // This will map to the Supabase row ID later
-      // ══════════════════════════════════════
-      function genReportId() {
-        const d = new Date();
-        const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-        const rand = Math.floor(Math.random() * 0xffff)
-          .toString(16)
-          .toUpperCase()
-          .padStart(4, "0");
-        return `DS-${date}-${rand}`;
-      }
+      // ═══════════════════════════════
+      // STATE
+      // ═══════════════════════════════
+      const selTags = { type: [], sev: [] };
+      const selCats = [];
+      const upFiles = [];
+      let reports = [];
+      let map, mLayer;
+      let prevPage = "pg-feed";
+      let curView = "map";
+      let activeFiltered = [];
 
-      // ══════════════════════════════════════
-      // SEED DATA
-      // ══════════════════════════════════════
       const SEED = [
         {
-          id: "DS-20260318-A1B2",
+          id: 1,
           reporter: "Arjun M.",
           state: "Maharashtra",
           area: "Pune",
@@ -1511,7 +1413,7 @@
           date: "2026-03-18",
         },
         {
-          id: "DS-20260317-C3D4",
+          id: 2,
           reporter: "Divya K.",
           state: "Karnataka",
           area: "Bengaluru",
@@ -1526,7 +1428,7 @@
           date: "2026-03-17",
         },
         {
-          id: "DS-20260319-E5F6",
+          id: 3,
           reporter: "Ravi T.",
           state: "Tamil Nadu",
           area: "Chennai",
@@ -1541,7 +1443,7 @@
           date: "2026-03-19",
         },
         {
-          id: "DS-20260315-G7H8",
+          id: 4,
           reporter: "Sneha P.",
           state: "Delhi",
           area: "Shahdara",
@@ -1556,7 +1458,7 @@
           date: "2026-03-15",
         },
         {
-          id: "DS-20260320-I9J0",
+          id: 5,
           reporter: "Mohan R.",
           state: "Telangana",
           area: "Hyderabad",
@@ -1571,7 +1473,7 @@
           date: "2026-03-20",
         },
         {
-          id: "DS-20260316-K1L2",
+          id: 6,
           reporter: "Priya S.",
           state: "West Bengal",
           area: "Kolkata",
@@ -1586,7 +1488,7 @@
           date: "2026-03-16",
         },
         {
-          id: "DS-20260320-M3N4",
+          id: 7,
           reporter: "Kiran B.",
           state: "Rajasthan",
           area: "Jaipur",
@@ -1601,7 +1503,7 @@
           date: "2026-03-20",
         },
         {
-          id: "DS-20260319-O5P6",
+          id: 8,
           reporter: "Meena T.",
           state: "Gujarat",
           area: "Ahmedabad",
@@ -1617,128 +1519,89 @@
         },
       ];
 
-      let reports = [...SEED];
-      let map,
-        mLayer,
-        curView = "map",
-        prevPage = "pg-feed";
-
-      // ══════════════════════════════════════
-      // PAGE ROUTING — the fix
-      // Using explicit display style instead
-      // of relying purely on class toggling
-      // ══════════════════════════════════════
-      const PAGES = ["pg-feed", "pg-detail", "pg-report"];
-
+      // ═══════════════════════════════
+      // PAGE ROUTING
+      // ═══════════════════════════════
       function goPage(id, from) {
-        log("goPage → " + id);
-
-        // Validate target exists
-        const target = document.getElementById(id);
-        if (!target) {
-          log("goPage: element #" + id + " not found", true);
-          return;
-        }
-
-        // Hide all pages
-        PAGES.forEach((pid) => {
-          const el = document.getElementById(pid);
-          if (!el) return;
-          el.classList.remove("on");
-        });
-
-        // Show target
-        target.classList.add("on");
-
-        // Nav tab highlighting
+        document
+          .querySelectorAll(".pg")
+          .forEach((p) => p.classList.remove("on"));
         document
           .querySelectorAll(".ntab")
           .forEach((t) => t.classList.remove("on"));
-        if (id === "pg-feed") {
-          const t = document.getElementById("ntab-feed");
-          if (t) t.classList.add("on");
-        }
-        if (id === "pg-report") {
-          const t = document.getElementById("ntab-report");
-          if (t) t.classList.add("on");
-        }
-
+        document.getElementById(id).classList.add("on");
+        if (id === "pg-feed")
+          document.querySelectorAll(".ntab")[0].classList.add("on");
+        else if (id === "pg-report")
+          document.querySelectorAll(".ntab")[1].classList.add("on");
         if (from) prevPage = from;
-
-        if (id === "pg-feed" && map) {
-          setTimeout(() => {
-            map.invalidateSize();
-            log("map resized");
-          }, 80);
-        }
+        if (id === "pg-feed" && map) setTimeout(() => map.invalidateSize(), 60);
         window.scrollTo(0, 0);
       }
 
       function goBack() {
-        log("goBack → " + prevPage);
         goPage(prevPage || "pg-feed");
       }
 
       function openDetail(id) {
-        log("openDetail → " + id);
         const r = reports.find((x) => x.id === id);
-        if (!r) {
-          log("openDetail: report " + id + " not found", true);
-          return;
-        }
+        if (!r) return;
         prevPage = "pg-feed";
         renderDetail(r);
         goPage("pg-detail");
       }
 
-      // ══════════════════════════════════════
-      // MAP INIT — CartoDB Voyager (English)
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
+      // MAP
+      // ═══════════════════════════════
       function initMap() {
-        log("initMap start");
-        try {
-          map = L.map("map", {
-            zoomControl: true,
-            scrollWheelZoom: true,
-          }).setView([20.5937, 78.9629], 5);
-          L.tileLayer(
-            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-            {
-              attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-              subdomains: "abcd",
-              maxZoom: 19,
-            },
-          ).addTo(map);
-          mLayer = L.layerGroup().addTo(map);
-          log("map tiles loaded (CartoDB Voyager, English)");
-          buildCatFilter();
-          buildStateFilter();
-          applyFilters();
-          log("initMap done");
-        } catch (e) {
-          log("initMap failed: " + e.message, true);
-        }
+        map = L.map("map", {
+          zoomControl: true,
+          scrollWheelZoom: true,
+        }).setView([20.5937, 78.9629], 5);
+        // CartoDB Positron — English labels, dark-tinted
+        L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+          {
+            attribution: "© OpenStreetMap © CARTO",
+            maxZoom: 19,
+            subdomains: "abcd",
+          },
+        ).addTo(map);
+        L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+          {
+            attribution: "",
+            maxZoom: 19,
+            subdomains: "abcd",
+            opacity: 0.7,
+          },
+        ).addTo(map);
+        mLayer = L.layerGroup().addTo(map);
+        reports = [...SEED];
+        buildCatFilter();
+        buildStateFilter();
+        applyFilters();
       }
 
       function makePinIcon(cats) {
+        const svg = pinIcon(cats);
         return L.divIcon({
           className: "",
-          html: `<div class="dpin">${pinIcon(cats)}</div>`,
-          iconSize: [28, 28],
-          iconAnchor: [14, 28],
-          popupAnchor: [0, -30],
+          html: `<div class="dpin">${svg}</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+          popupAnchor: [0, -32],
         });
       }
 
       function renderMarkers(data) {
         mLayer.clearLayers();
-        log("renderMarkers: " + data.length + " pins");
         data.forEach((r) => {
           const m = L.marker([r.lat, r.lng], {
             icon: makePinIcon(r.cats),
           }).addTo(mLayer);
-          m.bindPopup(buildPopupHTML(r), { maxWidth: 270, minWidth: 225 });
+          m.bindPopup(buildPopupHTML(r), { maxWidth: 270, minWidth: 220 });
           m.on("popupopen", () => {
             const btn = document.getElementById("pu-btn-" + r.id);
             if (btn) btn.onclick = () => openDetail(r.id);
@@ -1763,18 +1626,15 @@
       <div class="pu-area">${r.area}, ${r.state}</div>
       ${cats ? `<div class="pu-cats">${cats}</div>` : ""}
       ${r.notes ? `<div class="pu-notes">${r.notes}</div>` : ""}
-      <div class="pu-meta">
-        <span class="pu-by">by ${r.reporter}</span>
-        <span class="pu-date">${r.date}</span>
-      </div>
+      <div class="pu-meta"><span class="pu-by">by ${r.reporter}</span><span class="pu-date">${r.date}</span></div>
       <button class="pu-link" id="pu-btn-${r.id}">View full report →</button>
     </div>
   </div>`;
       }
 
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       // LIST
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       function renderList(data) {
         const el = document.getElementById("list-inner");
         if (!data.length) {
@@ -1794,26 +1654,71 @@
                   `<span class="chip">${catIcon(c)}<span>${c}</span></span>`,
               )
               .join("");
-            return `<div class="lcard" onclick="openDetail('${r.id}')">
+            return `<div class="lcard" onclick="openDetail(${r.id})">
       <div class="lcard-thumb">${thumb}</div>
       <div class="lcard-body">
         <div class="lcard-loc">${r.specific}</div>
         <div class="lcard-area">${r.area}, ${r.state}</div>
         <div class="lcard-chips">${chips}</div>
-        <div class="lcard-foot">
-          <span class="lcard-by">by ${r.reporter}</span>
-          <span class="lcard-date">${r.date}</span>
-        </div>
+        <div class="lcard-foot"><span class="lcard-by">by ${r.reporter}</span><span class="lcard-date">${r.date}</span></div>
       </div>
     </div>`;
           })
           .join("");
-        log("renderList: " + data.length + " cards");
       }
 
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
+      // DETAIL
+      // ═══════════════════════════════
+      function renderDetail(r) {
+        let photosHTML = "";
+        if (r.photos && r.photos.length) {
+          const n = Math.min(r.photos.length, 6);
+          const cls =
+            n === 1
+              ? "n1"
+              : n === 2
+                ? "n2"
+                : n === 3
+                  ? "n3"
+                  : n <= 6
+                    ? "n" + n
+                    : "n6";
+          photosHTML = `<div class="det-photos ${cls}">${r.photos
+            .slice(0, 6)
+            .map((p, i) => `<img class="det-photo dp${i}" src="${p}">`)
+            .join("")}</div>`;
+        } else {
+          photosHTML = `<div class="det-nophoto">${ICONS.photo}</div>`;
+        }
+        const cats = (r.cats || [])
+          .map(
+            (c) => `<div class="det-cat">${catIcon(c)}<span>${c}</span></div>`,
+          )
+          .join("");
+        const types = (r.type || [])
+          .map((t) => `<span class="det-tag">${t}</span>`)
+          .join("");
+        const sevs = (r.sev || [])
+          .map((s) => `<span class="det-tag">${s}</span>`)
+          .join("");
+
+        document.getElementById("det-content").innerHTML = `
+    ${photosHTML}
+    <div class="det-area">${r.area}, ${r.state}</div>
+    <div class="det-loc">${r.specific}</div>
+    ${cats ? `<div class="det-sec"><div class="det-sec-label">Category</div><div class="det-cats">${cats}</div></div>` : ""}
+    ${types ? `<div class="det-sec"><div class="det-sec-label">Site type</div><div class="det-tags">${types}</div></div>` : ""}
+    ${sevs ? `<div class="det-sec"><div class="det-sec-label">Severity</div><div class="det-tags">${sevs}</div></div>` : ""}
+    ${r.notes ? `<div class="det-sec"><div class="det-sec-label">Notes</div><div class="det-notes">${r.notes}</div></div>` : ""}
+    <div class="det-divider"></div>
+    <div class="det-meta-row"><span class="det-reporter">Reported by ${r.reporter}</span><span class="det-date">${r.date}</span></div>
+  `;
+      }
+
+      // ═══════════════════════════════
       // FILTERS
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       function buildStateFilter() {
         const el = document.getElementById("fs-state");
         [...new Set(reports.map((r) => r.state))].sort().forEach((s) => {
@@ -1822,7 +1727,6 @@
           o.textContent = s;
           el.appendChild(o);
         });
-        log("state filter built");
       }
 
       function buildCatFilter() {
@@ -1833,27 +1737,24 @@
           o.textContent = c.label;
           el.appendChild(o);
         });
-        // Build category cards in report form
+        // Build cat cards in report form
         const grid = document.getElementById("cgrid");
-        if (grid) {
-          grid.innerHTML = CATS.map(
-            (c) =>
-              `<div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')">
-        <div class="ccard-ico">${ICONS[c.icon]}</div>
-        <div class="ccard-lbl">${c.label}</div>
-      </div>`,
-          ).join("");
-          log("cat cards built: " + CATS.length);
-        } else {
-          log("cgrid element not found", true);
-        }
+        grid.innerHTML = CATS.map(
+          (c) => `
+    <div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')">
+      <div class="ccard-ico">${ICONS[c.icon]}</div>
+      <div class="ccard-lbl">${c.label}</div>
+    </div>`,
+        ).join("");
       }
 
       function applyFilters() {
         const state = document.getElementById("fs-state").value;
         const cat = document.getElementById("fs-cat").value;
+
+        // rebuild area dropdown
         const areaEl = document.getElementById("fs-area");
-        const prev = areaEl.value;
+        const prevArea = areaEl.value;
         areaEl.innerHTML = '<option value="">All areas</option>';
         [
           ...new Set(
@@ -1869,23 +1770,24 @@
             o.textContent = a;
             areaEl.appendChild(o);
           });
-        if (prev) areaEl.value = prev;
+        if (prevArea) areaEl.value = prevArea;
         const area = areaEl.value;
+
         const filtered = reports.filter((r) => {
           if (state && r.state !== state) return false;
           if (area && r.area !== area) return false;
           if (cat && !(r.cats || []).includes(cat)) return false;
           return true;
         });
+        activeFiltered = filtered;
         document.getElementById("cnt-n").textContent = filtered.length;
         renderMarkers(filtered);
         renderList(filtered);
-        log("filters applied → " + filtered.length + " results");
       }
 
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       // VIEW TOGGLE
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
       function setView(v) {
         curView = v;
         document.getElementById("map-wrap").style.display =
@@ -1898,183 +1800,78 @@
           .getElementById("btn-list")
           .classList.toggle("on", v === "list");
         if (v === "map" && map) setTimeout(() => map.invalidateSize(), 60);
-        log("view → " + v);
       }
 
-      function sizeViews() {
-        const tb = document.querySelector(".toolbar");
-        const h = window.innerHeight - 52 - (tb ? tb.offsetHeight : 40);
-        const mw = document.getElementById("map-wrap");
-        const lw = document.getElementById("list-wrap");
-        if (mw) mw.style.height = h + "px";
-        if (lw) lw.style.height = h + "px";
-      }
-
-      // ══════════════════════════════════════
-      // DETAIL RENDER
-      // ══════════════════════════════════════
-      function renderDetail(r) {
-        log("renderDetail: " + r.id);
-        let photos = "";
-        if (r.photos && r.photos.length) {
-          const n = Math.min(r.photos.length, 6);
-          const cls = ["", "n1", "n2", "n3", "n4", "n5", "n6"][n] || "n6";
-          photos = `<div class="det-photos ${cls}">${r.photos
-            .slice(0, 6)
-            .map((p, i) => `<img class="det-photo dp${i}" src="${p}">`)
-            .join("")}</div>`;
-        } else {
-          photos = `<div class="det-nophoto">${ICONS.photo}</div>`;
-        }
-        const cats = (r.cats || [])
-          .map(
-            (c) => `<div class="det-cat">${catIcon(c)}<span>${c}</span></div>`,
-          )
-          .join("");
-        const types = (r.type || [])
-          .map((t) => `<span class="det-tag">${t}</span>`)
-          .join("");
-        const sevs = (r.sev || [])
-          .map((s) => `<span class="det-tag">${s}</span>`)
-          .join("");
-
-        document.getElementById("det-content").innerHTML = `
-    ${photos}
-    <div class="det-id-badge">Report ID <span>${r.id}</span></div>
-    <div class="det-area">${r.area}, ${r.state}</div>
-    <div class="det-loc">${r.specific}</div>
-    ${cats ? `<div class="det-sec"><div class="det-sec-label">Category</div><div class="det-cats">${cats}</div></div>` : ""}
-    ${types ? `<div class="det-sec"><div class="det-sec-label">Site type</div><div class="det-tags">${types}</div></div>` : ""}
-    ${sevs ? `<div class="det-sec"><div class="det-sec-label">Severity</div><div class="det-tags">${sevs}</div></div>` : ""}
-    ${r.notes ? `<div class="det-sec"><div class="det-sec-label">Notes</div><div class="det-notes">${r.notes}</div></div>` : ""}
-    <div class="det-divider"></div>
-    <div class="det-meta-row">
-      <span class="det-reporter">Reported by ${r.reporter}</span>
-      <span class="det-date">${r.date}</span>
-    </div>`;
-      }
-
-      // ══════════════════════════════════════
-      // REPORT — STEPS
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
+      // STEPS
+      // ═══════════════════════════════
       function toggleStep(id) {
         document.getElementById(id).classList.toggle("open");
-        log("toggleStep: " + id);
       }
       function nextStep(cur, nxt) {
-        log("nextStep: " + cur + " → " + nxt);
         document.getElementById(cur).classList.add("done");
         document.getElementById(cur).classList.remove("open");
-        const nxtEl = document.getElementById(nxt);
-        if (!nxtEl) {
-          log("nextStep: #" + nxt + " not found", true);
-          return;
-        }
-        nxtEl.classList.add("open");
-        nxtEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById(nxt).classList.add("open");
+        document
+          .getElementById(nxt)
+          .scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
-      // ══════════════════════════════════════
-      // REPORT — TAGS & CATS
-      // ══════════════════════════════════════
-      const selTags = { type: [], sev: [] };
-      const selCats = [];
-
-      document.addEventListener("DOMContentLoaded", () => {
-        log("DOMContentLoaded — binding tags");
-        document.querySelectorAll(".tag").forEach((t) => {
-          t.addEventListener("click", () => {
-            const g = t.dataset.g;
-            t.classList.toggle("on");
-            const v = t.textContent.trim();
-            if (t.classList.contains("on")) {
-              selTags[g].push(v);
-            } else {
-              selTags[g] = selTags[g].filter((x) => x !== v);
-            }
-            log(
-              "tag toggled: [" +
-                g +
-                "] " +
-                v +
-                " → " +
-                JSON.stringify(selTags[g]),
-            );
-          });
+      // ═══════════════════════════════
+      // TAGS & CATS
+      // ═══════════════════════════════
+      document.querySelectorAll(".tag").forEach((t) => {
+        t.addEventListener("click", () => {
+          const g = t.dataset.g;
+          t.classList.toggle("on");
+          const v = t.textContent;
+          if (t.classList.contains("on")) selTags[g].push(v);
+          else selTags[g] = selTags[g].filter((x) => x !== v);
         });
       });
 
       function toggleCat(el, key) {
         el.classList.toggle("on");
-        if (el.classList.contains("on")) {
-          selCats.push(key);
-        } else {
+        if (el.classList.contains("on")) selCats.push(key);
+        else {
           const i = selCats.indexOf(key);
           if (i > -1) selCats.splice(i, 1);
         }
-        log("cat toggled: " + key + " → " + JSON.stringify(selCats));
       }
 
-      // ══════════════════════════════════════
-      // REPORT — UPLOAD
-      // ══════════════════════════════════════
-      const upFiles = [];
+      // ═══════════════════════════════
+      // UPLOAD
+      // ═══════════════════════════════
+      const upArea = document.getElementById("uparea");
+      const upInput = document.getElementById("photo-input");
+      const pGrid = document.getElementById("pgrid");
+      const upCnt = document.getElementById("upcount");
 
-      function initUpload() {
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (!upArea || !upInput) {
-          log("upload elements not found", true);
-          return;
-        }
-
-        upArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          upArea.classList.add("drag");
-        });
-        upArea.addEventListener("dragleave", () =>
-          upArea.classList.remove("drag"),
-        );
-        upArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          upArea.classList.remove("drag");
-          addFiles([...e.dataTransfer.files]);
-        });
-        upInput.addEventListener("change", () => {
-          log("photo-input change: " + upInput.files.length + " file(s)");
-          addFiles([...upInput.files]);
-          upInput.value = "";
-        });
-        log("upload listeners attached");
-      }
+      upArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        upArea.classList.add("drag");
+      });
+      upArea.addEventListener("dragleave", () =>
+        upArea.classList.remove("drag"),
+      );
+      upArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        upArea.classList.remove("drag");
+        addFiles([...e.dataTransfer.files]);
+      });
+      upInput.addEventListener("change", () => {
+        addFiles([...upInput.files]);
+        upInput.value = "";
+      });
 
       function addFiles(fs) {
-        let added = 0;
         fs.forEach((f) => {
-          if (upFiles.length >= 6) {
-            log("max 6 photos reached", true);
-            return;
-          }
-          if (!f.type.startsWith("image/")) {
-            log("skipped non-image: " + f.name, true);
-            return;
-          }
-          upFiles.push(f);
-          added++;
+          if (upFiles.length < 6 && f.type.startsWith("image/"))
+            upFiles.push(f);
         });
-        log("addFiles: +" + added + ", total=" + upFiles.length);
         renderPreviews();
       }
-
       function renderPreviews() {
-        const pGrid = document.getElementById("pgrid");
-        const upCnt = document.getElementById("upcount");
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (!pGrid) {
-          log("pgrid not found", true);
-          return;
-        }
         pGrid.innerHTML = "";
         if (!upFiles.length) {
           pGrid.style.display = "none";
@@ -2092,7 +1889,6 @@
           btn.textContent = "✕";
           btn.onclick = () => {
             upFiles.splice(i, 1);
-            log("removed photo " + i);
             renderPreviews();
           };
           d.appendChild(img);
@@ -2106,42 +1902,24 @@
         upArea.style.pointerEvents = full ? "none" : "";
       }
 
-      // ══════════════════════════════════════
-      // REPORT — SUBMIT
-      // ══════════════════════════════════════
+      // ═══════════════════════════════
+      // SUBMIT
+      // ═══════════════════════════════
       function submitReport() {
-        log("submitReport called");
         const name = document.getElementById("rname").value.trim();
         const state = document.getElementById("rstate").value.trim();
         const area = document.getElementById("rarea").value.trim();
         const specific = document.getElementById("rspec").value.trim();
-
-        if (!name) {
-          log("validation: name missing", true);
-          return;
-        }
-        if (!state) {
-          log("validation: state missing", true);
-          return;
-        }
-        if (!area) {
-          log("validation: area missing", true);
-          return;
-        }
-        if (!specific) {
-          log("validation: specific location missing", true);
+        if (!name || !state || !area || !specific) {
+          alert("Name, state, area and specific location are required.");
           return;
         }
         if (!upFiles.length) {
-          log("validation: no photos attached", true);
+          alert("Please add at least one photo.");
           return;
         }
-
-        const reportId = genReportId();
-        log("generated ID: " + reportId);
-
         const r = {
-          id: reportId,
+          id: Date.now(),
           reporter: name,
           state,
           area,
@@ -2155,41 +1933,23 @@
           lng: 78.9629 + (Math.random() - 0.5) * 14,
           date: new Date().toISOString().split("T")[0],
         };
-
-        log(
-          "report object: " +
-            JSON.stringify({
-              id: r.id,
-              state: r.state,
-              area: r.area,
-              cats: r.cats,
-            }),
-        );
         reports.push(r);
-
-        // Update state filter if new
-        const stateEl = document.getElementById("fs-state");
-        if (![...stateEl.options].find((o) => o.value === state)) {
+        const sel = document.getElementById("fs-state");
+        if (![...sel.options].find((o) => o.value === state)) {
           const o = document.createElement("option");
           o.value = state;
           o.textContent = state;
-          stateEl.appendChild(o);
-          log("new state added to filter: " + state);
+          sel.appendChild(o);
         }
-
         applyFilters();
-        log("report submitted: " + reportId);
-
         document.getElementById("form-screen").style.display = "none";
         document.getElementById("succ").classList.add("on");
       }
 
       function resetForm() {
-        log("resetForm");
-        ["rname", "rstate", "rarea", "rspec", "rnotes"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) el.value = "";
-        });
+        ["rname", "rstate", "rarea", "rspec", "rnotes"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
         document
           .querySelectorAll(".tag.on")
           .forEach((t) => t.classList.remove("on"));
@@ -2206,52 +1966,25 @@
           s.classList.remove("open", "done");
           if (i === 0) s.classList.add("open");
         });
-        const upArea = document.getElementById("uparea");
-        const upInput = document.getElementById("photo-input");
-        if (upInput) upInput.disabled = false;
-        if (upArea) {
-          upArea.style.opacity = "1";
-          upArea.style.pointerEvents = "";
-        }
+        upInput.disabled = false;
+        upArea.style.opacity = "1";
+        upArea.style.pointerEvents = "";
       }
 
-      // ══════════════════════════════════════
-      // ANTI-COPY
-      // ══════════════════════════════════════
-      document.addEventListener("contextmenu", (e) => e.preventDefault());
-      document.addEventListener("keydown", (e) => {
-        if (
-          (e.ctrlKey || e.metaKey) &&
-          ["u", "s", "a"].includes(e.key.toLowerCase())
-        )
-          e.preventDefault();
-        if (e.key === "F12") e.preventDefault();
-      });
-
-      // ══════════════════════════════════════
-      // BOOT
-      // ══════════════════════════════════════
-      window.addEventListener("load", () => {
-        log("window load — booting DumpSpot");
-        try {
-          sizeViews();
-          log("sizeViews OK");
-        } catch (e) {
-          log("sizeViews error: " + e.message, true);
-        }
-        try {
-          initMap();
-        } catch (e) {
-          log("initMap error: " + e.message, true);
-        }
-        try {
-          initUpload();
-        } catch (e) {
-          log("initUpload error: " + e.message, true);
-        }
-        log("boot complete");
-      });
+      // ═══════════════════════════════
+      // SIZING
+      // ═══════════════════════════════
+      function sizeViews() {
+        const tb = document.querySelector(".toolbar");
+        const h = window.innerHeight - 52 - (tb ? tb.offsetHeight : 40);
+        document.getElementById("map-wrap").style.height = h + "px";
+        document.getElementById("list-wrap").style.height = h + "px";
+      }
       window.addEventListener("resize", sizeViews);
+      window.addEventListener("load", () => {
+        sizeViews();
+        initMap();
+      });
     </script>
   </body>
 </html>
