@@ -121,6 +121,14 @@ function fmtTs(iso) {
   );
 }
 
+function normLocation(str) {
+  if (!str) return "";
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/\w/g, (c) => c.toUpperCase());
+}
+
 let reports = [],
   map,
   mLayer,
@@ -661,9 +669,9 @@ function renderPreviews() {
 
 async function submitReport() {
   const name = document.getElementById("rname").value.trim();
-  const state = document.getElementById("rstate").value.trim();
-  const area = document.getElementById("rarea").value.trim();
-  const specific = document.getElementById("rspec").value.trim();
+  const state = normLocation(document.getElementById("rstate").value);
+  const area = normLocation(document.getElementById("rarea").value);
+  const specific = normLocation(document.getElementById("rspec").value);
   if (!name || !state || !area || !specific) {
     toast("Fill in name, state, area and location.", true);
     return;
