@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DumpSpot</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link
@@ -40,7 +40,7 @@
         --pk35: rgba(255, 45, 120, 0.35);
         --r: 6px;
         --nav: 52px;
-        --fd: "Unbounded", sans-serif;
+        --fd: "Bebas Neue", sans-serif;
         --fb: "DM Sans", sans-serif;
         --fm: "Space Mono", monospace;
       }
@@ -103,10 +103,10 @@
       }
       .nlogo-t {
         font-family: var(--fd);
-        font-weight: 900;
-        font-size: 1rem;
+        font-weight: 400;
+        font-size: 1.3rem;
         color: var(--pk);
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         text-transform: uppercase;
       }
       .nlogo-s {
@@ -744,10 +744,10 @@
       }
       .rp-t {
         font-family: var(--fd);
-        font-weight: 900;
-        font-size: 2.1rem;
+        font-weight: 400;
+        font-size: 3rem;
         color: var(--pk);
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         text-transform: uppercase;
         line-height: 1;
         text-shadow: 0 0 28px rgba(255, 45, 120, 0.3);
@@ -767,6 +767,11 @@
         line-height: 1.7;
         border-left: 2px solid var(--pk35);
         padding-left: 0.85rem;
+      }
+      .rp-divider {
+        height: 1px;
+        background: var(--b1);
+        margin: 1.6rem 0;
       }
 
       .step {
@@ -1102,9 +1107,9 @@
         border: none;
         border-radius: var(--r);
         font-family: var(--fd);
-        font-size: 0.9rem;
-        font-weight: 700;
-        letter-spacing: 2px;
+        font-size: 1.4rem;
+        font-weight: 400;
+        letter-spacing: 3px;
         cursor: pointer;
         text-transform: uppercase;
         box-shadow: 0 0 20px rgba(255, 45, 120, 0.35);
@@ -1172,8 +1177,11 @@
       /* Toastify override */
       .toastify {
         font-family: var(--fm) !important;
-        font-size: 0.7rem !important;
+        font-size: 0.72rem !important;
         border-radius: var(--r) !important;
+      }
+      .toastify.on {
+        box-shadow: none !important;
       }
 
       @media (max-width: 480px) {
@@ -1260,6 +1268,7 @@
         id="form-screen"
         style="max-width: 600px; margin: 0 auto; padding: 2rem 1.25rem 5rem"
       >
+        <!-- Header -->
         <div class="rp-head">
           <div class="rp-t">DumpSpot</div>
           <div class="rp-s">post your dump here</div>
@@ -1269,128 +1278,101 @@
           </p>
         </div>
 
-        <!-- Step 1 -->
-        <div class="step open" id="s1">
-          <div class="step-hd" onclick="toggleStep('s1')">
-            <div class="step-n">1</div>
-            <div class="step-title">Who &amp; Where</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
-          </div>
-          <div class="step-bd">
-            <label class="fl-label">Your name <span class="req">*</span></label>
-            <input
-              type="text"
-              id="rname"
-              placeholder="What to call you"
-              maxlength="60"
-            />
-            <label class="fl-label"
-              >State <span class="req">*</span> &amp; Area
-              <span class="req">*</span></label
-            >
-            <div class="r2">
-              <input
-                type="text"
-                id="rstate"
-                placeholder="State"
-                maxlength="50"
-              />
-              <input
-                type="text"
-                id="rarea"
-                placeholder="District / Area"
-                maxlength="60"
-              />
-            </div>
-            <label class="fl-label"
-              >Specific location <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="rspec"
-              placeholder="e.g. Near SBI ATM, MG Road junction"
-              maxlength="120"
-            />
-            <button class="next-btn" onclick="nextStep('s1', 's2')">
-              Next →
-            </button>
-          </div>
+        <!-- ── YOUR NAME ── -->
+        <label class="fl-label">Your name <span class="req">*</span></label>
+        <input
+          type="text"
+          id="rname"
+          placeholder="What to call you"
+          maxlength="60"
+        />
+
+        <!-- ── LOCATION ── -->
+        <label class="fl-label"
+          >State <span class="req">*</span> &amp; Area
+          <span class="req">*</span></label
+        >
+        <div class="r2">
+          <input type="text" id="rstate" placeholder="State" maxlength="50" />
+          <input
+            type="text"
+            id="rarea"
+            placeholder="District / Area"
+            maxlength="60"
+          />
         </div>
 
-        <!-- Step 2 -->
-        <div class="step" id="s2">
-          <div class="step-hd" onclick="toggleStep('s2')">
-            <div class="step-n">2</div>
-            <div class="step-title">What kind of dump</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
-          </div>
-          <div class="step-bd">
-            <label class="fl-label"
-              >Site type <span class="opt">optional</span></label
-            >
-            <div class="trow">
-              <div class="tag" data-g="type">Road</div>
-              <div class="tag" data-g="type">Footpath</div>
-              <div class="tag" data-g="type">Nala / Drain</div>
-              <div class="tag" data-g="type">Open plot</div>
-              <div class="tag" data-g="type">Park</div>
-              <div class="tag" data-g="type">Market</div>
-              <div class="tag" data-g="type">Near school</div>
-              <div class="tag" data-g="type">Near hospital</div>
-            </div>
-            <label class="fl-label" style="margin-top: 1rem"
-              >Garbage category <span class="opt">optional</span></label
-            >
-            <div class="cgrid" id="cgrid"></div>
-            <label class="fl-label" style="margin-top: 1rem"
-              >Severity <span class="opt">optional</span></label
-            >
-            <div class="trow">
-              <div class="tag" data-g="sev">Minor</div>
-              <div class="tag" data-g="sev">Moderate</div>
-              <div class="tag" data-g="sev">Severe</div>
-              <div class="tag" data-g="sev">Blocking road</div>
-            </div>
-            <label class="fl-label" style="margin-top: 1rem"
-              >Notes <span class="opt">optional</span></label
-            >
-            <textarea
-              id="rnotes"
-              placeholder="Smell, duration, any hazard…"
-            ></textarea>
-            <button class="next-btn" onclick="nextStep('s2', 's3')">
-              Next →
-            </button>
-          </div>
+        <label class="fl-label"
+          >Specific location <span class="req">*</span></label
+        >
+        <input
+          type="text"
+          id="rspec"
+          placeholder="e.g. Near SBI ATM, MG Road junction"
+          maxlength="120"
+        />
+
+        <div class="rp-divider"></div>
+
+        <!-- ── SITE TYPE ── -->
+        <label class="fl-label"
+          >Type of site <span class="opt">optional</span></label
+        >
+        <div class="trow">
+          <div class="tag" data-g="type">Road</div>
+          <div class="tag" data-g="type">Footpath</div>
+          <div class="tag" data-g="type">Nala / Drain</div>
+          <div class="tag" data-g="type">Open plot</div>
+          <div class="tag" data-g="type">Park</div>
+          <div class="tag" data-g="type">Market</div>
+          <div class="tag" data-g="type">Near school</div>
+          <div class="tag" data-g="type">Near hospital</div>
         </div>
 
-        <!-- Step 3 -->
-        <div class="step" id="s3">
-          <div class="step-hd" onclick="toggleStep('s3')">
-            <div class="step-n">3</div>
-            <div class="step-title">Photos</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
-          </div>
-          <div class="step-bd">
-            <div class="uparea" id="uparea">
-              <input type="file" id="photo-input" accept="image/*" multiple />
-              <div class="uparea-ico">
-                <svg viewBox="0 0 24 24" stroke-width="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="3" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="M21 15l-5-5L5 21" />
-                </svg>
-              </div>
-              <p>Tap or drag to add photos</p>
-              <small>1 to 6 · JPG PNG WEBP</small>
-            </div>
-            <div id="pgrid" class="pgrid" style="display: none"></div>
-            <div id="upcount" class="upcount"></div>
-          </div>
+        <!-- ── GARBAGE CATEGORY ── -->
+        <label class="fl-label" style="margin-top: 1.4rem"
+          >Garbage category <span class="opt">optional</span></label
+        >
+        <div class="cgrid" id="cgrid"></div>
+
+        <!-- ── SEVERITY ── -->
+        <label class="fl-label" style="margin-top: 1.4rem"
+          >Severity <span class="opt">optional</span></label
+        >
+        <div class="trow">
+          <div class="tag" data-g="sev">Minor</div>
+          <div class="tag" data-g="sev">Moderate</div>
+          <div class="tag" data-g="sev">Severe</div>
+          <div class="tag" data-g="sev">Blocking road</div>
         </div>
+
+        <div class="rp-divider"></div>
+
+        <!-- ── NOTES ── -->
+        <label class="fl-label">Notes <span class="opt">optional</span></label>
+        <textarea
+          id="rnotes"
+          placeholder="Smell, duration, any hazard…"
+        ></textarea>
+
+        <!-- ── PHOTOS ── -->
+        <label class="fl-label" style="margin-top: 1.4rem"
+          >Photos <span class="req">*</span></label
+        >
+        <div class="uparea" id="uparea">
+          <input type="file" id="photo-input" accept="image/*" multiple />
+          <div class="uparea-ico">
+            <svg viewBox="0 0 24 24" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="3" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+          </div>
+          <p>Tap or drag to add photos</p>
+          <small>1 to 6 · JPG PNG WEBP</small>
+        </div>
+        <div id="pgrid" class="pgrid" style="display: none"></div>
+        <div id="upcount" class="upcount"></div>
 
         <button class="sub-btn" onclick="submitReport()">Submit Report</button>
         <p class="anon">No account needed · anonymous beyond your name</p>
@@ -1420,25 +1402,52 @@
 
     <script>
       // ══════════════════════════════════════
-      // TOAST + LOG UTILITY
-      // Every important action is both logged
-      // to console AND shown as a toast
+      // SILENT LOG (console only, no toasts)
       // ══════════════════════════════════════
       function log(msg, isErr) {
-        const prefix = isErr ? "[ERR]" : "[OK]";
-        console[isErr ? "error" : "log"](prefix, msg);
-        Toastify({
-          text: msg,
-          duration: isErr ? 4000 : 2200,
-          gravity: "bottom",
-          position: "right",
-          stopOnFocus: true,
-          style: {
-            background: isErr ? "#3a0a18" : "#0d1a0d",
-            border: isErr ? "1px solid #ff2d78" : "1px solid #243624",
-            color: isErr ? "#ff6a9a" : "#7aaa7a",
-          },
-        }).showToast();
+        console[isErr ? "error" : "log"](isErr ? "[ERR]" : "[OK]", msg);
+      }
+
+      // ══════════════════════════════════════
+      // WELCOME TOAST
+      // Shows once per browser session.
+      // Stored in sessionStorage so it won't
+      // reappear on normal refresh.
+      // Clears on hard refresh (Ctrl+Shift+R)
+      // because sessionStorage is wiped.
+      // ══════════════════════════════════════
+      function maybeShowWelcome() {
+        const KEY = "ds_welcomed";
+        if (sessionStorage.getItem(KEY)) return;
+        sessionStorage.setItem(KEY, "1");
+
+        const greetings = [
+          "Welcome back. Have a great day ahead 🌱",
+          "Good to see you. Stay aware, stay vocal 📍",
+          "Hey there. Every report matters 💚",
+          "Welcome to DumpSpot. Let's clean this up 🗺️",
+        ];
+        const msg = greetings[Math.floor(Math.random() * greetings.length)];
+
+        setTimeout(() => {
+          Toastify({
+            text: msg,
+            duration: 3500,
+            gravity: "bottom",
+            position: "center",
+            stopOnFocus: true,
+            style: {
+              background: "#0d140d",
+              border: "1px solid #2e452e",
+              color: "#ddeedd",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "0.72rem",
+              letterSpacing: "0.3px",
+              borderRadius: "6px",
+              padding: "0.65rem 1.1rem",
+            },
+          }).showToast();
+        }, 600);
       }
 
       // ══════════════════════════════════════
@@ -2202,10 +2211,6 @@
         renderPreviews();
         document.getElementById("form-screen").style.display = "";
         document.getElementById("succ").classList.remove("on");
-        document.querySelectorAll(".step").forEach((s, i) => {
-          s.classList.remove("open", "done");
-          if (i === 0) s.classList.add("open");
-        });
         const upArea = document.getElementById("uparea");
         const upInput = document.getElementById("photo-input");
         if (upInput) upInput.disabled = false;
@@ -2232,24 +2237,10 @@
       // BOOT
       // ══════════════════════════════════════
       window.addEventListener("load", () => {
-        log("window load — booting DumpSpot");
-        try {
-          sizeViews();
-          log("sizeViews OK");
-        } catch (e) {
-          log("sizeViews error: " + e.message, true);
-        }
-        try {
-          initMap();
-        } catch (e) {
-          log("initMap error: " + e.message, true);
-        }
-        try {
-          initUpload();
-        } catch (e) {
-          log("initUpload error: " + e.message, true);
-        }
-        log("boot complete");
+        sizeViews();
+        initMap();
+        initUpload();
+        maybeShowWelcome();
       });
       window.addEventListener("resize", sizeViews);
     </script>
