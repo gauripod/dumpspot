@@ -1,9 +1,17 @@
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && ["u", "s", "a"].includes(e.key.toLowerCase()))
-    e.preventDefault();
-  if (e.key === "F12") e.preventDefault();
-});
+const LOCK_INSPECT =
+  typeof LOCK_INSPECT_ENV !== "undefined" ? LOCK_INSPECT_ENV : false;
+
+if (LOCK_INSPECT) {
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("keydown", (e) => {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      ["u", "s", "a"].includes(e.key.toLowerCase())
+    )
+      e.preventDefault();
+    if (e.key === "F12") e.preventDefault();
+  });
+}
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
