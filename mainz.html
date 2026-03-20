@@ -5,22 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DumpSpot</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@1,700;1,900&family=DM+Sans:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
       :root {
         --bg: #070c07;
         --s1: #0d140d;
@@ -34,12 +32,24 @@
         --fa: #2e422e;
         --pk: #ff2d78;
         --pk10: rgba(255, 45, 120, 0.1);
-        --pk20: rgba(255, 45, 120, 0.2);
+        --pk15: rgba(255, 45, 120, 0.15);
         --pk35: rgba(255, 45, 120, 0.35);
         --r: 6px;
-        --fd: "Unbounded", sans-serif;
+        --nav: 70px;
+        --fd: "Playfair Display", serif;
         --fb: "DM Sans", sans-serif;
         --fm: "Space Mono", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
       }
       body {
         font-family: var(--fb);
@@ -47,35 +57,52 @@
         color: var(--tx);
         min-height: 100vh;
         overflow-x: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      input,
+      textarea,
+      button {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      .pg {
+        display: none !important;
+      }
+      .pg.on {
+        display: block !important;
+      }
+      #pg-feed.on {
+        display: flex !important;
+        flex-direction: column;
       }
 
-      /* ── NAV ── */
+      /* NAV */
       nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.25rem;
-        height: 52px;
+        height: var(--nav);
         background: var(--s1);
         border-bottom: 1px solid var(--b1);
         position: sticky;
         top: 0;
         z-index: 2000;
+        padding: 0 2rem;
       }
       .nlogo {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        line-height: 1;
-        gap: 3px;
+        gap: 2px;
+        cursor: pointer;
       }
       .nlogo-t {
         font-family: var(--fd);
-        font-weight: 900;
-        font-size: 1rem;
+        font-size: 1.7rem;
         color: var(--pk);
-        letter-spacing: 2px;
-        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        line-height: 1;
+        font-style: italic;
       }
       .nlogo-s {
         font-family: var(--fm);
@@ -83,18 +110,19 @@
         color: var(--mu);
         letter-spacing: 1.5px;
         text-transform: uppercase;
+        margin-top: 1px;
       }
       .ntabs {
         display: flex;
       }
       .ntab {
-        padding: 0 1rem;
-        height: 52px;
+        padding: 0 1.25rem;
+        height: var(--nav);
         display: flex;
         align-items: center;
         font-family: var(--fm);
-        font-size: 0.62rem;
-        letter-spacing: 0.5px;
+        font-size: 0.65rem;
+        letter-spacing: 0.8px;
         color: var(--mu);
         cursor: pointer;
         border-bottom: 2px solid transparent;
@@ -115,23 +143,10 @@
         border-bottom-color: var(--pk);
       }
 
-      /* ── PAGE SHELL ── */
-      .pg {
-        display: none;
-      }
-      .pg.on {
-        display: block;
-      }
-
-      /* ══════════════════════════
-   FEED PAGE
-══════════════════════════ */
+      /* FEED TOOLBAR */
       #pg-feed {
-        height: calc(100vh - 52px);
-        display: flex;
-        flex-direction: column;
+        height: calc(100vh - var(--nav));
       }
-
       .toolbar {
         padding: 0.5rem 1rem;
         background: var(--s1);
@@ -188,7 +203,6 @@
           background 0.15s,
           color 0.15s;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
       .vbtn.on {
         background: var(--pk);
@@ -196,15 +210,19 @@
       }
       .cnt {
         font-family: var(--fm);
-        font-size: 0.62rem;
+        font-size: 0.65rem;
         color: var(--mu);
         white-space: nowrap;
+        letter-spacing: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
       }
       .cnt b {
         color: var(--pk);
       }
 
-      /* Map */
+      /* MAP */
       #map-wrap {
         flex: 1;
         display: flex;
@@ -214,54 +232,25 @@
         flex: 1;
       }
       .leaflet-container {
-        background: #040804;
+        background: #e8e0d8;
       }
       .leaflet-tile {
-        filter: grayscale(1) brightness(0.22) contrast(1.3);
+        filter: saturate(0.55) brightness(0.92);
       }
       .leaflet-control-zoom a {
-        background: var(--s2) !important;
+        background: var(--s1) !important;
         color: var(--tx) !important;
         border-color: var(--b2) !important;
       }
-
-      /* Pin */
-      .dpin {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: var(--s1);
-        border: 1.5px solid var(--pk35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition:
-          transform 0.12s,
-          border-color 0.12s,
-          box-shadow 0.12s;
-        box-shadow: 0 0 10px rgba(255, 45, 120, 0.2);
-      }
-      .dpin:hover {
-        transform: scale(1.18);
-        border-color: var(--pk);
-        box-shadow: 0 0 18px rgba(255, 45, 120, 0.4);
-      }
-      .dpin svg {
-        width: 15px;
-        height: 15px;
-      }
-
-      /* Popup */
       .leaflet-popup-content-wrapper {
-        background: var(--s2) !important;
-        border: 1px solid var(--b3) !important;
+        background: var(--s1) !important;
+        border: 1px solid var(--b2) !important;
         border-radius: var(--r) !important;
         padding: 0 !important;
         box-shadow:
           0 0 0 1px var(--pk35),
-          0 14px 40px rgba(0, 0, 0, 0.9) !important;
-        min-width: 220px;
+          0 14px 40px rgba(0, 0, 0, 0.85) !important;
+        min-width: 215px;
       }
       .leaflet-popup-content {
         margin: 0 !important;
@@ -277,10 +266,37 @@
         font-size: 16px !important;
         z-index: 10;
       }
+      .dpin {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--s1);
+        border: 1.5px solid var(--pk35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 0 8px rgba(255, 45, 120, 0.2);
+        transition:
+          transform 0.12s,
+          border-color 0.12s,
+          box-shadow 0.12s;
+      }
+      .dpin:hover {
+        transform: scale(1.18);
+        border-color: var(--pk);
+        box-shadow: 0 0 16px rgba(255, 45, 120, 0.45);
+      }
+      .dpin svg {
+        width: 13px;
+        height: 13px;
+        stroke: var(--tx);
+        fill: none;
+      }
       .pu-img {
         border-radius: var(--r) var(--r) 0 0;
         overflow: hidden;
-        aspect-ratio: 16/8;
+        aspect-ratio: 16/7;
         background: var(--s3);
         display: flex;
         align-items: center;
@@ -293,84 +309,80 @@
         display: block;
       }
       .pu-img svg {
-        width: 32px;
-        height: 32px;
-        opacity: 0.25;
+        width: 22px;
+        height: 22px;
+        opacity: 0.15;
+        stroke: var(--mu);
+        fill: none;
       }
       .pu-body {
-        padding: 0.7rem 0.85rem 0.8rem;
+        padding: 0.65rem 0.85rem 0.75rem;
       }
       .pu-loc {
         font-family: var(--fd);
-        font-weight: 700;
-        font-size: 0.82rem;
+        font-size: 1rem;
         color: var(--tx);
-        line-height: 1.3;
-        margin-bottom: 0.12rem;
+        line-height: 1.2;
+        margin-bottom: 0.1rem;
+        letter-spacing: 0.5px;
       }
       .pu-area {
         font-family: var(--fm);
-        font-size: 0.58rem;
+        font-size: 0.54rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.3rem;
       }
       .pu-cats {
         display: flex;
-        gap: 0.35rem;
+        gap: 0.25rem;
         flex-wrap: wrap;
-        margin-top: 0.35rem;
+        margin-top: 0.28rem;
       }
       .pu-cat {
         display: flex;
         align-items: center;
-        gap: 0.28rem;
+        gap: 0.2rem;
         border: 1px solid var(--b2);
         border-radius: 3px;
-        padding: 0.15rem 0.42rem;
+        padding: 0.1rem 0.35rem;
         font-family: var(--fm);
-        font-size: 0.57rem;
+        font-size: 0.52rem;
         color: var(--mu);
         text-transform: uppercase;
       }
       .pu-cat svg {
-        width: 10px;
-        height: 10px;
-        flex-shrink: 0;
-      }
-      .pu-notes {
-        font-size: 0.75rem;
-        color: var(--mu);
-        margin-top: 0.35rem;
-        line-height: 1.4;
+        width: 8px;
+        height: 8px;
+        stroke: var(--mu);
+        fill: none;
       }
       .pu-meta {
         display: flex;
         justify-content: space-between;
-        margin-top: 0.5rem;
+        margin-top: 0.4rem;
       }
       .pu-by {
-        font-size: 0.68rem;
+        font-size: 0.64rem;
         color: var(--mu);
       }
       .pu-date {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.52rem;
         color: var(--fa);
       }
       .pu-link {
         display: block;
-        margin-top: 0.6rem;
-        padding: 0.4rem;
+        margin-top: 0.5rem;
+        padding: 0.32rem;
         text-align: center;
         border: 1px solid var(--b2);
         border-radius: var(--r);
         font-family: var(--fm);
-        font-size: 0.6rem;
+        font-size: 0.54rem;
         color: var(--mu);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         cursor: pointer;
         transition:
           border-color 0.15s,
@@ -383,111 +395,211 @@
         color: var(--pk);
       }
 
-      /* List */
+      /* DISPATCH WALL */
+      #list-wrap {
+        flex: 1;
+        overflow: hidden;
+        display: none;
+        flex-direction: column;
+      }
+      #list-wrap.on {
+        display: flex;
+      }
+      /* CHRONOLOGICAL LIST */
       #list-wrap {
         flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
         display: none;
+        flex-direction: column;
       }
       #list-wrap.on {
-        display: block;
-      }
-      .li {
-        padding: 0.6rem 0.9rem 2rem;
-      }
-      .lcard {
-        background: var(--s1);
-        border: 1px solid var(--b1);
-        border-radius: var(--r);
-        margin-bottom: 0.5rem;
         display: flex;
-        overflow: hidden;
+      }
+      .clist {
+        padding: 0.6rem 1.25rem 3rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .clist-group {
+        margin-bottom: 1.8rem;
+      }
+      .clist-heading {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid var(--b1);
+        position: relative;
+      }
+      .clist-heading-label {
+        font-family: var(--fd);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .clist-heading.today .clist-heading-label {
+        font-size: 5.6rem;
+        line-height: 1;
+        color: var(--pk);
+        text-shadow: 0 0 20px rgba(255, 45, 120, 0.22);
+        font-style: italic;
+      }
+      .clist-heading.yesterday .clist-heading-label {
+        font-size: 5.6rem;
+        line-height: 1;
+        color: #ede8e0;
+        font-style: italic;
+      }
+      .clist-heading.this-week .clist-heading-label {
+        font-size: 3.2rem;
+        line-height: 1;
+        color: #c0cfc0;
+        font-style: italic;
+      }
+      .clist-heading.older .clist-heading-label {
+        font-size: 2rem;
+        line-height: 1;
+        color: var(--mu);
+        font-style: italic;
+      }
+      .clist-heading-count {
+        font-family: var(--fm);
+        font-size: 0.54rem;
+        color: var(--fa);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .clist-group:nth-child(even) .clist-heading {
+        flex-direction: row-reverse;
+      }
+      .clist-group:nth-child(even) .clist-heading-count {
+        text-align: right;
+      }
+      .clist-heading {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+      }
+
+      /* Row-style card — no thumb, full width */
+      .lcard {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--b1);
+        margin-bottom: 0;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.7rem 0;
         cursor: pointer;
-        transition: border-color 0.15s;
+        transition: background 0.1s;
+        position: relative;
+      }
+      .lcard::before {
+        display: none;
       }
       .lcard:hover {
-        border-color: var(--b2);
+        background: rgba(255, 255, 255, 0);
       }
-      .lcard-thumb {
-        width: 80px;
-        flex-shrink: 0;
-        background: var(--s3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .lcard:hover::before {
+        display: none;
       }
-      .lcard-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+      .lcard.sev-severe::before,
+      .lcard.sev-blocking::before {
+        background: var(--pk);
       }
-      .lcard-thumb svg {
-        width: 28px;
-        height: 28px;
-        opacity: 0.2;
+      .lcard.sev-moderate::before {
+        background: #c88c14;
       }
-      .lcard-body {
-        padding: 0.6rem 0.8rem;
-        flex: 1;
+      .lcard.sev-minor::before {
+        background: #2a6e2a;
+      }
+      .lcard:last-child {
+        border-bottom: none;
+      }
+      .lcard:hover .lcard-loc {
+        color: #fff;
+      }
+      .lcard:hover .lcard-area {
+        opacity: 1;
+      }
+      .lcard:hover .lcard-by {
+        color: #ccdacc;
+      }
+
+      .lcard-main {
         min-width: 0;
       }
       .lcard-loc {
-        font-family: var(--fd);
-        font-weight: 700;
-        font-size: 0.8rem;
-        color: var(--tx);
-        line-height: 1.25;
+        font-family: var(--fb);
+        font-size: 0.95rem;
+        color: #e8e2da;
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0.1px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin-bottom: 0.12rem;
       }
       .lcard-area {
         font-family: var(--fm);
-        font-size: 0.56rem;
+        font-size: 0.54rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-top: 0.1rem;
+        margin-bottom: 0.3rem;
+        opacity: 0.85;
       }
       .lcard-chips {
         display: flex;
-        gap: 0.25rem;
-        margin-top: 0.32rem;
+        gap: 0.2rem;
         flex-wrap: wrap;
       }
       .chip {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        border: 1px solid var(--b2);
+        gap: 0.18rem;
+        border: 1px solid var(--b3);
         border-radius: 3px;
-        padding: 0.13rem 0.38rem;
+        padding: 0.09rem 0.3rem;
         font-family: var(--fm);
-        font-size: 0.56rem;
-        color: var(--mu);
+        font-size: 0.5rem;
+        color: #6e8e6e;
         text-transform: uppercase;
       }
       .chip svg {
-        width: 9px;
-        height: 9px;
-        flex-shrink: 0;
+        width: 7px;
+        height: 7px;
+        stroke: #6e8e6e;
+        fill: none;
       }
-      .lcard-foot {
+
+      .lcard-meta {
         display: flex;
-        justify-content: space-between;
-        margin-top: 0.38rem;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.22rem;
+        flex-shrink: 0;
+        padding-right: 1.5rem;
       }
       .lcard-by {
-        font-size: 0.66rem;
-        color: var(--mu);
+        font-size: 0.72rem;
+        color: #b8ccb8;
+        white-space: nowrap;
+        font-family: var(--fb);
       }
-      .lcard-date {
+      .lcard-time {
         font-family: var(--fm);
-        font-size: 0.56rem;
-        color: var(--fa);
+        font-size: 0.6rem;
+        color: #7a9a7a;
+        white-space: nowrap;
       }
-      .lempty {
+
+      .list-empty {
         text-align: center;
         padding: 3rem 1rem;
         font-family: var(--fm);
@@ -495,13 +607,9 @@
         color: var(--fa);
       }
 
-      /* ══════════════════════════
-   DETAIL PAGE
-══════════════════════════ */
+      /* DETAIL */
       #pg-detail {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 1.5rem 1.25rem 5rem;
+        padding: 0;
       }
       .back-btn {
         display: flex;
@@ -525,14 +633,15 @@
       .back-btn svg {
         width: 12px;
         height: 12px;
+        stroke: currentColor;
+        fill: none;
       }
-
       .det-photos {
         display: grid;
         gap: 3px;
         border-radius: var(--r);
         overflow: hidden;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.2rem;
       }
       .det-photos.n1 {
         grid-template-columns: 1fr;
@@ -542,7 +651,6 @@
       }
       .det-photos.n3 {
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
       }
       .det-photos.n3 .dp0 {
         grid-column: 1/3;
@@ -562,233 +670,234 @@
       .det-nophoto {
         width: 100%;
         aspect-ratio: 16/7;
-        background: var(--s3);
+        background: var(--s2);
         border-radius: var(--r);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.2rem;
       }
       .det-nophoto svg {
-        width: 48px;
-        height: 48px;
-        opacity: 0.15;
+        width: 44px;
+        height: 44px;
+        opacity: 0.1;
+        stroke: var(--mu);
+        fill: none;
       }
-
+      .det-id-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: var(--fm);
+        font-size: 0.54rem;
+        color: var(--fa);
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 3px;
+        padding: 0.18rem 0.58rem;
+        margin-bottom: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .det-id-badge span {
+        color: var(--mu);
+      }
       .det-area {
         font-family: var(--fm);
-        font-size: 0.62rem;
+        font-size: 0.65rem;
         color: var(--pk);
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.3rem;
+        opacity: 0.9;
       }
       .det-loc {
-        font-family: var(--fd);
-        font-weight: 900;
-        font-size: 1.6rem;
-        color: var(--tx);
-        line-height: 1.15;
-        margin-bottom: 1rem;
+        font-family: var(--fb);
+        font-size: clamp(1.4rem, 4vw, 2.4rem);
+        color: #ede8e0;
+        font-weight: 500;
+        line-height: 1.1;
+        margin-bottom: 0.3rem;
+        letter-spacing: 0.1px;
       }
-
-      .det-sec {
+      .det-timestamp {
+        font-family: var(--fm);
+        font-size: 0.6rem;
+        color: #6a8a6a;
         margin-bottom: 1.1rem;
+        letter-spacing: 0.3px;
+      }
+      .det-sec {
+        margin-bottom: 0.9rem;
       }
       .det-sec-label {
         font-family: var(--fm);
-        font-size: 0.58rem;
-        color: var(--fa);
+        font-size: 0.54rem;
+        color: #6a8a6a;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        margin-bottom: 0.45rem;
+        margin-bottom: 0.5rem;
       }
       .det-cats {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4rem;
+        gap: 0.36rem;
       }
       .det-cat {
         display: flex;
         align-items: center;
-        gap: 0.4rem;
-        border: 1px solid var(--b2);
+        gap: 0.32rem;
+        border: 1px solid var(--b3);
         border-radius: var(--r);
-        padding: 0.35rem 0.7rem;
+        padding: 0.28rem 0.62rem;
         font-family: var(--fm);
-        font-size: 0.62rem;
-        color: var(--mu);
+        font-size: 0.6rem;
+        color: #9ab89a;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
         background: var(--s2);
       }
       .det-cat svg {
-        width: 13px;
-        height: 13px;
-        flex-shrink: 0;
+        width: 11px;
+        height: 11px;
+        stroke: #7a9a7a;
+        fill: none;
       }
       .det-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.35rem;
+        gap: 0.3rem;
       }
       .det-tag {
-        border: 1px solid var(--b2);
+        border: 1px solid var(--b3);
         border-radius: 3px;
-        padding: 0.28rem 0.65rem;
+        padding: 0.22rem 0.58rem;
         font-family: var(--fm);
-        font-size: 0.6rem;
-        color: var(--mu);
+        font-size: 0.58rem;
+        color: #9ab89a;
         text-transform: uppercase;
       }
       .det-notes {
-        font-size: 0.9rem;
-        color: var(--mu);
+        font-size: 0.88rem;
+        color: #aabcaa;
         line-height: 1.7;
         background: var(--s2);
-        border: 1px solid var(--b1);
+        border: 1px solid var(--b2);
         border-radius: var(--r);
-        padding: 0.85rem 1rem;
+        padding: 0.8rem 1rem;
       }
       .det-divider {
         height: 1px;
         background: var(--b1);
-        margin: 1.1rem 0;
+        margin: 1rem 0;
       }
       .det-meta-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
       .det-reporter {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         color: var(--tx);
       }
       .det-date {
         font-family: var(--fm);
-        font-size: 0.62rem;
+        font-size: 0.58rem;
         color: var(--fa);
       }
+      #det-mini-map {
+        width: 100%;
+        height: 210px;
+        border-radius: var(--r);
+        overflow: hidden;
+        margin-top: 1.2rem;
+        border: 1px solid var(--b1);
+      }
 
-      /* ══════════════════════════
-   REPORT PAGE
-══════════════════════════ */
+      /* REPORT PAGE */
       #pg-report {
-        max-width: 600px;
+        padding: 2.5rem 2.5rem 5rem;
+      }
+      .rp-outer {
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem 1.25rem 5rem;
+        width: 100%;
+      }
+      .det-outer {
+        padding: 2.5rem 2.5rem 5rem;
       }
       .rp-head {
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
       }
       .rp-t {
         font-family: var(--fd);
-        font-weight: 900;
-        font-size: 2.1rem;
+        font-size: clamp(2rem, 7vw, 3.4rem);
         color: var(--pk);
-        letter-spacing: 2px;
-        text-transform: uppercase;
+        letter-spacing: 1px;
         line-height: 1;
-        text-shadow: 0 0 28px rgba(255, 45, 120, 0.3);
+        text-shadow: 0 0 28px rgba(255, 45, 120, 0.28);
+        font-style: italic;
+        text-transform: none;
       }
       .rp-s {
         font-family: var(--fm);
-        font-size: 0.65rem;
+        font-size: 0.58rem;
         color: var(--mu);
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin-top: 0.38rem;
+        margin-top: 0.4rem;
+        opacity: 0.7;
       }
       .rp-ctx {
-        margin-top: 0.9rem;
+        margin-top: 0.85rem;
         font-size: 0.86rem;
-        color: var(--mu);
+        color: #6a8a6a;
         line-height: 1.7;
         border-left: 2px solid var(--pk35);
         padding-left: 0.85rem;
+        max-width: 580px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1.1fr;
+        gap: 2rem;
+        align-items: start;
+      }
+      @media (max-width: 920px) {
+        .form-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+        }
+      }
+      @media (max-width: 780px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .form-col {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .form-full {
+        grid-column: 1/-1;
+      }
+      .form-notes-row {
+        grid-column: 1/-1;
+        margin-top: 0;
       }
 
-      /* Steps */
-      .step {
-        margin-bottom: 0.3rem;
+      @media (max-width: 780px) {
+        .form-full {
+          grid-column: 1;
+        }
       }
-      .step-hd {
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
-        padding: 0.85rem 1rem;
-        background: var(--s1);
-        border: 1px solid var(--b1);
-        border-radius: var(--r);
-        cursor: pointer;
-        transition: border-color 0.15s;
-        user-select: none;
+      .rp-divider {
+        height: 1px;
+        background: var(--b1);
+        margin: 1.5rem 0;
       }
-      .step-hd:hover {
-        border-color: var(--b2);
-      }
-      .step.open .step-hd {
-        border-color: var(--pk35);
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-      }
-      .step-n {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: var(--pk10);
-        border: 1px solid var(--pk35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--fm);
-        font-size: 0.58rem;
-        color: var(--pk);
-        flex-shrink: 0;
-        transition: background 0.2s;
-      }
-      .step.done .step-n {
-        background: var(--pk);
-        color: #fff;
-        border-color: var(--pk);
-      }
-      .step-title {
-        font-family: var(--fm);
-        font-size: 0.68rem;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: var(--tx);
-        flex: 1;
-      }
-      .step-ck {
-        font-size: 0.75rem;
-        color: var(--pk);
-        display: none;
-      }
-      .step.done .step-ck {
-        display: block;
-      }
-      .step-arr {
-        font-size: 0.65rem;
-        color: var(--mu);
-        transition: transform 0.2s;
-      }
-      .step.open .step-arr {
-        transform: rotate(180deg);
-      }
-      .step-bd {
-        display: none;
-        padding: 1rem;
-        background: var(--s1);
-        border: 1px solid var(--pk35);
-        border-top: none;
-        border-bottom-left-radius: var(--r);
-        border-bottom-right-radius: var(--r);
-      }
-      .step.open .step-bd {
-        display: block;
-      }
-
       .fl-label {
         font-family: var(--fm);
         font-size: 0.6rem;
@@ -810,7 +919,6 @@
         font-size: 0.54rem;
         margin-left: 0.3rem;
       }
-
       input[type="text"],
       textarea {
         width: 100%;
@@ -829,82 +937,121 @@
       input[type="text"]:focus,
       textarea:focus {
         border-color: var(--pk);
-        box-shadow: 0 0 0 3px var(--pk10);
+        box-shadow: 0 0 0 3px var(--pk15);
       }
       textarea {
         resize: vertical;
-        min-height: 70px;
+        min-height: 80px;
       }
       .r2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
       }
-
-      /* Cat cards */
-      .cgrid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.45rem;
-        margin-top: 0.4rem;
+      @media (max-width: 480px) {
+        .r2 {
+          grid-template-columns: 1fr;
+        }
       }
-      .ccard {
-        border: 1px solid var(--b1);
-        border-radius: var(--r);
-        padding: 0.7rem 0.4rem 0.6rem;
-        text-align: center;
-        cursor: pointer;
+
+      /* Location search */
+      .loc-search-wrap {
+        position: relative;
+      }
+      .loc-maps-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        margin-top: 0.5rem;
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--mu);
         background: var(--s2);
+        border: 1px solid var(--b2);
+        border-radius: var(--r);
+        padding: 0.3rem 0.72rem;
+        cursor: pointer;
         transition:
           border-color 0.15s,
-          background 0.15s;
-        user-select: none;
+          color 0.15s;
       }
-      .ccard:hover {
-        border-color: var(--b2);
-      }
-      .ccard.on {
-        background: var(--pk10);
+      .loc-maps-btn:hover {
         border-color: var(--pk35);
-      }
-      .ccard-ico {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 0.3rem;
-      }
-      .ccard-ico svg {
-        width: 22px;
-        height: 22px;
-      }
-      .ccard-lbl {
-        font-family: var(--fm);
-        font-size: 0.55rem;
-        color: var(--mu);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        line-height: 1.3;
-      }
-      .ccard.on .ccard-lbl {
         color: var(--pk);
+      }
+      .loc-maps-btn svg {
+        width: 10px;
+        height: 10px;
+        stroke: currentColor;
+        fill: none;
+      }
+      .loc-results {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 500;
+        background: var(--s1);
+        border: 1px solid var(--b2);
+        border-radius: var(--r);
+        max-height: 195px;
+        overflow-y: auto;
+        display: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      }
+      .loc-results.open {
+        display: block;
+      }
+      .loc-result-item {
+        padding: 0.52rem 0.78rem;
+        font-size: 0.82rem;
+        color: var(--tx);
+        cursor: pointer;
+        border-bottom: 1px solid var(--b1);
+        transition: background 0.1s;
+      }
+      .loc-result-item:last-child {
+        border-bottom: none;
+      }
+      .loc-result-item:hover {
+        background: var(--s2);
+      }
+      .loc-result-item small {
+        display: block;
+        font-family: var(--fm);
+        font-size: 0.52rem;
+        color: var(--mu);
+        margin-top: 0.12rem;
+      }
+      .loc-searching {
+        padding: 0.52rem 0.78rem;
+        font-family: var(--fm);
+        font-size: 0.58rem;
+        color: var(--fa);
+        text-transform: uppercase;
       }
 
       /* Tags */
       .trow {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-top: 0.4rem;
+        gap: 0.32rem;
+        margin-top: 0.38rem;
       }
       .tag {
-        padding: 0.27rem 0.68rem;
+        padding: 0.25rem 0.65rem;
         border-radius: 3px;
         border: 1px solid var(--b1);
-        font-size: 0.67rem;
+        font-size: 0.65rem;
         cursor: pointer;
         background: var(--s2);
         color: var(--mu);
-        transition: all 0.12s;
-        user-select: none;
+        transition:
+          border-color 0.12s,
+          color 0.12s,
+          background 0.12s;
         font-family: var(--fm);
       }
       .tag:hover {
@@ -917,11 +1064,67 @@
         border-color: var(--pk35);
       }
 
+      /* Cat cards */
+      .cgrid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+        margin-top: 0.38rem;
+      }
+      @media (max-width: 360px) {
+        .cgrid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .ccard {
+        border: 1px solid var(--b1);
+        border-radius: var(--r);
+        padding: 0.62rem 0.35rem 0.52rem;
+        text-align: center;
+        cursor: pointer;
+        background: var(--s2);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .ccard:hover {
+        border-color: var(--b2);
+      }
+      .ccard.on {
+        background: var(--pk10);
+        border-color: var(--pk35);
+      }
+      .ccard-ico {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0.26rem;
+      }
+      .ccard-ico svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--mu);
+        fill: none;
+      }
+      .ccard.on .ccard-ico svg {
+        stroke: var(--pk);
+      }
+      .ccard-lbl {
+        font-family: var(--fm);
+        font-size: 0.5rem;
+        color: var(--mu);
+        text-transform: uppercase;
+        letter-spacing: 0.35px;
+        line-height: 1.3;
+      }
+      .ccard.on .ccard-lbl {
+        color: var(--pk);
+      }
+
       /* Upload */
       .uparea {
         border: 1.5px dashed var(--b2);
         border-radius: var(--r);
-        padding: 1.8rem 1rem;
+        padding: 2.5rem 1.5rem;
         text-align: center;
         cursor: pointer;
         transition:
@@ -934,7 +1137,7 @@
       .uparea:hover,
       .uparea.drag {
         border-color: var(--pk35);
-        background: #0e160e;
+        background: #0c160c;
         box-shadow: 0 0 0 3px var(--pk10);
       }
       .uparea input[type="file"] {
@@ -946,28 +1149,36 @@
         height: 100%;
       }
       .uparea-ico {
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.35rem;
         display: flex;
         justify-content: center;
       }
       .uparea-ico svg {
-        width: 28px;
-        height: 28px;
-        opacity: 0.35;
+        width: 40px;
+        height: 40px;
+        opacity: 0.3;
+        stroke: var(--mu);
+        fill: none;
       }
       .uparea p {
-        font-size: 0.82rem;
-        color: var(--mu);
+        font-size: 0.95rem;
+        color: #8aaa8a;
       }
       .uparea small {
-        font-size: 0.66rem;
-        color: var(--fa);
+        font-size: 0.68rem;
+        color: var(--mu);
+        opacity: 0.6;
       }
       .pgrid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.4rem;
-        margin-top: 0.6rem;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.32rem;
+        margin-top: 0.5rem;
+      }
+      @media (max-width: 480px) {
+        .pgrid {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
       .pitem {
         position: relative;
@@ -984,81 +1195,75 @@
       }
       .prm {
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: 3px;
+        right: 3px;
         background: rgba(0, 0, 0, 0.8);
         border: none;
         border-radius: 50%;
-        width: 19px;
-        height: 19px;
+        width: 17px;
+        height: 17px;
         color: #fff;
-        font-size: 0.65rem;
+        font-size: 0.58rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       .upcount {
-        font-size: 0.62rem;
+        font-size: 0.58rem;
         color: var(--fa);
-        margin-top: 0.35rem;
+        margin-top: 0.28rem;
         text-align: right;
         font-family: var(--fm);
       }
 
-      .next-btn {
-        width: 100%;
-        margin-top: 1rem;
-        padding: 0.68rem;
-        background: var(--s3);
-        color: var(--tx);
-        border: 1px solid var(--b2);
-        border-radius: var(--r);
-        font-family: var(--fm);
-        font-size: 0.68rem;
-        letter-spacing: 1px;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
+      .sub-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        text-align: center;
       }
-      .next-btn:hover {
-        border-color: var(--pk35);
-        background: var(--s2);
-      }
-
       .sub-btn {
-        width: 100%;
-        margin-top: 1.5rem;
-        padding: 0.85rem;
+        padding: 0.75rem 2.2rem;
         background: var(--pk);
         color: #fff;
         border: none;
         border-radius: var(--r);
         font-family: var(--fd);
-        font-size: 0.9rem;
-        font-weight: 700;
-        letter-spacing: 2px;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
         cursor: pointer;
-        text-transform: uppercase;
-        box-shadow: 0 0 20px rgba(255, 45, 120, 0.35);
+        text-transform: none;
+        font-style: italic;
+        box-shadow: 0 0 18px rgba(255, 45, 120, 0.3);
         transition:
           box-shadow 0.15s,
           transform 0.1s;
+        flex-shrink: 0;
       }
       .sub-btn:hover {
-        box-shadow: 0 0 32px rgba(255, 45, 120, 0.55);
+        box-shadow: 0 0 28px rgba(255, 45, 120, 0.52);
       }
       .sub-btn:active {
-        transform: scale(0.99);
+        transform: scale(0.98);
       }
       .anon {
-        font-size: 0.62rem;
-        color: var(--fa);
-        text-align: center;
-        margin-top: 0.7rem;
+        font-size: 0.6rem;
+        color: var(--mu);
         font-family: var(--fm);
+        line-height: 1.6;
+        opacity: 0.6;
+        text-align: center;
+      }
+      @media (max-width: 480px) {
+        .sub-btn {
+          width: 100%;
+        }
+      }
+      .sub-btn {
+        min-width: 220px;
       }
 
       /* Success */
@@ -1072,16 +1277,24 @@
       }
       .succ h2 {
         font-family: var(--fd);
-        font-size: 1.8rem;
+        font-size: 2.8rem;
         color: var(--pk);
         margin-bottom: 0.5rem;
-        letter-spacing: 3px;
-        text-shadow: 0 0 24px rgba(255, 45, 120, 0.45);
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 24px rgba(255, 45, 120, 0.4);
+        font-style: italic;
+        text-transform: none;
       }
       .succ p {
         color: var(--mu);
         font-size: 0.86rem;
         line-height: 1.7;
+      }
+      .succ-id {
+        font-family: var(--fm);
+        font-size: 0.6rem;
+        color: var(--fa);
+        margin-top: 0.6rem;
       }
       .ragain {
         margin-top: 1.5rem;
@@ -1104,39 +1317,30 @@
         border-color: var(--pk35);
         color: var(--tx);
       }
-
-      @media (max-width: 480px) {
-        .r2 {
-          grid-template-columns: 1fr;
-        }
-        .pgrid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .cgrid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .rp-t {
-          font-size: 1.7rem;
-        }
-        .det-loc {
-          font-size: 1.25rem;
-        }
+      .toastify {
+        font-family: var(--fm) !important;
+        font-size: 0.7rem !important;
+        border-radius: var(--r) !important;
       }
     </style>
   </head>
   <body>
     <nav>
-      <div class="nlogo">
+      <div class="nlogo" onclick="goPage('pg-feed')">
         <div class="nlogo-t">DumpSpot</div>
         <div class="nlogo-s">post your dump here</div>
       </div>
       <div class="ntabs">
-        <button class="ntab on" onclick="goPage('pg-feed')">Feed</button>
-        <button class="ntab" onclick="goPage('pg-report')">+ Report</button>
+        <button class="ntab on" id="ntab-feed" onclick="goPage('pg-feed')">
+          Feed
+        </button>
+        <button class="ntab" id="ntab-report" onclick="goPage('pg-report')">
+          + Report
+        </button>
       </div>
     </nav>
 
-    <!-- ══ FEED ══ -->
+    <!-- FEED -->
     <div id="pg-feed" class="pg on">
       <div class="toolbar">
         <span class="fl">Filter</span>
@@ -1157,201 +1361,248 @@
             List
           </button>
         </div>
-        <div class="cnt"><b id="cnt-n">0</b> spots</div>
+        <div class="cnt"><b id="cnt-n">0</b><span>spots</span></div>
       </div>
       <div id="map-wrap"><div id="map"></div></div>
-      <div id="list-wrap"><div class="li" id="list-inner"></div></div>
+      <div id="list-wrap">
+        <div class="clist" id="clist"></div>
+      </div>
     </div>
 
-    <!-- ══ DETAIL ══ -->
+    <!-- DETAIL -->
     <div id="pg-detail" class="pg">
-      <button class="back-btn" onclick="goBack()">
-        <svg
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path d="M8 2L4 6l4 4" />
-        </svg>
-        Back to feed
-      </button>
-      <div id="det-content"></div>
+      <div class="rp-outer det-outer">
+        <button class="back-btn" onclick="goBack()">
+          <svg viewBox="0 0 12 12" stroke-width="1.5">
+            <path d="M8 2L4 6l4 4" />
+          </svg>
+          Back to feed
+        </button>
+        <div id="det-content"></div>
+        <div id="det-mini-map" style="display: none; margin-top: 1.2rem"></div>
+      </div>
     </div>
 
-    <!-- ══ REPORT ══ -->
+    <!-- REPORT -->
     <div id="pg-report" class="pg">
-      <div id="form-screen">
-        <div class="rp-head">
-          <div class="rp-t">DumpSpot</div>
-          <div class="rp-s">post your dump here</div>
-          <p class="rp-ctx">
-            See garbage piling up on your street? Drop a pin.<br />No login, no
-            hassle — a name, a place, a photo.
-          </p>
-        </div>
-
-        <!-- Step 1 -->
-        <div class="step open" id="s1">
-          <div class="step-hd" onclick="toggleStep('s1')">
-            <div class="step-n">1</div>
-            <div class="step-title">Who & Where</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
+      <div class="rp-outer">
+        <div id="form-screen">
+          <div class="rp-head">
+            <div class="rp-t">DumpSpot</div>
+            <div class="rp-s">post your dump here</div>
+            <p class="rp-ctx">
+              See garbage piling up on your street? Drop a pin.<br />No login,
+              no hassle — a name, a place, a photo.
+            </p>
           </div>
-          <div class="step-bd">
-            <label class="fl-label">Your name <span class="req">*</span></label>
-            <input
-              type="text"
-              id="rname"
-              placeholder="What to call you"
-              maxlength="60"
-            />
-            <label class="fl-label"
-              >State <span class="req">*</span> & Area
-              <span class="req">*</span></label
-            >
-            <div class="r2">
+
+          <div class="form-grid">
+            <!-- COL 1: Identity + Location + Notes -->
+            <div class="form-col">
+              <label class="fl-label"
+                >Your name <span class="req">*</span></label
+              >
               <input
                 type="text"
-                id="rstate"
-                placeholder="State"
-                maxlength="50"
-              />
-              <input
-                type="text"
-                id="rarea"
-                placeholder="District / Area"
+                id="rname"
+                placeholder="What to call you"
                 maxlength="60"
               />
-            </div>
-            <label class="fl-label"
-              >Specific location <span class="req">*</span></label
-            >
-            <input
-              type="text"
-              id="rspec"
-              placeholder="e.g. Near SBI ATM, MG Road junction"
-              maxlength="120"
-            />
-            <button class="next-btn" onclick="nextStep('s1', 's2')">
-              Next →
-            </button>
-          </div>
-        </div>
 
-        <!-- Step 2 -->
-        <div class="step" id="s2">
-          <div class="step-hd" onclick="toggleStep('s2')">
-            <div class="step-n">2</div>
-            <div class="step-title">What kind of dump</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
-          </div>
-          <div class="step-bd">
-            <label class="fl-label"
-              >Site type <span class="opt">optional</span></label
-            >
-            <div class="trow">
-              <div class="tag" data-g="type">Road</div>
-              <div class="tag" data-g="type">Footpath</div>
-              <div class="tag" data-g="type">Nala / Drain</div>
-              <div class="tag" data-g="type">Open plot</div>
-              <div class="tag" data-g="type">Park</div>
-              <div class="tag" data-g="type">Market</div>
-              <div class="tag" data-g="type">Near school</div>
-              <div class="tag" data-g="type">Near hospital</div>
-            </div>
-
-            <label class="fl-label" style="margin-top: 1rem"
-              >Garbage category <span class="opt">optional</span></label
-            >
-            <div class="cgrid" id="cgrid"></div>
-
-            <label class="fl-label" style="margin-top: 1rem"
-              >Severity <span class="opt">optional</span></label
-            >
-            <div class="trow">
-              <div class="tag" data-g="sev">Minor</div>
-              <div class="tag" data-g="sev">Moderate</div>
-              <div class="tag" data-g="sev">Severe</div>
-              <div class="tag" data-g="sev">Blocking road</div>
-            </div>
-
-            <label class="fl-label" style="margin-top: 1rem"
-              >Notes <span class="opt">optional</span></label
-            >
-            <textarea
-              id="rnotes"
-              placeholder="Smell, duration, any hazard…"
-            ></textarea>
-            <button class="next-btn" onclick="nextStep('s2', 's3')">
-              Next →
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="step" id="s3">
-          <div class="step-hd" onclick="toggleStep('s3')">
-            <div class="step-n">3</div>
-            <div class="step-title">Photos</div>
-            <div class="step-ck">✓</div>
-            <div class="step-arr">▾</div>
-          </div>
-          <div class="step-bd">
-            <div class="uparea" id="uparea">
-              <input type="file" id="photo-input" accept="image/*" multiple />
-              <div class="uparea-ico">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="3" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="M21 15l-5-5L5 21" />
-                </svg>
+              <label class="fl-label"
+                >State <span class="req">*</span> &amp; Area
+                <span class="req">*</span></label
+              >
+              <div class="r2">
+                <input
+                  type="text"
+                  id="rstate"
+                  placeholder="State"
+                  maxlength="50"
+                />
+                <input
+                  type="text"
+                  id="rarea"
+                  placeholder="District / Area"
+                  maxlength="60"
+                />
               </div>
-              <p>Tap or drag to add photos</p>
-              <small>1 to 6 · JPG PNG WEBP</small>
+
+              <label class="fl-label"
+                >Specific location <span class="req">*</span></label
+              >
+              <div class="loc-search-wrap">
+                <input
+                  type="text"
+                  id="rspec"
+                  placeholder="Search or type your location"
+                  maxlength="200"
+                  autocomplete="off"
+                  oninput="onLocInput(this.value)"
+                />
+                <div class="loc-results" id="loc-results"></div>
+              </div>
+              <button class="loc-maps-btn" onclick="openGoogleMaps()">
+                <svg viewBox="0 0 24 24" stroke-width="1.5">
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                  />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+                Open in Google Maps instead
+              </button>
             </div>
-            <div id="pgrid" class="pgrid" style="display: none"></div>
-            <div id="upcount" class="upcount"></div>
+
+            <!-- COL 2: Site type + Severity -->
+            <div class="form-col">
+              <label class="fl-label"
+                >Type of site <span class="opt">optional</span></label
+              >
+              <div class="trow">
+                <div class="tag" data-g="type">Road</div>
+                <div class="tag" data-g="type">Footpath</div>
+                <div class="tag" data-g="type">Nala / Drain</div>
+                <div class="tag" data-g="type">Open plot</div>
+                <div class="tag" data-g="type">Park</div>
+                <div class="tag" data-g="type">Market</div>
+                <div class="tag" data-g="type">Near school</div>
+                <div class="tag" data-g="type">Near hospital</div>
+              </div>
+
+              <label class="fl-label" style="margin-top: 1.3rem"
+                >Severity <span class="opt">optional</span></label
+              >
+              <div class="trow">
+                <div class="tag" data-g="sev">Minor</div>
+                <div class="tag" data-g="sev">Moderate</div>
+                <div class="tag" data-g="sev">Severe</div>
+                <div class="tag" data-g="sev">Blocking road</div>
+              </div>
+            </div>
+
+            <!-- COL 3: Garbage category -->
+            <div class="form-col">
+              <label class="fl-label"
+                >Garbage category <span class="opt">optional</span></label
+              >
+              <div class="cgrid" id="cgrid"></div>
+            </div>
+
+            <!-- NOTES: spans col1+col2, sits parallel to garbage category col3 -->
+            <div class="form-notes-row">
+              <label class="fl-label"
+                >Notes <span class="opt">optional</span></label
+              >
+              <textarea
+                id="rnotes"
+                placeholder="Smell, duration, any hazard to public…"
+                style="width: 100%; height: 80px; resize: none"
+              ></textarea>
+            </div>
+
+            <!-- PHOTOS full width -->
+            <div class="form-full">
+              <div class="rp-divider"></div>
+              <label class="fl-label">Photos <span class="req">*</span></label>
+              <div class="uparea" id="uparea">
+                <input type="file" id="photo-input" accept="image/*" multiple />
+                <div class="uparea-ico">
+                  <svg viewBox="0 0 24 24" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </div>
+                <p>Tap or drag photos here</p>
+                <small>1 to 6 · JPG PNG WEBP</small>
+              </div>
+              <div id="pgrid" class="pgrid" style="display: none"></div>
+              <div id="upcount" class="upcount"></div>
+              <div class="sub-row">
+                <button class="sub-btn" onclick="submitReport()">
+                  Submit Report
+                </button>
+                <p class="anon">
+                  No account needed<br />anonymous beyond your name
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <button class="sub-btn" onclick="submitReport()">Submit Report</button>
-        <p class="anon">No account needed · anonymous beyond your name</p>
-      </div>
-
-      <div class="succ" id="succ">
-        <svg
-          style="width: 40px; height: 40px; margin-bottom: 1rem; opacity: 0.6"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--pk)"
-          stroke-width="1.5"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 12l3 3 5-5" />
-        </svg>
-        <h2>Pinned.</h2>
-        <p>
-          Your report is live on the map.<br />Share DumpSpot — more eyes, more
-          pressure.
-        </p>
-        <button class="ragain" onclick="resetForm()">
-          Report another spot
-        </button>
+        <div class="succ" id="succ">
+          <svg
+            style="
+              width: 44px;
+              height: 44px;
+              margin-bottom: 1rem;
+              opacity: 0.42;
+            "
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--pk)"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12l3 3 5-5" />
+          </svg>
+          <h2>Pinned.</h2>
+          <p>
+            Your report is live on the map.<br />Share DumpSpot — more eyes,
+            more pressure.
+          </p>
+          <div class="succ-id" id="succ-id"></div>
+          <button class="ragain" onclick="resetForm()">
+            Report another spot
+          </button>
+        </div>
       </div>
     </div>
 
     <script>
-      // ═══════════════════════════════
-      // SVG ICONS
-      // ═══════════════════════════════
+      document.addEventListener("contextmenu", (e) => e.preventDefault());
+      document.addEventListener("keydown", (e) => {
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          ["u", "s", "a"].includes(e.key.toLowerCase())
+        )
+          e.preventDefault();
+        if (e.key === "F12") e.preventDefault();
+      });
+
+      const log = (m, err) =>
+        console[err ? "error" : "log"](err ? "[ERR]" : "[OK]", m);
+
+      function maybeShowWelcome() {
+        if (sessionStorage.getItem("ds_welcomed")) return;
+        sessionStorage.setItem("ds_welcomed", "1");
+        const msgs = [
+          "Welcome back. Have a great day ahead 🌱",
+          "Good to see you. Stay aware, stay vocal 📍",
+          "Hey there. Every report matters 💚",
+          "Welcome to DumpSpot. Let's clean this up 🗺️",
+        ];
+        setTimeout(() => {
+          Toastify({
+            text: msgs[Math.floor(Math.random() * msgs.length)],
+            duration: 3500,
+            gravity: "bottom",
+            position: "center",
+            stopOnFocus: true,
+            style: {
+              background: "#0d140d",
+              border: "1px solid #2e452e",
+              color: "#ddeedd",
+              fontFamily: "'Space Mono',monospace",
+              fontSize: ".72rem",
+              letterSpacing: ".3px",
+              borderRadius: "6px",
+              padding: ".65rem 1.1rem",
+            },
+          }).showToast();
+        }, 700);
+      }
+
       const ICONS = {
         bin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>`,
         flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c0 0-4 4-4 8a4 4 0 008 0c0-2-1-4-1-4s-1 3-3 3-2-2-2-2 2-1 2-5z"/></svg>`,
@@ -1359,10 +1610,9 @@
         brick: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="5" rx="1"/><rect x="2" y="12" width="9" height="5" rx="1"/><rect x="13" y="12" width="9" height="5" rx="1"/></svg>`,
         bolt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>`,
         cross: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="2" width="6" height="20" rx="1"/><rect x="2" y="9" width="20" height="6" rx="1"/></svg>`,
-        bone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h10M5 7v10M19 7v10M7 19h10"/></svg>`,
+        bone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="9" cy="4.5" rx="1.8" ry="2.2"/><ellipse cx="15" cy="4.5" rx="1.8" ry="2.2"/><ellipse cx="5.5" cy="9.5" rx="1.5" ry="1.8"/><ellipse cx="18.5" cy="9.5" rx="1.5" ry="1.8"/><path d="M12 22c-2.8 0-6-2.5-6-6 0-2 1.5-3.5 3-4.5 1-.7 2-1 3-1s2 .3 3 1c1.5 1 3 2.5 3 4.5 0 3.5-3.2 6-6 6z"/></svg>`,
         photo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
       };
-
       const CATS = [
         { key: "Plastic waste", icon: "bin", label: "Plastic" },
         { key: "Food waste", icon: "bin", label: "Food waste" },
@@ -1374,31 +1624,44 @@
         { key: "Animal waste", icon: "bone", label: "Animal" },
         { key: "Mixed / general", icon: "bin", label: "Mixed" },
       ];
-
       function catIcon(key) {
         const c = CATS.find((x) => x.key === key);
         return c ? ICONS[c.icon] : ICONS.bin;
       }
       function pinIcon(cats) {
-        if (!cats || !cats.length) return ICONS.bin;
-        return catIcon(cats[0]);
+        return !cats || !cats.length ? ICONS.bin : catIcon(cats[0]);
       }
 
-      // ═══════════════════════════════
-      // STATE
-      // ═══════════════════════════════
-      const selTags = { type: [], sev: [] };
-      const selCats = [];
-      const upFiles = [];
-      let reports = [];
-      let map, mLayer;
-      let prevPage = "pg-feed";
-      let curView = "map";
-      let activeFiltered = [];
+      function genId() {
+        const d = new Date();
+        const dt = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+        const tm = `${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}${String(d.getSeconds()).padStart(2, "0")}`;
+        const r = Math.floor(Math.random() * 0xffff)
+          .toString(16)
+          .toUpperCase()
+          .padStart(4, "0");
+        return `DS-${dt}-${tm}-${r}`;
+      }
+      function fmtTs(iso) {
+        const d = new Date(iso);
+        return (
+          d.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }) +
+          " · " +
+          d.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+        );
+      }
 
       const SEED = [
         {
-          id: 1,
+          id: "DS-20260318-183042-A1B2",
           reporter: "Arjun M.",
           state: "Maharashtra",
           area: "Pune",
@@ -1410,10 +1673,10 @@
           photos: [],
           lat: 18.5204,
           lng: 73.8567,
-          date: "2026-03-18",
+          ts: "2026-03-18T18:30:42",
         },
         {
-          id: 2,
+          id: "DS-20260317-091514-C3D4",
           reporter: "Divya K.",
           state: "Karnataka",
           area: "Bengaluru",
@@ -1425,10 +1688,10 @@
           photos: [],
           lat: 12.9352,
           lng: 77.6245,
-          date: "2026-03-17",
+          ts: "2026-03-17T09:15:14",
         },
         {
-          id: 3,
+          id: "DS-20260319-143220-E5F6",
           reporter: "Ravi T.",
           state: "Tamil Nadu",
           area: "Chennai",
@@ -1440,10 +1703,10 @@
           photos: [],
           lat: 13.085,
           lng: 80.2101,
-          date: "2026-03-19",
+          ts: "2026-03-19T14:32:20",
         },
         {
-          id: 4,
+          id: "DS-20260315-074533-G7H8",
           reporter: "Sneha P.",
           state: "Delhi",
           area: "Shahdara",
@@ -1455,10 +1718,10 @@
           photos: [],
           lat: 28.6729,
           lng: 77.2946,
-          date: "2026-03-15",
+          ts: "2026-03-15T07:45:33",
         },
         {
-          id: 5,
+          id: "DS-20260320-112045-I9J0",
           reporter: "Mohan R.",
           state: "Telangana",
           area: "Hyderabad",
@@ -1470,10 +1733,10 @@
           photos: [],
           lat: 17.4435,
           lng: 78.4685,
-          date: "2026-03-20",
+          ts: "2026-03-20T11:20:45",
         },
         {
-          id: 6,
+          id: "DS-20260316-200318-K1L2",
           reporter: "Priya S.",
           state: "West Bengal",
           area: "Kolkata",
@@ -1485,10 +1748,10 @@
           photos: [],
           lat: 22.5497,
           lng: 88.3554,
-          date: "2026-03-16",
+          ts: "2026-03-16T20:03:18",
         },
         {
-          id: 7,
+          id: "DS-20260320-083001-M3N4",
           reporter: "Kiran B.",
           state: "Rajasthan",
           area: "Jaipur",
@@ -1500,10 +1763,10 @@
           photos: [],
           lat: 26.9124,
           lng: 75.7873,
-          date: "2026-03-20",
+          ts: "2026-03-20T08:30:01",
         },
         {
-          id: 8,
+          id: "DS-20260319-163455-O5P6",
           reporter: "Meena T.",
           state: "Gujarat",
           area: "Ahmedabad",
@@ -1515,34 +1778,34 @@
           photos: [],
           lat: 22.995,
           lng: 72.6031,
-          date: "2026-03-19",
+          ts: "2026-03-19T16:34:55",
         },
       ];
+      let reports = [...SEED],
+        map,
+        mLayer,
+        detMap = null,
+        curView = "map",
+        prevPage = "pg-feed";
+      const PAGES = ["pg-feed", "pg-detail", "pg-report"];
 
-      // ═══════════════════════════════
-      // PAGE ROUTING
-      // ═══════════════════════════════
       function goPage(id, from) {
-        document
-          .querySelectorAll(".pg")
-          .forEach((p) => p.classList.remove("on"));
+        PAGES.forEach((p) => document.getElementById(p).classList.remove("on"));
         document
           .querySelectorAll(".ntab")
           .forEach((t) => t.classList.remove("on"));
         document.getElementById(id).classList.add("on");
         if (id === "pg-feed")
-          document.querySelectorAll(".ntab")[0].classList.add("on");
-        else if (id === "pg-report")
-          document.querySelectorAll(".ntab")[1].classList.add("on");
+          document.getElementById("ntab-feed").classList.add("on");
+        if (id === "pg-report")
+          document.getElementById("ntab-report").classList.add("on");
         if (from) prevPage = from;
-        if (id === "pg-feed" && map) setTimeout(() => map.invalidateSize(), 60);
+        if (id === "pg-feed" && map) setTimeout(() => map.invalidateSize(), 80);
         window.scrollTo(0, 0);
       }
-
       function goBack() {
         goPage(prevPage || "pg-feed");
       }
-
       function openDetail(id) {
         const r = reports.find((x) => x.id === id);
         if (!r) return;
@@ -1551,65 +1814,47 @@
         goPage("pg-detail");
       }
 
-      // ═══════════════════════════════
-      // MAP
-      // ═══════════════════════════════
       function initMap() {
         map = L.map("map", {
           zoomControl: true,
           scrollWheelZoom: true,
         }).setView([20.5937, 78.9629], 5);
-        // CartoDB Positron — English labels, dark-tinted
         L.tileLayer(
-          "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+          "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
           {
             attribution: "© OpenStreetMap © CARTO",
-            maxZoom: 19,
             subdomains: "abcd",
-          },
-        ).addTo(map);
-        L.tileLayer(
-          "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-          {
-            attribution: "",
             maxZoom: 19,
-            subdomains: "abcd",
-            opacity: 0.7,
           },
         ).addTo(map);
         mLayer = L.layerGroup().addTo(map);
-        reports = [...SEED];
         buildCatFilter();
         buildStateFilter();
         applyFilters();
       }
-
       function makePinIcon(cats) {
-        const svg = pinIcon(cats);
         return L.divIcon({
           className: "",
-          html: `<div class="dpin">${svg}</div>`,
-          iconSize: [30, 30],
-          iconAnchor: [15, 30],
-          popupAnchor: [0, -32],
+          html: `<div class="dpin">${pinIcon(cats)}</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 28],
+          popupAnchor: [0, -30],
         });
       }
-
       function renderMarkers(data) {
         mLayer.clearLayers();
         data.forEach((r) => {
           const m = L.marker([r.lat, r.lng], {
             icon: makePinIcon(r.cats),
           }).addTo(mLayer);
-          m.bindPopup(buildPopupHTML(r), { maxWidth: 270, minWidth: 220 });
+          m.bindPopup(buildPopHTML(r), { maxWidth: 260, minWidth: 210 });
           m.on("popupopen", () => {
             const btn = document.getElementById("pu-btn-" + r.id);
             if (btn) btn.onclick = () => openDetail(r.id);
           });
         });
       }
-
-      function buildPopupHTML(r) {
+      function buildPopHTML(r) {
         const imgEl =
           r.photos && r.photos.length
             ? `<div class="pu-img"><img src="${r.photos[0]}"></div>`
@@ -1619,106 +1864,113 @@
             (c) => `<span class="pu-cat">${catIcon(c)}<span>${c}</span></span>`,
           )
           .join("");
-        return `<div>
-    ${imgEl}
-    <div class="pu-body">
-      <div class="pu-loc">${r.specific}</div>
-      <div class="pu-area">${r.area}, ${r.state}</div>
-      ${cats ? `<div class="pu-cats">${cats}</div>` : ""}
-      ${r.notes ? `<div class="pu-notes">${r.notes}</div>` : ""}
-      <div class="pu-meta"><span class="pu-by">by ${r.reporter}</span><span class="pu-date">${r.date}</span></div>
-      <button class="pu-link" id="pu-btn-${r.id}">View full report →</button>
+        return `<div>${imgEl}<div class="pu-body"><div class="pu-loc">${r.specific}</div><div class="pu-area">${r.area}, ${r.state}</div>${cats ? `<div class="pu-cats">${cats}</div>` : ""}${r.notes ? `<div style="font-size:.72rem;color:var(--mu);margin-top:.28rem;line-height:1.4;">${r.notes}</div>` : ""}<div class="pu-meta"><span class="pu-by">by ${r.reporter}</span><span class="pu-date">${fmtTs(r.ts)}</span></div><button class="pu-link" id="pu-btn-${r.id}">View full report →</button></div></div>`;
+      }
+
+      function sevClass(sev) {
+        if (!sev || !sev.length) return "sev-none";
+        const s = sev[0].toLowerCase();
+        if (s.includes("block")) return "sev-blocking";
+        if (s.includes("severe")) return "sev-severe";
+        if (s.includes("moderate")) return "sev-moderate";
+        return "sev-minor";
+      }
+
+      function groupByTime(data) {
+        const now = new Date();
+        const todayStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
+        const yestStart = new Date(todayStart - 86400000);
+        const weekStart = new Date(todayStart - 6 * 86400000);
+
+        const groups = { today: [], yesterday: [], thisWeek: [], older: {} };
+        data.forEach((r) => {
+          const d = new Date(r.ts);
+          if (d >= todayStart) groups.today.push(r);
+          else if (d >= yestStart) groups.yesterday.push(r);
+          else if (d >= weekStart) groups.thisWeek.push(r);
+          else {
+            const key = d.toLocaleDateString("en-IN", {
+              month: "long",
+              year: "numeric",
+            });
+            if (!groups.older[key]) groups.older[key] = [];
+            groups.older[key].push(r);
+          }
+        });
+        return groups;
+      }
+
+      function renderLCard(r) {
+        const sc = sevClass(r.sev);
+        const chips = (r.cats || [])
+          .map(
+            (c) => `<span class="chip">${catIcon(c)}<span>${c}</span></span>`,
+          )
+          .join("");
+        const timeStr = new Date(r.ts).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+        return `<div class="lcard ${sc}" onclick="openDetail('${r.id}')">
+    <div class="lcard-main">
+      <div class="lcard-loc">${r.specific}</div>
+      <div class="lcard-area">${r.area}, ${r.state}</div>
+      ${chips ? `<div class="lcard-chips">${chips}</div>` : ""}
+    </div>
+    <div class="lcard-meta">
+      <span class="lcard-by">by ${r.reporter}</span>
+      <span class="lcard-time">${timeStr}</span>
     </div>
   </div>`;
       }
 
-      // ═══════════════════════════════
-      // LIST
-      // ═══════════════════════════════
-      function renderList(data) {
-        const el = document.getElementById("list-inner");
+      function renderGroup(label, items, cls) {
+        if (!items || !items.length) return "";
+        const sorted = [...items].sort(
+          (a, b) => new Date(b.ts) - new Date(a.ts),
+        );
+        return `<div class="clist-group">
+    <div class="clist-heading ${cls}">
+      <span class="clist-heading-label">${label}</span>
+      <span class="clist-heading-count">${items.length} report${items.length > 1 ? "s" : ""}</span>
+    </div>
+    ${sorted.map(renderLCard).join("")}
+  </div>`;
+      }
+
+      function renderWall(data) {
+        const el = document.getElementById("clist");
         if (!data.length) {
           el.innerHTML =
-            '<div class="lempty">No spots match this filter.</div>';
+            '<div class="list-empty">No spots match this filter.</div>';
           return;
         }
-        el.innerHTML = data
-          .map((r) => {
-            const thumb =
-              r.photos && r.photos.length
-                ? `<img src="${r.photos[0]}">`
-                : pinIcon(r.cats);
-            const chips = (r.cats || [])
-              .map(
-                (c) =>
-                  `<span class="chip">${catIcon(c)}<span>${c}</span></span>`,
-              )
-              .join("");
-            return `<div class="lcard" onclick="openDetail(${r.id})">
-      <div class="lcard-thumb">${thumb}</div>
-      <div class="lcard-body">
-        <div class="lcard-loc">${r.specific}</div>
-        <div class="lcard-area">${r.area}, ${r.state}</div>
-        <div class="lcard-chips">${chips}</div>
-        <div class="lcard-foot"><span class="lcard-by">by ${r.reporter}</span><span class="lcard-date">${r.date}</span></div>
-      </div>
-    </div>`;
-          })
-          .join("");
+        const g = groupByTime(data);
+        let html = "";
+        // Priority: today → yesterday → this week → older months
+        if (g.today.length) html += renderGroup("Today", g.today, "today");
+        else if (g.yesterday.length)
+          html += renderGroup("Yesterday", g.yesterday, "yesterday");
+        // Always show yesterday if today shown too
+        if (g.today.length && g.yesterday.length)
+          html += renderGroup("Yesterday", g.yesterday, "yesterday");
+        if (g.thisWeek.length)
+          html += renderGroup("This week", g.thisWeek, "this-week");
+        // Older: group by month
+        const monthKeys = Object.keys(g.older).sort((a, b) => {
+          return new Date("01 " + b) - new Date("01 " + a);
+        });
+        monthKeys.forEach((k) => {
+          html += renderGroup(k, g.older[k], "older");
+        });
+        el.innerHTML = html;
       }
 
-      // ═══════════════════════════════
-      // DETAIL
-      // ═══════════════════════════════
-      function renderDetail(r) {
-        let photosHTML = "";
-        if (r.photos && r.photos.length) {
-          const n = Math.min(r.photos.length, 6);
-          const cls =
-            n === 1
-              ? "n1"
-              : n === 2
-                ? "n2"
-                : n === 3
-                  ? "n3"
-                  : n <= 6
-                    ? "n" + n
-                    : "n6";
-          photosHTML = `<div class="det-photos ${cls}">${r.photos
-            .slice(0, 6)
-            .map((p, i) => `<img class="det-photo dp${i}" src="${p}">`)
-            .join("")}</div>`;
-        } else {
-          photosHTML = `<div class="det-nophoto">${ICONS.photo}</div>`;
-        }
-        const cats = (r.cats || [])
-          .map(
-            (c) => `<div class="det-cat">${catIcon(c)}<span>${c}</span></div>`,
-          )
-          .join("");
-        const types = (r.type || [])
-          .map((t) => `<span class="det-tag">${t}</span>`)
-          .join("");
-        const sevs = (r.sev || [])
-          .map((s) => `<span class="det-tag">${s}</span>`)
-          .join("");
-
-        document.getElementById("det-content").innerHTML = `
-    ${photosHTML}
-    <div class="det-area">${r.area}, ${r.state}</div>
-    <div class="det-loc">${r.specific}</div>
-    ${cats ? `<div class="det-sec"><div class="det-sec-label">Category</div><div class="det-cats">${cats}</div></div>` : ""}
-    ${types ? `<div class="det-sec"><div class="det-sec-label">Site type</div><div class="det-tags">${types}</div></div>` : ""}
-    ${sevs ? `<div class="det-sec"><div class="det-sec-label">Severity</div><div class="det-tags">${sevs}</div></div>` : ""}
-    ${r.notes ? `<div class="det-sec"><div class="det-sec-label">Notes</div><div class="det-notes">${r.notes}</div></div>` : ""}
-    <div class="det-divider"></div>
-    <div class="det-meta-row"><span class="det-reporter">Reported by ${r.reporter}</span><span class="det-date">${r.date}</span></div>
-  `;
-      }
-
-      // ═══════════════════════════════
-      // FILTERS
-      // ═══════════════════════════════
       function buildStateFilter() {
         const el = document.getElementById("fs-state");
         [...new Set(reports.map((r) => r.state))].sort().forEach((s) => {
@@ -1728,7 +1980,6 @@
           el.appendChild(o);
         });
       }
-
       function buildCatFilter() {
         const el = document.getElementById("fs-cat");
         CATS.forEach((c) => {
@@ -1737,24 +1988,16 @@
           o.textContent = c.label;
           el.appendChild(o);
         });
-        // Build cat cards in report form
-        const grid = document.getElementById("cgrid");
-        grid.innerHTML = CATS.map(
-          (c) => `
-    <div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')">
-      <div class="ccard-ico">${ICONS[c.icon]}</div>
-      <div class="ccard-lbl">${c.label}</div>
-    </div>`,
+        document.getElementById("cgrid").innerHTML = CATS.map(
+          (c) =>
+            `<div class="ccard" data-cat="${c.key}" onclick="toggleCat(this,'${c.key}')"><div class="ccard-ico">${ICONS[c.icon]}</div><div class="ccard-lbl">${c.label}</div></div>`,
         ).join("");
       }
-
       function applyFilters() {
         const state = document.getElementById("fs-state").value;
         const cat = document.getElementById("fs-cat").value;
-
-        // rebuild area dropdown
         const areaEl = document.getElementById("fs-area");
-        const prevArea = areaEl.value;
+        const prev = areaEl.value;
         areaEl.innerHTML = '<option value="">All areas</option>';
         [
           ...new Set(
@@ -1770,24 +2013,19 @@
             o.textContent = a;
             areaEl.appendChild(o);
           });
-        if (prevArea) areaEl.value = prevArea;
+        if (prev) areaEl.value = prev;
         const area = areaEl.value;
-
         const filtered = reports.filter((r) => {
           if (state && r.state !== state) return false;
           if (area && r.area !== area) return false;
           if (cat && !(r.cats || []).includes(cat)) return false;
           return true;
         });
-        activeFiltered = filtered;
         document.getElementById("cnt-n").textContent = filtered.length;
         renderMarkers(filtered);
-        renderList(filtered);
+        renderWall(filtered);
       }
 
-      // ═══════════════════════════════
-      // VIEW TOGGLE
-      // ═══════════════════════════════
       function setView(v) {
         curView = v;
         document.getElementById("map-wrap").style.display =
@@ -1801,35 +2039,168 @@
           .classList.toggle("on", v === "list");
         if (v === "map" && map) setTimeout(() => map.invalidateSize(), 60);
       }
-
-      // ═══════════════════════════════
-      // STEPS
-      // ═══════════════════════════════
-      function toggleStep(id) {
-        document.getElementById(id).classList.toggle("open");
-      }
-      function nextStep(cur, nxt) {
-        document.getElementById(cur).classList.add("done");
-        document.getElementById(cur).classList.remove("open");
-        document.getElementById(nxt).classList.add("open");
-        document
-          .getElementById(nxt)
-          .scrollIntoView({ behavior: "smooth", block: "start" });
+      function sizeViews() {
+        const tb = document.querySelector(".toolbar");
+        const h = window.innerHeight - 52 - (tb ? tb.offsetHeight : 40);
+        const mw = document.getElementById("map-wrap");
+        const lw = document.getElementById("list-wrap");
+        if (mw) mw.style.height = h + "px";
+        if (lw) lw.style.height = h + "px";
       }
 
-      // ═══════════════════════════════
-      // TAGS & CATS
-      // ═══════════════════════════════
-      document.querySelectorAll(".tag").forEach((t) => {
-        t.addEventListener("click", () => {
-          const g = t.dataset.g;
-          t.classList.toggle("on");
-          const v = t.textContent;
-          if (t.classList.contains("on")) selTags[g].push(v);
-          else selTags[g] = selTags[g].filter((x) => x !== v);
-        });
+      function renderDetail(r) {
+        // Photos
+        let photos = "";
+        if (r.photos && r.photos.length) {
+          const n = Math.min(r.photos.length, 6);
+          const cls = ["", "n1", "n2", "n3", "n4", "n5", "n6"][n] || "n6";
+          photos = `<div class="det-photos ${cls}">${r.photos
+            .slice(0, 6)
+            .map((p, i) => `<img class="det-photo dp${i}" src="${p}">`)
+            .join("")}</div>`;
+        } else {
+          photos = `<div class="det-nophoto">${ICONS.photo}</div>`;
+        }
+
+        // Matches report page form layout: left col = location/notes, right col = categories/tags
+        const cats = (r.cats || [])
+          .map(
+            (c) => `<div class="det-cat">${catIcon(c)}<span>${c}</span></div>`,
+          )
+          .join("");
+        const types = (r.type || [])
+          .map((t) => `<span class="det-tag">${t}</span>`)
+          .join("");
+        const sevs = (r.sev || [])
+          .map((s) => `<span class="det-tag">${s}</span>`)
+          .join("");
+
+        document.getElementById("det-content").innerHTML = `
+    ${photos}
+    <div class="det-id-badge">Report ID <span>${r.id}</span></div>
+    <div class="det-area">${r.area}, ${r.state}</div>
+    <div class="det-loc">${r.specific}</div>
+    <div class="det-timestamp">Submitted ${fmtTs(r.ts)} &nbsp;&middot;&nbsp; by ${r.reporter}</div>
+    <div class="form-grid" style="margin-top:1.25rem;">
+      <div class="form-col">
+        <div class="det-sec-label" style="margin-bottom:.45rem;">Location</div>
+        <div style="font-family:var(--fb);font-size:.85rem;color:#8ab08a;font-weight:500;">${r.state} &middot; ${r.area}</div>
+        ${r.notes ? `<div class="det-sec-label" style="margin-top:1.1rem;margin-bottom:.45rem;">Notes</div><div class="det-notes">${r.notes}</div>` : ""}
+      </div>
+      <div class="form-col">
+        ${types ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Type of site</div><div class="det-tags" style="margin-bottom:.85rem;">${types}</div>` : ""}
+        ${sevs ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Severity</div><div class="det-tags">${sevs}</div>` : ""}
+      </div>
+      <div class="form-col">
+        ${cats ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Garbage category</div><div class="det-cats">${cats}</div>` : ""}
+      </div>
+    </div>`;
+
+        // Mini map — highlight the area
+        const mm = document.getElementById("det-mini-map");
+        mm.innerHTML = "";
+        mm.style.display = "block";
+        if (detMap) {
+          try {
+            detMap.remove();
+          } catch (e) {}
+          detMap = null;
+        }
+        setTimeout(() => {
+          detMap = L.map("det-mini-map", {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            touchZoom: false,
+            doubleClickZoom: false,
+          }).setView([r.lat, r.lng], 14);
+          L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            { subdomains: "abcd", maxZoom: 19 },
+          ).addTo(detMap);
+          // Highlight circle for the area
+          L.circle([r.lat, r.lng], {
+            radius: 400,
+            color: "#ff2d78",
+            fillColor: "#ff2d78",
+            fillOpacity: 0.08,
+            weight: 1.5,
+            opacity: 0.6,
+          }).addTo(detMap);
+          L.marker([r.lat, r.lng], { icon: makePinIcon(r.cats) }).addTo(detMap);
+          detMap.invalidateSize();
+        }, 80);
+      }
+
+      let locTimer = null,
+        locLat = null,
+        locLng = null;
+      function onLocInput(val) {
+        clearTimeout(locTimer);
+        const box = document.getElementById("loc-results");
+        if (val.length < 3) {
+          box.classList.remove("open");
+          box.innerHTML = "";
+          return;
+        }
+        box.innerHTML = '<div class="loc-searching">Searching…</div>';
+        box.classList.add("open");
+        locTimer = setTimeout(() => searchLoc(val), 500);
+      }
+      async function searchLoc(q) {
+        const box = document.getElementById("loc-results");
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=5&accept-language=en`,
+          );
+          const data = await res.json();
+          if (!data.length) {
+            box.innerHTML =
+              '<div class="loc-searching">No results. Type your location manually.</div>';
+            return;
+          }
+          box.innerHTML = data
+            .map(
+              (item) =>
+                `<div class="loc-result-item" onclick="pickLoc('${item.display_name.replace(/'/g, "\\'")}',${item.lat},${item.lon})">${item.display_name.split(",")[0]}<small>${item.display_name}</small></div>`,
+            )
+            .join("");
+        } catch (e) {
+          box.innerHTML =
+            '<div class="loc-searching">Search unavailable. Type manually.</div>';
+        }
+      }
+      function pickLoc(name, lat, lng) {
+        document.getElementById("rspec").value = name;
+        locLat = parseFloat(lat);
+        locLng = parseFloat(lng);
+        const box = document.getElementById("loc-results");
+        box.classList.remove("open");
+        box.innerHTML = "";
+      }
+      function openGoogleMaps() {
+        window.open("https://www.google.com/maps", "_blank");
+      }
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".loc-search-wrap")) {
+          const box = document.getElementById("loc-results");
+          if (box) box.classList.remove("open");
+        }
       });
 
+      const selTags = { type: [], sev: [] };
+      const selCats = [];
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".tag").forEach((t) => {
+          t.addEventListener("click", () => {
+            const g = t.dataset.g;
+            t.classList.toggle("on");
+            const v = t.textContent.trim();
+            if (t.classList.contains("on")) selTags[g].push(v);
+            else selTags[g] = selTags[g].filter((x) => x !== v);
+          });
+        });
+      });
       function toggleCat(el, key) {
         el.classList.toggle("on");
         if (el.classList.contains("on")) selCats.push(key);
@@ -1839,31 +2210,25 @@
         }
       }
 
-      // ═══════════════════════════════
-      // UPLOAD
-      // ═══════════════════════════════
-      const upArea = document.getElementById("uparea");
-      const upInput = document.getElementById("photo-input");
-      const pGrid = document.getElementById("pgrid");
-      const upCnt = document.getElementById("upcount");
-
-      upArea.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        upArea.classList.add("drag");
-      });
-      upArea.addEventListener("dragleave", () =>
-        upArea.classList.remove("drag"),
-      );
-      upArea.addEventListener("drop", (e) => {
-        e.preventDefault();
-        upArea.classList.remove("drag");
-        addFiles([...e.dataTransfer.files]);
-      });
-      upInput.addEventListener("change", () => {
-        addFiles([...upInput.files]);
-        upInput.value = "";
-      });
-
+      const upFiles = [];
+      function initUpload() {
+        const ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        ua.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          ua.classList.add("drag");
+        });
+        ua.addEventListener("dragleave", () => ua.classList.remove("drag"));
+        ua.addEventListener("drop", (e) => {
+          e.preventDefault();
+          ua.classList.remove("drag");
+          addFiles([...e.dataTransfer.files]);
+        });
+        ui.addEventListener("change", () => {
+          addFiles([...ui.files]);
+          ui.value = "";
+        });
+      }
       function addFiles(fs) {
         fs.forEach((f) => {
           if (upFiles.length < 6 && f.type.startsWith("image/"))
@@ -1872,13 +2237,17 @@
         renderPreviews();
       }
       function renderPreviews() {
-        pGrid.innerHTML = "";
+        const pg = document.getElementById("pgrid"),
+          uc = document.getElementById("upcount"),
+          ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        pg.innerHTML = "";
         if (!upFiles.length) {
-          pGrid.style.display = "none";
-          upCnt.textContent = "";
+          pg.style.display = "none";
+          uc.textContent = "";
           return;
         }
-        pGrid.style.display = "grid";
+        pg.style.display = "grid";
         upFiles.forEach((f, i) => {
           const d = document.createElement("div");
           d.className = "pitem";
@@ -1893,33 +2262,48 @@
           };
           d.appendChild(img);
           d.appendChild(btn);
-          pGrid.appendChild(d);
+          pg.appendChild(d);
         });
-        upCnt.textContent = `${upFiles.length}/6 photo${upFiles.length > 1 ? "s" : ""}`;
+        uc.textContent = `${upFiles.length}/6 photo${upFiles.length > 1 ? "s" : ""}`;
         const full = upFiles.length >= 6;
-        upInput.disabled = full;
-        upArea.style.opacity = full ? "0.5" : "1";
-        upArea.style.pointerEvents = full ? "none" : "";
+        ui.disabled = full;
+        ua.style.opacity = full ? "0.5" : "1";
+        ua.style.pointerEvents = full ? "none" : "";
       }
 
-      // ═══════════════════════════════
-      // SUBMIT
-      // ═══════════════════════════════
+      function toast(msg, err) {
+        Toastify({
+          text: msg,
+          duration: 3000,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: err ? "#3a0a18" : "#0d140d",
+            border: err ? "1px solid #ff2d78" : "1px solid #2e452e",
+            color: err ? "#ff6a9a" : "#ddeedd",
+            fontFamily: "'Space Mono',monospace",
+            fontSize: ".7rem",
+            borderRadius: "6px",
+          },
+        }).showToast();
+      }
+
       function submitReport() {
         const name = document.getElementById("rname").value.trim();
         const state = document.getElementById("rstate").value.trim();
         const area = document.getElementById("rarea").value.trim();
         const specific = document.getElementById("rspec").value.trim();
         if (!name || !state || !area || !specific) {
-          alert("Name, state, area and specific location are required.");
+          toast("Fill in name, state, area and location.", true);
           return;
         }
         if (!upFiles.length) {
-          alert("Please add at least one photo.");
+          toast("Add at least one photo.", true);
           return;
         }
+        const id = genId();
         const r = {
-          id: Date.now(),
+          id,
           reporter: name,
           state,
           area,
@@ -1929,9 +2313,9 @@
           sev: [...selTags.sev],
           notes: document.getElementById("rnotes").value.trim(),
           photos: upFiles.map((f) => URL.createObjectURL(f)),
-          lat: 20.5937 + (Math.random() - 0.5) * 14,
-          lng: 78.9629 + (Math.random() - 0.5) * 14,
-          date: new Date().toISOString().split("T")[0],
+          lat: locLat !== null ? locLat : 20.5937 + (Math.random() - 0.5) * 14,
+          lng: locLng !== null ? locLng : 78.9629 + (Math.random() - 0.5) * 14,
+          ts: new Date().toISOString(),
         };
         reports.push(r);
         const sel = document.getElementById("fs-state");
@@ -1944,12 +2328,14 @@
         applyFilters();
         document.getElementById("form-screen").style.display = "none";
         document.getElementById("succ").classList.add("on");
+        document.getElementById("succ-id").textContent = "ID: " + id;
       }
 
       function resetForm() {
-        ["rname", "rstate", "rarea", "rspec", "rnotes"].forEach(
-          (id) => (document.getElementById(id).value = ""),
-        );
+        ["rname", "rstate", "rarea", "rspec", "rnotes"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
         document
           .querySelectorAll(".tag.on")
           .forEach((t) => t.classList.remove("on"));
@@ -1959,32 +2345,27 @@
         Object.keys(selTags).forEach((k) => (selTags[k] = []));
         selCats.length = 0;
         upFiles.length = 0;
+        locLat = null;
+        locLng = null;
         renderPreviews();
         document.getElementById("form-screen").style.display = "";
         document.getElementById("succ").classList.remove("on");
-        document.querySelectorAll(".step").forEach((s, i) => {
-          s.classList.remove("open", "done");
-          if (i === 0) s.classList.add("open");
-        });
-        upInput.disabled = false;
-        upArea.style.opacity = "1";
-        upArea.style.pointerEvents = "";
+        const ua = document.getElementById("uparea"),
+          ui = document.getElementById("photo-input");
+        if (ui) ui.disabled = false;
+        if (ua) {
+          ua.style.opacity = "1";
+          ua.style.pointerEvents = "";
+        }
       }
 
-      // ═══════════════════════════════
-      // SIZING
-      // ═══════════════════════════════
-      function sizeViews() {
-        const tb = document.querySelector(".toolbar");
-        const h = window.innerHeight - 52 - (tb ? tb.offsetHeight : 40);
-        document.getElementById("map-wrap").style.height = h + "px";
-        document.getElementById("list-wrap").style.height = h + "px";
-      }
-      window.addEventListener("resize", sizeViews);
       window.addEventListener("load", () => {
         sizeViews();
         initMap();
+        initUpload();
+        maybeShowWelcome();
       });
+      window.addEventListener("resize", sizeViews);
     </script>
   </body>
 </html>
