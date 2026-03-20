@@ -158,7 +158,23 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script>
+  (function() {
+    var url  = (typeof SUPABASE_URL  !== "undefined" && SUPABASE_URL)  || "";
+    var key  = (typeof SUPABASE_KEY  !== "undefined" && SUPABASE_KEY)  || "";
+    var lock = (typeof LOCK_INSPECT_ENV !== "undefined") ? LOCK_INSPECT_ENV : false;
+    window.SUPABASE_URL      = url;
+    window.SUPABASE_KEY      = key;
+    window.LOCK_INSPECT_ENV  = lock;
+    if (!url || !key) console.warn("[DumpSpot] config missing — add config.js or set env vars");
+  })();
+</script>
+<script src="config.js" onerror="console.warn('[DumpSpot] config.js not found, using env vars')"></script>
+<script>
+  window.SUPABASE_URL     = (typeof SUPABASE_URL  !== "undefined" && SUPABASE_URL)  || window.SUPABASE_URL;
+  window.SUPABASE_KEY     = (typeof SUPABASE_KEY  !== "undefined" && SUPABASE_KEY)  || window.SUPABASE_KEY;
+  window.LOCK_INSPECT_ENV = (typeof LOCK_INSPECT_ENV !== "undefined") ? LOCK_INSPECT_ENV : window.LOCK_INSPECT_ENV;
+</script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="app.js"></script>
 </body>
