@@ -653,10 +653,43 @@ function initUpload() {
   });
 }
 
-function addFiles(fs) {
-  fs.forEach((f) => {
-    if (upFiles.length < 6 && f.type.startsWith("image/")) upFiles.push(f);
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 1280;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (blob) =>
+          resolve(
+            new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+              type: "image/webp",
+            }),
+          ),
+        "image/webp",
+        0.82,
+      );
+    };
+    img.src = url;
   });
+}
+
+async function addFiles(fs) {
+  const eligible = fs
+    .filter((f) => f.type.startsWith("image/"))
+    .slice(0, 6 - upFiles.length);
+  for (const f of eligible) {
+    const compressed = await compressImage(f);
+    if (upFiles.length < 6) upFiles.push(compressed);
+  }
   renderPreviews();
 }
 

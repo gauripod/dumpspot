@@ -15,12 +15,12 @@
 <body>
 
 <nav>
-  <div class="nlogo" onclick="goPage('pg-feed')">
+  <div class="nlogo" onclick="goPage('pg-feed');setView('map')">
     <div class="nlogo-t">DumpSpot</div>
     <div class="nlogo-s">post your dump here</div>
   </div>
   <div class="ntabs">
-    <button class="ntab on" id="ntab-feed"   onclick="goPage('pg-feed')">Feed</button>
+    <button class="ntab on" id="ntab-feed"   onclick="goPage('pg-feed');setView('map')">Feed</button>
     <button class="ntab"    id="ntab-report" onclick="goPage('pg-report')">+ Report</button>
   </div>
 </nav>
