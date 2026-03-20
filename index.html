@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DumpSpot</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0a120a;
+        --bg2: #0f1a0f;
+        --surface: #111d11;
+        --surface2: #172017;
+        --border: #1e321e;
+        --border2: #2a472a;
+        --text: #e8f5e8;
+        --muted: #6b8f6b;
+        --faint: #3a5a3a;
+        --pink: #ff2d78;
+        --pink-dim: #ff2d7822;
+        --pink-border: #ff2d7855;
+        --green: #0d2e0d;
+        --green-bright: #1a4a1a;
+        --radius: 5px;
+        --font-display: "Unbounded", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+        --font-mono: "Space Mono", monospace;
+      }
+      body {
+        font-family: var(--font-body);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* NAV */
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        height: 54px;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .nav-logo-wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1;
+      }
+      .nav-logo {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: var(--pink);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .nav-sub {
+        font-family: var(--font-mono);
+        font-size: 0.52rem;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+      .nav-tabs {
+        display: flex;
+      }
+      .nav-tab {
+        padding: 0 1.1rem;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        text-transform: uppercase;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+      }
+      .nav-tab:hover {
+        color: var(--text);
+      }
+      .nav-tab.active {
+        color: var(--pink);
+        border-bottom-color: var(--pink);
+      }
+
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* MAP PAGE */
+      #map-page {
+        height: calc(100vh - 54px);
+        display: flex;
+        flex-direction: column;
+      }
+      .map-toolbar {
+        padding: 0.55rem 1rem;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .filter-label {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+      .filter-select {
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        padding: 0.3rem 0.65rem;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+      }
+      .filter-select:focus {
+        border-color: var(--pink);
+      }
+      .filter-select option {
+        background: #0a120a;
+      }
+      .dot-count {
+        margin-left: auto;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--muted);
+      }
+      .dot-count span {
+        color: var(--pink);
+        font-weight: 700;
+      }
+      #map {
+        flex: 1;
+      }
+
+      .leaflet-container {
+        background: #060e06;
+      }
+      .leaflet-tile {
+        filter: grayscale(1) brightness(0.28) hue-rotate(80deg) saturate(2);
+      }
+      .leaflet-control-zoom a {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        border-color: var(--border2) !important;
+      }
+
+      .dump-marker {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--pink);
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow:
+          0 0 12px var(--pink),
+          0 2px 8px rgba(0, 0, 0, 0.8);
+        transition:
+          transform 0.12s,
+          box-shadow 0.12s;
+      }
+      .dump-marker:hover {
+        transform: scale(1.2);
+        box-shadow:
+          0 0 20px var(--pink),
+          0 2px 8px rgba(0, 0, 0, 0.8);
+      }
+      .dump-marker-inner {
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .leaflet-popup-content-wrapper {
+        background: var(--surface) !important;
+        border: 1px solid var(--border2) !important;
+        border-radius: var(--radius) !important;
+        padding: 0 !important;
+        box-shadow:
+          0 0 0 1px var(--pink-border),
+          0 12px 40px rgba(0, 0, 0, 0.9) !important;
+        min-width: 240px;
+      }
+      .leaflet-popup-content {
+        margin: 0 !important;
+        width: auto !important;
+      }
+      .leaflet-popup-tip-container {
+        display: none;
+      }
+      .leaflet-popup-close-button {
+        color: var(--muted) !important;
+        top: 7px !important;
+        right: 9px !important;
+        font-size: 18px !important;
+        z-index: 10;
+      }
+
+      .popup-photos {
+        border-radius: var(--radius) var(--radius) 0 0;
+        overflow: hidden;
+        display: grid;
+        gap: 2px;
+      }
+      .popup-photos.one {
+        grid-template-columns: 1fr;
+      }
+      .popup-photos.multi {
+        grid-template-columns: 1fr 1fr;
+      }
+      .popup-photo {
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        display: block;
+        background: var(--surface2);
+      }
+      .popup-placeholder {
+        width: 100%;
+        aspect-ratio: 16/7;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--faint);
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+      .popup-body {
+        padding: 0.8rem 0.9rem 0.85rem;
+      }
+      .popup-location {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: var(--text);
+        line-height: 1.25;
+        margin-bottom: 0.2rem;
+      }
+      .popup-area {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        color: var(--pink);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.45rem;
+      }
+      .popup-tags {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        margin-top: 0.4rem;
+      }
+      .popup-tag {
+        font-family: var(--font-mono);
+        font-size: 0.57rem;
+        padding: 0.18rem 0.45rem;
+        border: 1px solid var(--border2);
+        border-radius: 3px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .popup-notes {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 0.4rem;
+        line-height: 1.4;
+      }
+      .popup-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.55rem;
+      }
+      .popup-reporter {
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+      .popup-date {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--faint);
+      }
+
+      /* REPORT PAGE */
+      #report-page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 5rem;
+      }
+
+      .report-header {
+        margin-bottom: 2.2rem;
+      }
+      .report-title {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 2.6rem;
+        color: var(--pink);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        line-height: 1;
+        text-shadow: 0 0 32px rgba(255, 45, 120, 0.4);
+      }
+      .report-sub {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 0.4rem;
+      }
+      .report-context {
+        margin-top: 1rem;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.7;
+        border-left: 2px solid var(--pink-border);
+        padding-left: 0.9rem;
+      }
+
+      .field-label {
+        font-family: var(--font-mono);
+        font-size: 0.63rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--muted);
+        margin-bottom: 0.4rem;
+        margin-top: 1.5rem;
+        display: block;
+      }
+      .req {
+        color: var(--pink);
+      }
+      .opt {
+        color: var(--faint);
+        font-size: 0.58rem;
+        margin-left: 0.3rem;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 0.92rem;
+        padding: 0.65rem 0.85rem;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      input[type="text"]:focus,
+      textarea:focus {
+        border-color: var(--pink);
+        box-shadow: 0 0 0 3px var(--pink-dim);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 72px;
+      }
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+      }
+
+      .tags-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+      }
+      .tag {
+        padding: 0.3rem 0.75rem;
+        border-radius: 3px;
+        border: 1px solid var(--border2);
+        font-size: 0.72rem;
+        cursor: pointer;
+        background: var(--surface);
+        color: var(--muted);
+        transition: all 0.12s;
+        user-select: none;
+        font-family: var(--font-mono);
+      }
+      .tag:hover {
+        border-color: var(--border2);
+        color: var(--text);
+      }
+      .tag.active {
+        background: var(--pink-dim);
+        color: var(--pink);
+        border-color: var(--pink-border);
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 1.6rem 0 0;
+      }
+
+      .upload-area {
+        border: 1.5px dashed var(--border2);
+        border-radius: var(--radius);
+        padding: 2rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          box-shadow 0.2s;
+        background: var(--surface);
+        position: relative;
+      }
+      .upload-area:hover,
+      .upload-area.drag-over {
+        border-color: var(--pink);
+        background: #130d10;
+        box-shadow: 0 0 0 3px var(--pink-dim);
+      }
+      .upload-area input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .upload-icon {
+        font-size: 1.6rem;
+        margin-bottom: 0.4rem;
+      }
+      .upload-area p {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .upload-area small {
+        font-size: 0.7rem;
+        color: var(--faint);
+      }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+        margin-top: 0.7rem;
+      }
+      .preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface2);
+      }
+      .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .remove-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(0, 0, 0, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        color: #fff;
+        font-size: 0.68rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .upload-count {
+        font-size: 0.67rem;
+        color: var(--faint);
+        margin-top: 0.4rem;
+        text-align: right;
+        font-family: var(--font-mono);
+      }
+
+      .submit-btn {
+        width: 100%;
+        margin-top: 2rem;
+        padding: 0.9rem;
+        background: var(--pink);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius);
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        cursor: pointer;
+        text-transform: uppercase;
+        box-shadow: 0 0 20px rgba(255, 45, 120, 0.4);
+        transition:
+          box-shadow 0.15s,
+          transform 0.1s;
+      }
+      .submit-btn:hover {
+        box-shadow: 0 0 32px rgba(255, 45, 120, 0.65);
+      }
+      .submit-btn:active {
+        transform: scale(0.99);
+      }
+      .anon-note {
+        font-size: 0.66rem;
+        color: var(--faint);
+        text-align: center;
+        margin-top: 0.75rem;
+        font-family: var(--font-mono);
+      }
+
+      .success-screen {
+        display: none;
+        text-align: center;
+        padding: 5rem 1rem;
+      }
+      .success-screen.visible {
+        display: block;
+      }
+      .success-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+      .success-screen h2 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        color: var(--pink);
+        margin-bottom: 0.5rem;
+        letter-spacing: 3px;
+        text-shadow: 0 0 28px rgba(255, 45, 120, 0.5);
+      }
+      .success-screen p {
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.7;
+      }
+      .report-again {
+        margin-top: 1.5rem;
+        display: inline-block;
+        padding: 0.5rem 1.4rem;
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        color: var(--muted);
+        cursor: pointer;
+        background: none;
+        font-family: var(--font-mono);
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .report-again:hover {
+        border-color: var(--pink);
+        color: var(--text);
+      }
+
+      @media (max-width: 480px) {
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+        .preview-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .report-title {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-logo-wrap">
+        <div class="nav-logo">DumpSpot</div>
+        <div class="nav-sub">post your dump here</div>
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchPage('map-page')">
+          Feed
+        </button>
+        <button class="nav-tab" onclick="switchPage('report-page')">
+          + Report
+        </button>
+      </div>
+    </nav>
+
+    <!-- MAP PAGE -->
+    <div id="map-page" class="page active">
+      <div class="map-toolbar">
+        <span class="filter-label">Filter</span>
+        <select
+          class="filter-select"
+          id="filter-state"
+          onchange="applyFilters()"
+        >
+          <option value="">All states</option>
+        </select>
+        <select
+          class="filter-select"
+          id="filter-area"
+          onchange="applyFilters()"
+        >
+          <option value="">All areas</option>
+        </select>
+        <select
+          class="filter-select"
+          id="filter-type"
+          onchange="applyFilters()"
+        >
+          <option value="">All site types</option>
+          <option>Road</option>
+          <option>Footpath</option>
+          <option>Nala / Drain</option>
+          <option>Open plot</option>
+          <option>Park</option>
+          <option>Market</option>
+          <option>Near school</option>
+          <option>Near hospital</option>
+        </select>
+        <div class="dot-count"><span id="count-num">0</span> spots</div>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- REPORT PAGE -->
+    <div id="report-page" class="page">
+      <div id="form-screen">
+        <div class="report-header">
+          <div class="report-title">DumpSpot</div>
+          <div class="report-sub">post your dump here</div>
+          <p class="report-context">
+            See garbage piling up on your street? Drop a pin.<br />
+            No login, no forms — a name, a place, a photo. That's it.
+          </p>
+        </div>
+
+        <label class="field-label">Your name <span class="req">*</span></label>
+        <input
+          type="text"
+          id="reporter-name"
+          placeholder="What to call you"
+          maxlength="60"
+        />
+
+        <label class="field-label"
+          >State <span class="req">*</span> &amp; Area
+          <span class="req">*</span></label
+        >
+        <div class="row-2">
+          <input type="text" id="state" placeholder="State" maxlength="50" />
+          <input
+            type="text"
+            id="area"
+            placeholder="District / Area"
+            maxlength="60"
+          />
+        </div>
+
+        <label class="field-label"
+          >Specific location <span class="req">*</span></label
+        >
+        <input
+          type="text"
+          id="specific-place"
+          placeholder="e.g. Near SBI ATM, MG Road junction"
+          maxlength="120"
+        />
+
+        <div class="divider"></div>
+
+        <label class="field-label" style="margin-top: 1.5rem"
+          >Type of site <span class="opt">optional</span></label
+        >
+        <div class="tags-row">
+          <div class="tag" data-group="type">Road</div>
+          <div class="tag" data-group="type">Footpath</div>
+          <div class="tag" data-group="type">Nala / Drain</div>
+          <div class="tag" data-group="type">Open plot</div>
+          <div class="tag" data-group="type">Park</div>
+          <div class="tag" data-group="type">Market</div>
+          <div class="tag" data-group="type">Near school</div>
+          <div class="tag" data-group="type">Near hospital</div>
+        </div>
+
+        <label class="field-label"
+          >Garbage type <span class="opt">optional</span></label
+        >
+        <div class="tags-row">
+          <div class="tag" data-group="garbage">Plastic</div>
+          <div class="tag" data-group="garbage">Food waste</div>
+          <div class="tag" data-group="garbage">Construction debris</div>
+          <div class="tag" data-group="garbage">Sewage</div>
+          <div class="tag" data-group="garbage">Burning garbage</div>
+          <div class="tag" data-group="garbage">Mixed / general</div>
+        </div>
+
+        <label class="field-label"
+          >Severity <span class="opt">optional</span></label
+        >
+        <div class="tags-row">
+          <div class="tag" data-group="severity">Minor</div>
+          <div class="tag" data-group="severity">Moderate</div>
+          <div class="tag" data-group="severity">Severe</div>
+          <div class="tag" data-group="severity">Blocking road</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <label class="field-label" style="margin-top: 1.5rem"
+          >Notes <span class="opt">optional</span></label
+        >
+        <textarea
+          id="notes"
+          placeholder="Smell, duration, any hazard…"
+        ></textarea>
+
+        <label class="field-label">Photos <span class="req">*</span></label>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="photo-input" accept="image/*" multiple />
+          <div class="upload-icon">📷</div>
+          <p>Tap to add photos</p>
+          <small>1 to 6 · JPG, PNG, WEBP</small>
+        </div>
+        <div id="preview-grid" class="preview-grid" style="display: none"></div>
+        <div id="upload-count" class="upload-count"></div>
+
+        <button class="submit-btn" onclick="submitReport()">
+          Submit Report
+        </button>
+        <p class="anon-note">No account needed · anonymous beyond your name</p>
+      </div>
+
+      <div class="success-screen" id="success-screen">
+        <div class="success-icon">📍</div>
+        <h2>Pinned.</h2>
+        <p>
+          Your report is on the map.<br />Share DumpSpot — more eyes, more
+          pressure.
+        </p>
+        <button class="report-again" onclick="resetForm()">
+          Report another spot
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const selectedTags = { type: [], garbage: [], severity: [] };
+      const files = [];
+      let reports = [];
+      let map, markersLayer;
+
+      const seedReports = [
+        {
+          id: 1,
+          reporter: "Arjun M.",
+          state: "Maharashtra",
+          area: "Pune",
+          specific: "FC Road near Goodluck Café",
+          type: ["Road"],
+          garbage: ["Plastic", "Food waste"],
+          severity: ["Moderate"],
+          notes: "Overflowing since 3 days",
+          photos: [],
+          lat: 18.5204,
+          lng: 73.8567,
+          date: "2026-03-18",
+        },
+        {
+          id: 2,
+          reporter: "Divya K.",
+          state: "Karnataka",
+          area: "Bengaluru",
+          specific: "Koramangala 5th Block drain",
+          type: ["Nala / Drain"],
+          garbage: ["Sewage"],
+          severity: ["Severe"],
+          notes: "Black water on road",
+          photos: [],
+          lat: 12.9352,
+          lng: 77.6245,
+          date: "2026-03-17",
+        },
+        {
+          id: 3,
+          reporter: "Ravi T.",
+          state: "Tamil Nadu",
+          area: "Chennai",
+          specific: "Anna Nagar market back lane",
+          type: ["Market"],
+          garbage: ["Food waste", "Mixed / general"],
+          severity: ["Moderate"],
+          notes: "",
+          photos: [],
+          lat: 13.085,
+          lng: 80.2101,
+          date: "2026-03-19",
+        },
+        {
+          id: 4,
+          reporter: "Sneha P.",
+          state: "Delhi",
+          area: "Shahdara",
+          specific: "Near Govt school gate",
+          type: ["Near school"],
+          garbage: ["Plastic"],
+          severity: ["Minor"],
+          notes: "Kids walk through this daily",
+          photos: [],
+          lat: 28.6729,
+          lng: 77.2946,
+          date: "2026-03-15",
+        },
+        {
+          id: 5,
+          reporter: "Mohan R.",
+          state: "Telangana",
+          area: "Hyderabad",
+          specific: "Begumpet footpath",
+          type: ["Footpath"],
+          garbage: ["Construction debris"],
+          severity: ["Blocking road"],
+          notes: "Cannot walk",
+          photos: [],
+          lat: 17.4435,
+          lng: 78.4685,
+          date: "2026-03-20",
+        },
+        {
+          id: 6,
+          reporter: "Priya S.",
+          state: "West Bengal",
+          area: "Kolkata",
+          specific: "Park Street side lane",
+          type: ["Footpath"],
+          garbage: ["Mixed / general"],
+          severity: ["Moderate"],
+          notes: "",
+          photos: [],
+          lat: 22.5497,
+          lng: 88.3554,
+          date: "2026-03-16",
+        },
+      ];
+
+      function switchPage(id) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document
+          .querySelectorAll(".nav-tab")
+          [id === "map-page" ? 0 : 1].classList.add("active");
+        if (id === "map-page" && map)
+          setTimeout(() => map.invalidateSize(), 50);
+      }
+
+      function initMap() {
+        map = L.map("map", {
+          zoomControl: true,
+          scrollWheelZoom: true,
+        }).setView([20.5937, 78.9629], 5);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap",
+          maxZoom: 18,
+        }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+        reports = [...seedReports];
+        populateStateFilter();
+        renderMarkers(reports);
+      }
+
+      function populateStateFilter() {
+        const el = document.getElementById("filter-state");
+        [...new Set(reports.map((r) => r.state))].sort().forEach((s) => {
+          const o = document.createElement("option");
+          o.value = s;
+          o.textContent = s;
+          el.appendChild(o);
+        });
+      }
+
+      function applyFilters() {
+        const state = document.getElementById("filter-state").value;
+        const areaEl = document.getElementById("filter-area");
+        const prevArea = areaEl.value;
+        areaEl.innerHTML = '<option value="">All areas</option>';
+        [
+          ...new Set(
+            reports
+              .filter((r) => !state || r.state === state)
+              .map((r) => r.area),
+          ),
+        ]
+          .sort()
+          .forEach((a) => {
+            const o = document.createElement("option");
+            o.value = a;
+            o.textContent = a;
+            areaEl.appendChild(o);
+          });
+        if (prevArea) areaEl.value = prevArea;
+        const area = areaEl.value;
+        const type = document.getElementById("filter-type").value;
+        const final = reports.filter((r) => {
+          if (state && r.state !== state) return false;
+          if (area && r.area !== area) return false;
+          if (type && !r.type.includes(type)) return false;
+          return true;
+        });
+        renderMarkers(final);
+      }
+
+      function makeIcon() {
+        return L.divIcon({
+          className: "",
+          html: '<div class="dump-marker"><div class="dump-marker-inner">🗑</div></div>',
+          iconSize: [26, 26],
+          iconAnchor: [13, 26],
+          popupAnchor: [0, -28],
+        });
+      }
+
+      function renderMarkers(data) {
+        markersLayer.clearLayers();
+        document.getElementById("count-num").textContent = data.length;
+        data.forEach((r) => {
+          L.marker([r.lat, r.lng], { icon: makeIcon() })
+            .addTo(markersLayer)
+            .bindPopup(buildPopup(r), { maxWidth: 280, minWidth: 240 });
+        });
+      }
+
+      function buildPopup(r) {
+        const top =
+          r.photos && r.photos.length
+            ? `<div class="popup-photos ${r.photos.length === 1 ? "one" : "multi"}">${r.photos
+                .slice(0, 4)
+                .map((s) => `<img class="popup-photo" src="${s}">`)
+                .join("")}</div>`
+            : `<div class="popup-placeholder">📍</div>`;
+        const tags = [...r.type, ...r.garbage, ...r.severity].filter(Boolean);
+        return `<div>${top}<div class="popup-body">
+    <div class="popup-location">${r.specific}</div>
+    <div class="popup-area">${r.area}, ${r.state}</div>
+    ${tags.length ? `<div class="popup-tags">${tags.map((t) => `<span class="popup-tag">${t}</span>`).join("")}</div>` : ""}
+    ${r.notes ? `<div class="popup-notes">${r.notes}</div>` : ""}
+    <div class="popup-meta">
+      <div class="popup-reporter">by ${r.reporter}</div>
+      <div class="popup-date">${r.date}</div>
+    </div>
+  </div></div>`;
+      }
+
+      document.querySelectorAll(".tag").forEach((tag) => {
+        tag.addEventListener("click", () => {
+          const g = tag.dataset.group;
+          tag.classList.toggle("active");
+          const v = tag.textContent;
+          if (tag.classList.contains("active")) selectedTags[g].push(v);
+          else selectedTags[g] = selectedTags[g].filter((x) => x !== v);
+        });
+      });
+
+      const uploadArea = document.getElementById("upload-area");
+      const photoInput = document.getElementById("photo-input");
+      const previewGrid = document.getElementById("preview-grid");
+      const uploadCount = document.getElementById("upload-count");
+
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("drag-over");
+      });
+      uploadArea.addEventListener("dragleave", () =>
+        uploadArea.classList.remove("drag-over"),
+      );
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove("drag-over");
+        addFiles([...e.dataTransfer.files]);
+      });
+      photoInput.addEventListener("change", () => {
+        addFiles([...photoInput.files]);
+        photoInput.value = "";
+      });
+
+      function addFiles(f) {
+        f.forEach((x) => {
+          if (files.length < 6 && x.type.startsWith("image/")) files.push(x);
+        });
+        renderPreviews();
+      }
+
+      function renderPreviews() {
+        previewGrid.innerHTML = "";
+        if (!files.length) {
+          previewGrid.style.display = "none";
+          uploadCount.textContent = "";
+          return;
+        }
+        previewGrid.style.display = "grid";
+        files.forEach((f, i) => {
+          const div = document.createElement("div");
+          div.className = "preview-item";
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(f);
+          const btn = document.createElement("button");
+          btn.className = "remove-btn";
+          btn.textContent = "✕";
+          btn.onclick = () => {
+            files.splice(i, 1);
+            renderPreviews();
+          };
+          div.appendChild(img);
+          div.appendChild(btn);
+          previewGrid.appendChild(div);
+        });
+        uploadCount.textContent = `${files.length}/6 photo${files.length > 1 ? "s" : ""}`;
+        const full = files.length >= 6;
+        photoInput.disabled = full;
+        uploadArea.style.opacity = full ? "0.5" : "1";
+        uploadArea.style.pointerEvents = full ? "none" : "";
+      }
+
+      function submitReport() {
+        const name = document.getElementById("reporter-name").value.trim();
+        const state = document.getElementById("state").value.trim();
+        const area = document.getElementById("area").value.trim();
+        const specific = document.getElementById("specific-place").value.trim();
+        if (!name || !state || !area || !specific) {
+          alert("Name, state, area and specific location are required.");
+          return;
+        }
+        if (!files.length) {
+          alert("Please add at least one photo.");
+          return;
+        }
+        const r = {
+          id: Date.now(),
+          reporter: name,
+          state,
+          area,
+          specific,
+          type: [...selectedTags.type],
+          garbage: [...selectedTags.garbage],
+          severity: [...selectedTags.severity],
+          notes: document.getElementById("notes").value.trim(),
+          photos: files.map((f) => URL.createObjectURL(f)),
+          lat: 20.5937 + (Math.random() - 0.5) * 12,
+          lng: 78.9629 + (Math.random() - 0.5) * 12,
+          date: new Date().toISOString().split("T")[0],
+        };
+        reports.push(r);
+        const el = document.getElementById("filter-state");
+        if (![...el.options].find((o) => o.value === state)) {
+          const o = document.createElement("option");
+          o.value = state;
+          o.textContent = state;
+          el.appendChild(o);
+        }
+        applyFilters();
+        document.getElementById("form-screen").style.display = "none";
+        document.getElementById("success-screen").classList.add("visible");
+      }
+
+      function resetForm() {
+        ["reporter-name", "state", "area", "specific-place", "notes"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+        document
+          .querySelectorAll(".tag.active")
+          .forEach((t) => t.classList.remove("active"));
+        Object.keys(selectedTags).forEach((k) => (selectedTags[k] = []));
+        files.length = 0;
+        renderPreviews();
+        document.getElementById("form-screen").style.display = "";
+        document.getElementById("success-screen").classList.remove("visible");
+        photoInput.disabled = false;
+        uploadArea.style.opacity = "1";
+        uploadArea.style.pointerEvents = "";
+      }
+
+      window.addEventListener("load", initMap);
+    </script>
+  </body>
+</html>
