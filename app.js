@@ -5,6 +5,8 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "F12") e.preventDefault();
 });
 
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 function maybeShowWelcome() {
   if (sessionStorage.getItem("ds_welcomed")) return;
   sessionStorage.setItem("ds_welcomed", "1");
@@ -33,6 +35,23 @@ function maybeShowWelcome() {
       },
     }).showToast();
   }, 700);
+}
+
+function toast(msg, err) {
+  Toastify({
+    text: msg,
+    duration: err ? 4000 : 3000,
+    gravity: "bottom",
+    position: "center",
+    style: {
+      background: err ? "#3a0a18" : "#0d140d",
+      border: err ? "1px solid #ff2d78" : "1px solid #2e452e",
+      color: err ? "#ff6a9a" : "#ddeedd",
+      fontFamily: "'Space Mono',monospace",
+      fontSize: ".7rem",
+      borderRadius: "6px",
+    },
+  }).showToast();
 }
 
 const ICONS = {
@@ -94,130 +113,7 @@ function fmtTs(iso) {
   );
 }
 
-const SEED = [
-  {
-    id: "DS-20260318-183042-A1B2",
-    reporter: "Arjun M.",
-    state: "Maharashtra",
-    area: "Pune",
-    specific: "FC Road near Goodluck Café",
-    type: ["Road"],
-    cats: ["Plastic waste", "Food waste"],
-    sev: ["Moderate"],
-    notes: "Overflowing since 3 days",
-    photos: [],
-    lat: 18.5204,
-    lng: 73.8567,
-    ts: "2026-03-18T18:30:42",
-  },
-  {
-    id: "DS-20260317-091514-C3D4",
-    reporter: "Divya K.",
-    state: "Karnataka",
-    area: "Bengaluru",
-    specific: "Koramangala 5th Block drain",
-    type: ["Nala / Drain"],
-    cats: ["Nala / Sewage"],
-    sev: ["Severe"],
-    notes: "Black water spilling onto road",
-    photos: [],
-    lat: 12.9352,
-    lng: 77.6245,
-    ts: "2026-03-17T09:15:14",
-  },
-  {
-    id: "DS-20260319-143220-E5F6",
-    reporter: "Ravi T.",
-    state: "Tamil Nadu",
-    area: "Chennai",
-    specific: "Anna Nagar market back lane",
-    type: ["Market"],
-    cats: ["Food waste", "Mixed / general"],
-    sev: ["Moderate"],
-    notes: "",
-    photos: [],
-    lat: 13.085,
-    lng: 80.2101,
-    ts: "2026-03-19T14:32:20",
-  },
-  {
-    id: "DS-20260315-074533-G7H8",
-    reporter: "Sneha P.",
-    state: "Delhi",
-    area: "Shahdara",
-    specific: "Near Govt school gate",
-    type: ["Near school"],
-    cats: ["Plastic waste"],
-    sev: ["Minor"],
-    notes: "Kids walk through this daily",
-    photos: [],
-    lat: 28.6729,
-    lng: 77.2946,
-    ts: "2026-03-15T07:45:33",
-  },
-  {
-    id: "DS-20260320-112045-I9J0",
-    reporter: "Mohan R.",
-    state: "Telangana",
-    area: "Hyderabad",
-    specific: "Begumpet footpath",
-    type: ["Footpath"],
-    cats: ["Construction"],
-    sev: ["Blocking road"],
-    notes: "Cannot walk on footpath at all",
-    photos: [],
-    lat: 17.4435,
-    lng: 78.4685,
-    ts: "2026-03-20T11:20:45",
-  },
-  {
-    id: "DS-20260316-200318-K1L2",
-    reporter: "Priya S.",
-    state: "West Bengal",
-    area: "Kolkata",
-    specific: "Park Street side lane",
-    type: ["Footpath"],
-    cats: ["Mixed / general"],
-    sev: ["Moderate"],
-    notes: "",
-    photos: [],
-    lat: 22.5497,
-    lng: 88.3554,
-    ts: "2026-03-16T20:03:18",
-  },
-  {
-    id: "DS-20260320-083001-M3N4",
-    reporter: "Kiran B.",
-    state: "Rajasthan",
-    area: "Jaipur",
-    specific: "Sindhi Camp bus stand back",
-    type: ["Road"],
-    cats: ["Burning garbage"],
-    sev: ["Severe"],
-    notes: "Burning since morning, thick smoke",
-    photos: [],
-    lat: 26.9124,
-    lng: 75.7873,
-    ts: "2026-03-20T08:30:01",
-  },
-  {
-    id: "DS-20260319-163455-O5P6",
-    reporter: "Meena T.",
-    state: "Gujarat",
-    area: "Ahmedabad",
-    specific: "Maninagar nala overflow",
-    type: ["Nala / Drain"],
-    cats: ["Nala / Sewage"],
-    sev: ["Severe"],
-    notes: "",
-    photos: [],
-    lat: 22.995,
-    lng: 72.6031,
-    ts: "2026-03-19T16:34:55",
-  },
-];
-
-let reports = [...SEED],
+let reports = [],
   map,
   mLayer,
   detMap = null,
@@ -248,6 +144,34 @@ function openDetail(id) {
   goPage("pg-detail");
 }
 
+async function fetchReports() {
+  setFeedLoading(true);
+  try {
+    const { data, error } = await sb
+      .from("reports")
+      .select("*, report_photos(url, position)")
+      .order("ts", { ascending: false });
+    if (error) throw error;
+    reports = data.map((r) => ({
+      ...r,
+      photos: (r.report_photos || [])
+        .sort((a, b) => a.position - b.position)
+        .map((p) => p.url),
+    }));
+  } catch (e) {
+    toast("Could not load reports. Check your connection.", true);
+    reports = [];
+  }
+  setFeedLoading(false);
+  buildStateFilter();
+  applyFilters();
+}
+
+function setFeedLoading(on) {
+  const el = document.getElementById("feed-loading");
+  if (el) el.style.display = on ? "flex" : "none";
+}
+
 function initMap() {
   map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView(
     [20.5937, 78.9629],
@@ -263,8 +187,7 @@ function initMap() {
   ).addTo(map);
   mLayer = L.layerGroup().addTo(map);
   buildCatFilter();
-  buildStateFilter();
-  applyFilters();
+  fetchReports();
 }
 
 function makePinIcon(cats) {
@@ -384,23 +307,25 @@ function renderWall(data) {
     html += renderGroup("Yesterday", g.yesterday, "yesterday");
   if (g.thisWeek.length)
     html += renderGroup("This week", g.thisWeek, "this-week");
-  const monthKeys = Object.keys(g.older).sort(
-    (a, b) => new Date("01 " + b) - new Date("01 " + a),
-  );
-  monthKeys.forEach((k) => {
-    html += renderGroup(k, g.older[k], "older");
-  });
+  Object.keys(g.older)
+    .sort((a, b) => new Date("01 " + b) - new Date("01 " + a))
+    .forEach((k) => {
+      html += renderGroup(k, g.older[k], "older");
+    });
   el.innerHTML = html;
 }
 
 function buildStateFilter() {
   const el = document.getElementById("fs-state");
+  const current = el.value;
+  el.innerHTML = '<option value="">All states</option>';
   [...new Set(reports.map((r) => r.state))].sort().forEach((s) => {
     const o = document.createElement("option");
     o.value = s;
     o.textContent = s;
     el.appendChild(o);
   });
+  if (current) el.value = current;
 }
 
 function buildCatFilter() {
@@ -491,7 +416,6 @@ function renderDetail(r) {
   const sevs = (r.sev || [])
     .map((s) => `<span class="det-tag">${s}</span>`)
     .join("");
-
   document.getElementById("det-content").innerHTML = `
     ${photos}
     <div class="det-id-badge">Report ID <span>${r.id}</span></div>
@@ -512,7 +436,6 @@ function renderDetail(r) {
         ${cats ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Garbage category</div><div class="det-cats">${cats}</div>` : ""}
       </div>
     </div>`;
-
   const mm = document.getElementById("det-mini-map");
   mm.innerHTML = "";
   mm.style.display = "block";
@@ -632,27 +555,6 @@ function toggleCat(el, key) {
   }
 }
 
-const upFiles = [];
-
-function initUpload() {
-  const ua = document.getElementById("uparea"),
-    ui = document.getElementById("photo-input");
-  ua.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    ua.classList.add("drag");
-  });
-  ua.addEventListener("dragleave", () => ua.classList.remove("drag"));
-  ua.addEventListener("drop", (e) => {
-    e.preventDefault();
-    ua.classList.remove("drag");
-    addFiles([...e.dataTransfer.files]);
-  });
-  ui.addEventListener("change", () => {
-    addFiles([...ui.files]);
-    ui.value = "";
-  });
-}
-
 function compressImage(file) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -679,6 +581,27 @@ function compressImage(file) {
       );
     };
     img.src = url;
+  });
+}
+
+const upFiles = [];
+
+function initUpload() {
+  const ua = document.getElementById("uparea"),
+    ui = document.getElementById("photo-input");
+  ua.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    ua.classList.add("drag");
+  });
+  ua.addEventListener("dragleave", () => ua.classList.remove("drag"));
+  ua.addEventListener("drop", (e) => {
+    e.preventDefault();
+    ua.classList.remove("drag");
+    addFiles([...e.dataTransfer.files]);
+  });
+  ui.addEventListener("change", () => {
+    addFiles([...ui.files]);
+    ui.value = "";
   });
 }
 
@@ -728,24 +651,7 @@ function renderPreviews() {
   ua.style.pointerEvents = full ? "none" : "";
 }
 
-function toast(msg, err) {
-  Toastify({
-    text: msg,
-    duration: 3000,
-    gravity: "bottom",
-    position: "center",
-    style: {
-      background: err ? "#3a0a18" : "#0d140d",
-      border: err ? "1px solid #ff2d78" : "1px solid #2e452e",
-      color: err ? "#ff6a9a" : "#ddeedd",
-      fontFamily: "'Space Mono',monospace",
-      fontSize: ".7rem",
-      borderRadius: "6px",
-    },
-  }).showToast();
-}
-
-function submitReport() {
+async function submitReport() {
   const name = document.getElementById("rname").value.trim();
   const state = document.getElementById("rstate").value.trim();
   const area = document.getElementById("rarea").value.trim();
@@ -758,34 +664,56 @@ function submitReport() {
     toast("Add at least one photo.", true);
     return;
   }
-  const id = genId();
-  const r = {
-    id,
-    reporter: name,
-    state,
-    area,
-    specific,
-    type: [...selTags.type],
-    cats: [...selCats],
-    sev: [...selTags.sev],
-    notes: document.getElementById("rnotes").value.trim(),
-    photos: upFiles.map((f) => URL.createObjectURL(f)),
-    lat: locLat !== null ? locLat : 20.5937 + (Math.random() - 0.5) * 14,
-    lng: locLng !== null ? locLng : 78.9629 + (Math.random() - 0.5) * 14,
-    ts: new Date().toISOString(),
-  };
-  reports.push(r);
-  const sel = document.getElementById("fs-state");
-  if (![...sel.options].find((o) => o.value === state)) {
-    const o = document.createElement("option");
-    o.value = state;
-    o.textContent = state;
-    sel.appendChild(o);
+  const btn = document.querySelector(".sub-btn");
+  btn.textContent = "Uploading…";
+  btn.disabled = true;
+  try {
+    const id = genId();
+    const photoUrls = [];
+    for (let i = 0; i < upFiles.length; i++) {
+      const file = upFiles[i];
+      const path = `${id}/${i + 1}.webp`;
+      const { error: upErr } = await sb.storage
+        .from("report-photos")
+        .upload(path, file, { contentType: "image/webp", upsert: false });
+      if (upErr) throw upErr;
+      const { data: urlData } = sb.storage
+        .from("report-photos")
+        .getPublicUrl(path);
+      photoUrls.push({ url: urlData.publicUrl, position: i + 1 });
+    }
+    const { error: repErr } = await sb.from("reports").insert({
+      id,
+      reporter: name,
+      state,
+      area,
+      specific,
+      type: selTags.type,
+      cats: selCats,
+      sev: selTags.sev,
+      notes: document.getElementById("rnotes").value.trim(),
+      lat: locLat !== null ? locLat : 20.5937 + (Math.random() - 0.5) * 14,
+      lng: locLng !== null ? locLng : 78.9629 + (Math.random() - 0.5) * 14,
+      ts: new Date().toISOString(),
+    });
+    if (repErr) throw repErr;
+    const { error: photoErr } = await sb.from("report_photos").insert(
+      photoUrls.map((p) => ({
+        report_id: id,
+        url: p.url,
+        position: p.position,
+      })),
+    );
+    if (photoErr) throw photoErr;
+    await fetchReports();
+    document.getElementById("form-screen").style.display = "none";
+    document.getElementById("succ").classList.add("on");
+    document.getElementById("succ-id").textContent = "ID: " + id;
+  } catch (e) {
+    toast("Submit failed: " + (e.message || "unknown error"), true);
+    btn.textContent = "Submit Report";
+    btn.disabled = false;
   }
-  applyFilters();
-  document.getElementById("form-screen").style.display = "none";
-  document.getElementById("succ").classList.add("on");
-  document.getElementById("succ-id").textContent = "ID: " + id;
 }
 
 function resetForm() {
@@ -805,6 +733,9 @@ function resetForm() {
   renderPreviews();
   document.getElementById("form-screen").style.display = "";
   document.getElementById("succ").classList.remove("on");
+  const btn = document.querySelector(".sub-btn");
+  btn.textContent = "Submit Report";
+  btn.disabled = false;
   const ua = document.getElementById("uparea"),
     ui = document.getElementById("photo-input");
   if (ui) ui.disabled = false;
