@@ -22,21 +22,20 @@
         padding: 0;
       }
       :root {
-        --bg: #0a120a;
-        --bg2: #0f1a0f;
-        --surface: #111d11;
-        --surface2: #172017;
-        --border: #1e321e;
-        --border2: #2a472a;
-        --text: #e8f5e8;
-        --muted: #6b8f6b;
-        --faint: #3a5a3a;
+        --bg: #080f08;
+        --bg2: #0c150c;
+        --surface: #101a10;
+        --surface2: #162016;
+        --border: #1b2e1b;
+        --border2: #254025;
+        --text: #e2f0e2;
+        --muted: #5a7a5a;
+        --faint: #2e4a2e;
         --pink: #ff2d78;
-        --pink-dim: #ff2d7822;
-        --pink-border: #ff2d7855;
-        --green: #0d2e0d;
-        --green-bright: #1a4a1a;
-        --radius: 5px;
+        --pink-glow: rgba(255, 45, 120, 0.25);
+        --pink-dim: rgba(255, 45, 120, 0.12);
+        --pink-border: rgba(255, 45, 120, 0.35);
+        --radius: 6px;
         --font-display: "Unbounded", sans-serif;
         --font-body: "DM Sans", sans-serif;
         --font-mono: "Space Mono", monospace;
@@ -46,15 +45,16 @@
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
+        overflow-x: hidden;
       }
 
-      /* NAV */
+      /* ── NAV ── */
       nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.5rem;
-        height: 54px;
+        padding: 0 1.2rem;
+        height: 52px;
         background: var(--bg2);
         border-bottom: 1px solid var(--border);
         position: sticky;
@@ -70,14 +70,14 @@
       .nav-logo {
         font-family: var(--font-display);
         font-weight: 900;
-        font-size: 1.1rem;
+        font-size: 1rem;
         color: var(--pink);
         letter-spacing: 2px;
         text-transform: uppercase;
       }
       .nav-sub {
         font-family: var(--font-mono);
-        font-size: 0.52rem;
+        font-size: 0.48rem;
         color: var(--muted);
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -87,12 +87,12 @@
         display: flex;
       }
       .nav-tab {
-        padding: 0 1.1rem;
-        height: 54px;
+        padding: 0 1rem;
+        height: 52px;
         display: flex;
         align-items: center;
         font-family: var(--font-mono);
-        font-size: 0.68rem;
+        font-size: 0.65rem;
         letter-spacing: 0.5px;
         color: var(--muted);
         cursor: pointer;
@@ -114,6 +114,7 @@
         border-bottom-color: var(--pink);
       }
 
+      /* ── PAGES ── */
       .page {
         display: none;
       }
@@ -121,24 +122,26 @@
         display: block;
       }
 
-      /* MAP PAGE */
-      #map-page {
-        height: calc(100vh - 54px);
+      /* ── FEED PAGE ── */
+      #feed-page {
+        height: calc(100vh - 52px);
         display: flex;
         flex-direction: column;
       }
-      .map-toolbar {
-        padding: 0.55rem 1rem;
+
+      .feed-toolbar {
+        padding: 0.5rem 1rem;
         background: var(--bg2);
         border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         flex-wrap: wrap;
+        flex-shrink: 0;
       }
       .filter-label {
         font-family: var(--font-mono);
-        font-size: 0.62rem;
+        font-size: 0.6rem;
         color: var(--muted);
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -150,8 +153,8 @@
         border-radius: var(--radius);
         color: var(--text);
         font-family: var(--font-mono);
-        font-size: 0.7rem;
-        padding: 0.3rem 0.65rem;
+        font-size: 0.68rem;
+        padding: 0.28rem 0.6rem;
         cursor: pointer;
         outline: none;
         transition: border-color 0.15s;
@@ -161,27 +164,61 @@
         border-color: var(--pink);
       }
       .filter-select option {
-        background: #0a120a;
+        background: #080f08;
+      }
+
+      .view-toggle {
+        margin-left: auto;
+        display: flex;
+        gap: 0;
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .view-btn {
+        padding: 0.28rem 0.7rem;
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        cursor: pointer;
+        color: var(--muted);
+        background: var(--surface);
+        border: none;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .view-btn.active {
+        background: var(--pink);
+        color: #fff;
       }
       .dot-count {
-        margin-left: auto;
         font-family: var(--font-mono);
-        font-size: 0.68rem;
+        font-size: 0.65rem;
         color: var(--muted);
+        white-space: nowrap;
       }
       .dot-count span {
         color: var(--pink);
         font-weight: 700;
+      }
+
+      /* MAP VIEW */
+      #map-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
       #map {
         flex: 1;
       }
 
       .leaflet-container {
-        background: #060e06;
+        background: #050d05;
       }
       .leaflet-tile {
-        filter: grayscale(1) brightness(0.28) hue-rotate(80deg) saturate(2);
+        filter: grayscale(1) brightness(0.26) hue-rotate(85deg) saturate(2.5);
       }
       .leaflet-control-zoom a {
         background: var(--surface) !important;
@@ -189,32 +226,28 @@
         border-color: var(--border2) !important;
       }
 
-      .dump-marker {
-        width: 26px;
-        height: 26px;
+      .dump-pin {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: var(--pink);
-        border: 2px solid rgba(255, 255, 255, 0.12);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        font-size: 15px;
+        line-height: 1;
         box-shadow:
-          0 0 12px var(--pink),
+          0 0 14px var(--pink-glow),
           0 2px 8px rgba(0, 0, 0, 0.8);
         transition:
           transform 0.12s,
           box-shadow 0.12s;
+        border: 1.5px solid var(--pink-border);
+        background: rgba(10, 18, 10, 0.92);
       }
-      .dump-marker:hover {
+      .dump-pin:hover {
         transform: scale(1.2);
-        box-shadow:
-          0 0 20px var(--pink),
-          0 2px 8px rgba(0, 0, 0, 0.8);
-      }
-      .dump-marker-inner {
-        font-size: 12px;
-        line-height: 1;
+        box-shadow: 0 0 22px var(--pink-glow);
       }
 
       .leaflet-popup-content-wrapper {
@@ -261,7 +294,7 @@
         display: block;
         background: var(--surface2);
       }
-      .popup-placeholder {
+      .popup-no-photo {
         width: 100%;
         aspect-ratio: 16/7;
         background: var(--surface2);
@@ -269,132 +302,317 @@
         align-items: center;
         justify-content: center;
         font-size: 1.8rem;
-        color: var(--faint);
         border-radius: var(--radius) var(--radius) 0 0;
       }
       .popup-body {
-        padding: 0.8rem 0.9rem 0.85rem;
+        padding: 0.75rem 0.85rem 0.8rem;
       }
       .popup-location {
         font-family: var(--font-display);
         font-weight: 700;
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         color: var(--text);
         line-height: 1.25;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.15rem;
       }
       .popup-area {
         font-family: var(--font-mono);
-        font-size: 0.62rem;
+        font-size: 0.6rem;
         color: var(--pink);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.45rem;
+        margin-bottom: 0.4rem;
       }
-      .popup-tags {
+      .popup-cats {
         display: flex;
         gap: 0.3rem;
         flex-wrap: wrap;
-        margin-top: 0.4rem;
+        margin-top: 0.35rem;
       }
-      .popup-tag {
-        font-family: var(--font-mono);
-        font-size: 0.57rem;
-        padding: 0.18rem 0.45rem;
-        border: 1px solid var(--border2);
-        border-radius: 3px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+      .popup-cat {
+        font-size: 1rem;
+        line-height: 1;
+        display: inline-block;
       }
       .popup-notes {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         color: var(--muted);
-        margin-top: 0.4rem;
+        margin-top: 0.35rem;
         line-height: 1.4;
       }
       .popup-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 0.55rem;
+        margin-top: 0.5rem;
       }
       .popup-reporter {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         color: var(--muted);
       }
       .popup-date {
         font-family: var(--font-mono);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--faint);
       }
 
-      /* REPORT PAGE */
-      #report-page {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 2.5rem 1.5rem 5rem;
+      /* LIST VIEW */
+      #list-view {
+        flex: 1;
+        overflow-y: auto;
+        display: none;
+      }
+      #list-view.active {
+        display: block;
+      }
+      .list-inner {
+        padding: 0.75rem 1rem 2rem;
+      }
+      .list-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 0.6rem;
+        display: flex;
+        gap: 0;
+        overflow: hidden;
+        transition: border-color 0.15s;
+      }
+      .list-card:hover {
+        border-color: var(--border2);
+      }
+      .list-card-photo {
+        width: 88px;
+        flex-shrink: 0;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+      }
+      .list-card-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .list-card-body {
+        padding: 0.65rem 0.8rem;
+        flex: 1;
+        min-width: 0;
+      }
+      .list-card-location {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: var(--text);
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .list-card-area {
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        color: var(--pink);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.1rem;
+      }
+      .list-card-cats {
+        display: flex;
+        gap: 0.25rem;
+        margin-top: 0.35rem;
+        flex-wrap: wrap;
+      }
+      .list-cat-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        color: var(--muted);
+        border: 1px solid var(--border2);
+        border-radius: 3px;
+        padding: 0.15rem 0.4rem;
+      }
+      .list-cat-chip span:first-child {
+        font-size: 0.85rem;
+      }
+      .list-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.4rem;
+      }
+      .list-card-reporter {
+        font-size: 0.68rem;
+        color: var(--muted);
+      }
+      .list-card-date {
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        color: var(--faint);
+      }
+      .list-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--faint);
       }
 
-      .report-header {
-        margin-bottom: 2.2rem;
+      /* ── REPORT PAGE ── */
+      #report-page {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 5rem;
       }
-      .report-title {
+
+      .rp-header {
+        margin-bottom: 2rem;
+      }
+      .rp-title {
         font-family: var(--font-display);
         font-weight: 900;
-        font-size: 2.6rem;
+        font-size: 2.2rem;
         color: var(--pink);
         letter-spacing: 2px;
         text-transform: uppercase;
         line-height: 1;
-        text-shadow: 0 0 32px rgba(255, 45, 120, 0.4);
+        text-shadow: 0 0 28px rgba(255, 45, 120, 0.35);
       }
-      .report-sub {
+      .rp-sub {
         font-family: var(--font-mono);
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         color: var(--muted);
         letter-spacing: 1px;
         text-transform: uppercase;
-        margin-top: 0.4rem;
+        margin-top: 0.35rem;
       }
-      .report-context {
-        margin-top: 1rem;
-        font-size: 0.88rem;
+      .rp-context {
+        margin-top: 0.9rem;
+        font-size: 0.86rem;
         color: var(--muted);
         line-height: 1.7;
         border-left: 2px solid var(--pink-border);
-        padding-left: 0.9rem;
+        padding-left: 0.85rem;
+      }
+
+      /* Steps */
+      .step {
+        margin-bottom: 0.25rem;
+      }
+      .step-head {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.9rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: border-color 0.15s;
+        user-select: none;
+      }
+      .step-head:hover {
+        border-color: var(--border2);
+      }
+      .step.open .step-head {
+        border-color: var(--pink-border);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      .step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--pink-dim);
+        border: 1px solid var(--pink-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        color: var(--pink);
+        flex-shrink: 0;
+      }
+      .step.done .step-num {
+        background: var(--pink);
+        color: #fff;
+        border-color: var(--pink);
+      }
+      .step-title {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text);
+        flex: 1;
+      }
+      .step-check {
+        font-size: 0.8rem;
+        color: var(--pink);
+        display: none;
+      }
+      .step.done .step-check {
+        display: block;
+      }
+      .step-arrow {
+        font-size: 0.7rem;
+        color: var(--muted);
+        transition: transform 0.2s;
+      }
+      .step.open .step-arrow {
+        transform: rotate(180deg);
+      }
+
+      .step-body {
+        display: none;
+        padding: 1rem;
+        background: var(--surface);
+        border: 1px solid var(--pink-border);
+        border-top: none;
+        border-bottom-left-radius: var(--radius);
+        border-bottom-right-radius: var(--radius);
+      }
+      .step.open .step-body {
+        display: block;
       }
 
       .field-label {
         font-family: var(--font-mono);
-        font-size: 0.63rem;
+        font-size: 0.62rem;
         text-transform: uppercase;
         letter-spacing: 1.2px;
         color: var(--muted);
-        margin-bottom: 0.4rem;
-        margin-top: 1.5rem;
+        margin-bottom: 0.38rem;
+        margin-top: 1.1rem;
         display: block;
+      }
+      .field-label:first-child {
+        margin-top: 0;
       }
       .req {
         color: var(--pink);
       }
       .opt {
         color: var(--faint);
-        font-size: 0.58rem;
+        font-size: 0.56rem;
         margin-left: 0.3rem;
+        text-transform: uppercase;
       }
 
       input[type="text"],
       textarea {
         width: 100%;
-        background: var(--surface);
+        background: var(--bg2);
         border: 1px solid var(--border2);
         border-radius: var(--radius);
         color: var(--text);
         font-family: var(--font-body);
-        font-size: 0.92rem;
-        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
         outline: none;
         transition:
           border-color 0.15s,
@@ -407,27 +625,70 @@
       }
       textarea {
         resize: vertical;
-        min-height: 72px;
+        min-height: 68px;
       }
       .row-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.6rem;
+        gap: 0.5rem;
       }
 
+      /* Category cards */
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-top: 0.4rem;
+      }
+      .cat-card {
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        padding: 0.75rem 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        background: var(--bg2);
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .cat-card:hover {
+        border-color: var(--border2);
+        background: var(--surface);
+      }
+      .cat-card.active {
+        background: var(--pink-dim);
+        border-color: var(--pink-border);
+      }
+      .cat-card-icon {
+        font-size: 1.6rem;
+        line-height: 1;
+        margin-bottom: 0.3rem;
+      }
+      .cat-card-label {
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        line-height: 1.3;
+      }
+      .cat-card.active .cat-card-label {
+        color: var(--pink);
+      }
+
+      /* Tags */
       .tags-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4rem;
+        gap: 0.35rem;
         margin-top: 0.4rem;
       }
       .tag {
-        padding: 0.3rem 0.75rem;
+        padding: 0.28rem 0.7rem;
         border-radius: 3px;
         border: 1px solid var(--border2);
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         cursor: pointer;
-        background: var(--surface);
+        background: var(--bg2);
         color: var(--muted);
         transition: all 0.12s;
         user-select: none;
@@ -443,23 +704,18 @@
         border-color: var(--pink-border);
       }
 
-      .divider {
-        height: 1px;
-        background: var(--border);
-        margin: 1.6rem 0 0;
-      }
-
+      /* Upload */
       .upload-area {
         border: 1.5px dashed var(--border2);
         border-radius: var(--radius);
-        padding: 2rem 1rem;
+        padding: 1.8rem 1rem;
         text-align: center;
         cursor: pointer;
         transition:
           border-color 0.2s,
           background 0.2s,
           box-shadow 0.2s;
-        background: var(--surface);
+        background: var(--bg2);
         position: relative;
       }
       .upload-area:hover,
@@ -477,15 +733,15 @@
         height: 100%;
       }
       .upload-icon {
-        font-size: 1.6rem;
-        margin-bottom: 0.4rem;
+        font-size: 1.5rem;
+        margin-bottom: 0.35rem;
       }
       .upload-area p {
-        font-size: 0.85rem;
+        font-size: 0.83rem;
         color: var(--muted);
       }
       .upload-area small {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         color: var(--faint);
       }
 
@@ -493,7 +749,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 0.4rem;
-        margin-top: 0.7rem;
+        margin-top: 0.65rem;
       }
       .preview-item {
         position: relative;
@@ -515,33 +771,55 @@
         background: rgba(0, 0, 0, 0.8);
         border: none;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
+        width: 19px;
+        height: 19px;
         color: #fff;
-        font-size: 0.68rem;
+        font-size: 0.65rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       .upload-count {
-        font-size: 0.67rem;
+        font-size: 0.65rem;
         color: var(--faint);
-        margin-top: 0.4rem;
+        margin-top: 0.35rem;
         text-align: right;
         font-family: var(--font-mono);
       }
 
+      .step-next-btn {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.7rem;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius);
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .step-next-btn:hover {
+        border-color: var(--pink-border);
+        background: var(--surface);
+      }
+
       .submit-btn {
         width: 100%;
-        margin-top: 2rem;
-        padding: 0.9rem;
+        margin-top: 1.5rem;
+        padding: 0.85rem;
         background: var(--pink);
         color: #fff;
         border: none;
         border-radius: var(--radius);
         font-family: var(--font-display);
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         letter-spacing: 2px;
         cursor: pointer;
@@ -558,13 +836,14 @@
         transform: scale(0.99);
       }
       .anon-note {
-        font-size: 0.66rem;
+        font-size: 0.64rem;
         color: var(--faint);
         text-align: center;
-        margin-top: 0.75rem;
+        margin-top: 0.7rem;
         font-family: var(--font-mono);
       }
 
+      /* Success */
       .success-screen {
         display: none;
         text-align: center;
@@ -572,10 +851,6 @@
       }
       .success-screen.visible {
         display: block;
-      }
-      .success-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
       }
       .success-screen h2 {
         font-family: var(--font-display);
@@ -587,7 +862,7 @@
       }
       .success-screen p {
         color: var(--muted);
-        font-size: 0.88rem;
+        font-size: 0.86rem;
         line-height: 1.7;
       }
       .report-again {
@@ -596,7 +871,7 @@
         padding: 0.5rem 1.4rem;
         border: 1px solid var(--border2);
         border-radius: var(--radius);
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: var(--muted);
         cursor: pointer;
         background: none;
@@ -619,8 +894,11 @@
         .preview-grid {
           grid-template-columns: repeat(2, 1fr);
         }
-        .report-title {
-          font-size: 2rem;
+        .cat-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .rp-title {
+          font-size: 1.75rem;
         }
       }
     </style>
@@ -632,7 +910,7 @@
         <div class="nav-sub">post your dump here</div>
       </div>
       <div class="nav-tabs">
-        <button class="nav-tab active" onclick="switchPage('map-page')">
+        <button class="nav-tab active" onclick="switchPage('feed-page')">
           Feed
         </button>
         <button class="nav-tab" onclick="switchPage('report-page')">
@@ -641,9 +919,9 @@
       </div>
     </nav>
 
-    <!-- MAP PAGE -->
-    <div id="map-page" class="page active">
-      <div class="map-toolbar">
+    <!-- ── FEED PAGE ── -->
+    <div id="feed-page" class="page active">
+      <div class="feed-toolbar">
         <span class="filter-label">Filter</span>
         <select
           class="filter-select"
@@ -659,127 +937,206 @@
         >
           <option value="">All areas</option>
         </select>
-        <select
-          class="filter-select"
-          id="filter-type"
-          onchange="applyFilters()"
-        >
-          <option value="">All site types</option>
-          <option>Road</option>
-          <option>Footpath</option>
-          <option>Nala / Drain</option>
-          <option>Open plot</option>
-          <option>Park</option>
-          <option>Market</option>
-          <option>Near school</option>
-          <option>Near hospital</option>
-        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-map" onclick="setView('map')">
+            Map
+          </button>
+          <button class="view-btn" id="btn-list" onclick="setView('list')">
+            List
+          </button>
+        </div>
         <div class="dot-count"><span id="count-num">0</span> spots</div>
       </div>
-      <div id="map"></div>
+
+      <div id="map-view">
+        <div id="map"></div>
+      </div>
+
+      <div id="list-view">
+        <div class="list-inner" id="list-inner"></div>
+      </div>
     </div>
 
-    <!-- REPORT PAGE -->
+    <!-- ── REPORT PAGE ── -->
     <div id="report-page" class="page">
       <div id="form-screen">
-        <div class="report-header">
-          <div class="report-title">DumpSpot</div>
-          <div class="report-sub">post your dump here</div>
-          <p class="report-context">
+        <div class="rp-header">
+          <div class="rp-title">DumpSpot</div>
+          <div class="rp-sub">post your dump here</div>
+          <p class="rp-context">
             See garbage piling up on your street? Drop a pin.<br />
             No login, no forms — a name, a place, a photo. That's it.
           </p>
         </div>
 
-        <label class="field-label">Your name <span class="req">*</span></label>
-        <input
-          type="text"
-          id="reporter-name"
-          placeholder="What to call you"
-          maxlength="60"
-        />
-
-        <label class="field-label"
-          >State <span class="req">*</span> &amp; Area
-          <span class="req">*</span></label
-        >
-        <div class="row-2">
-          <input type="text" id="state" placeholder="State" maxlength="50" />
-          <input
-            type="text"
-            id="area"
-            placeholder="District / Area"
-            maxlength="60"
-          />
+        <!-- Step 1: Who & Where -->
+        <div class="step open" id="step-1">
+          <div class="step-head" onclick="toggleStep('step-1')">
+            <div class="step-num">1</div>
+            <div class="step-title">Who & Where</div>
+            <div class="step-check">✓</div>
+            <div class="step-arrow">▾</div>
+          </div>
+          <div class="step-body">
+            <label class="field-label"
+              >Your name <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="reporter-name"
+              placeholder="What to call you"
+              maxlength="60"
+            />
+            <label class="field-label"
+              >State <span class="req">*</span> & Area
+              <span class="req">*</span></label
+            >
+            <div class="row-2">
+              <input
+                type="text"
+                id="state"
+                placeholder="State"
+                maxlength="50"
+              />
+              <input
+                type="text"
+                id="area"
+                placeholder="District / Area"
+                maxlength="60"
+              />
+            </div>
+            <label class="field-label"
+              >Specific location <span class="req">*</span></label
+            >
+            <input
+              type="text"
+              id="specific-place"
+              placeholder="e.g. Near SBI ATM, MG Road junction"
+              maxlength="120"
+            />
+            <button
+              class="step-next-btn"
+              onclick="nextStep('step-1', 'step-2')"
+            >
+              Next →
+            </button>
+          </div>
         </div>
 
-        <label class="field-label"
-          >Specific location <span class="req">*</span></label
-        >
-        <input
-          type="text"
-          id="specific-place"
-          placeholder="e.g. Near SBI ATM, MG Road junction"
-          maxlength="120"
-        />
+        <!-- Step 2: What kind -->
+        <div class="step" id="step-2">
+          <div class="step-head" onclick="toggleStep('step-2')">
+            <div class="step-num">2</div>
+            <div class="step-title">What kind of dump</div>
+            <div class="step-check">✓</div>
+            <div class="step-arrow">▾</div>
+          </div>
+          <div class="step-body">
+            <label class="field-label"
+              >Type of site <span class="opt">optional</span></label
+            >
+            <div class="tags-row">
+              <div class="tag" data-group="type">Road</div>
+              <div class="tag" data-group="type">Footpath</div>
+              <div class="tag" data-group="type">Nala / Drain</div>
+              <div class="tag" data-group="type">Open plot</div>
+              <div class="tag" data-group="type">Park</div>
+              <div class="tag" data-group="type">Market</div>
+              <div class="tag" data-group="type">Near school</div>
+              <div class="tag" data-group="type">Near hospital</div>
+            </div>
 
-        <div class="divider"></div>
+            <label class="field-label" style="margin-top: 1rem"
+              >Garbage category <span class="opt">optional</span></label
+            >
+            <div class="cat-grid" id="cat-grid">
+              <div class="cat-card" data-cat="Plastic waste">
+                <div class="cat-card-icon">🧴</div>
+                <div class="cat-card-label">Plastic</div>
+              </div>
+              <div class="cat-card" data-cat="Food waste">
+                <div class="cat-card-icon">🍱</div>
+                <div class="cat-card-label">Food waste</div>
+              </div>
+              <div class="cat-card" data-cat="Construction debris">
+                <div class="cat-card-icon">🧱</div>
+                <div class="cat-card-label">Debris</div>
+              </div>
+              <div class="cat-card" data-cat="Nala / Sewage">
+                <div class="cat-card-icon">💧</div>
+                <div class="cat-card-label">Nala / Sewage</div>
+              </div>
+              <div class="cat-card" data-cat="Burning garbage">
+                <div class="cat-card-icon">🔥</div>
+                <div class="cat-card-label">Burning</div>
+              </div>
+              <div class="cat-card" data-cat="Animal carcass">
+                <div class="cat-card-icon">🦴</div>
+                <div class="cat-card-label">Animal</div>
+              </div>
+              <div class="cat-card" data-cat="Medical waste">
+                <div class="cat-card-icon">🩺</div>
+                <div class="cat-card-label">Medical</div>
+              </div>
+              <div class="cat-card" data-cat="E-waste">
+                <div class="cat-card-icon">🔌</div>
+                <div class="cat-card-label">E-waste</div>
+              </div>
+              <div class="cat-card" data-cat="Mixed / general">
+                <div class="cat-card-icon">🗑️</div>
+                <div class="cat-card-label">Mixed</div>
+              </div>
+            </div>
 
-        <label class="field-label" style="margin-top: 1.5rem"
-          >Type of site <span class="opt">optional</span></label
-        >
-        <div class="tags-row">
-          <div class="tag" data-group="type">Road</div>
-          <div class="tag" data-group="type">Footpath</div>
-          <div class="tag" data-group="type">Nala / Drain</div>
-          <div class="tag" data-group="type">Open plot</div>
-          <div class="tag" data-group="type">Park</div>
-          <div class="tag" data-group="type">Market</div>
-          <div class="tag" data-group="type">Near school</div>
-          <div class="tag" data-group="type">Near hospital</div>
+            <label class="field-label" style="margin-top: 1rem"
+              >Severity <span class="opt">optional</span></label
+            >
+            <div class="tags-row">
+              <div class="tag" data-group="severity">Minor</div>
+              <div class="tag" data-group="severity">Moderate</div>
+              <div class="tag" data-group="severity">Severe</div>
+              <div class="tag" data-group="severity">Blocking road</div>
+            </div>
+
+            <label class="field-label" style="margin-top: 1rem"
+              >Notes <span class="opt">optional</span></label
+            >
+            <textarea
+              id="notes"
+              placeholder="Smell, duration, hazard, anything useful…"
+            ></textarea>
+            <button
+              class="step-next-btn"
+              onclick="nextStep('step-2', 'step-3')"
+            >
+              Next →
+            </button>
+          </div>
         </div>
 
-        <label class="field-label"
-          >Garbage type <span class="opt">optional</span></label
-        >
-        <div class="tags-row">
-          <div class="tag" data-group="garbage">Plastic</div>
-          <div class="tag" data-group="garbage">Food waste</div>
-          <div class="tag" data-group="garbage">Construction debris</div>
-          <div class="tag" data-group="garbage">Sewage</div>
-          <div class="tag" data-group="garbage">Burning garbage</div>
-          <div class="tag" data-group="garbage">Mixed / general</div>
+        <!-- Step 3: Photos -->
+        <div class="step" id="step-3">
+          <div class="step-head" onclick="toggleStep('step-3')">
+            <div class="step-num">3</div>
+            <div class="step-title">Photos</div>
+            <div class="step-check">✓</div>
+            <div class="step-arrow">▾</div>
+          </div>
+          <div class="step-body">
+            <div class="upload-area" id="upload-area">
+              <input type="file" id="photo-input" accept="image/*" multiple />
+              <div class="upload-icon">📷</div>
+              <p>Tap or drag to add photos</p>
+              <small>1 to 6 · JPG, PNG, WEBP</small>
+            </div>
+            <div
+              id="preview-grid"
+              class="preview-grid"
+              style="display: none"
+            ></div>
+            <div id="upload-count" class="upload-count"></div>
+          </div>
         </div>
-
-        <label class="field-label"
-          >Severity <span class="opt">optional</span></label
-        >
-        <div class="tags-row">
-          <div class="tag" data-group="severity">Minor</div>
-          <div class="tag" data-group="severity">Moderate</div>
-          <div class="tag" data-group="severity">Severe</div>
-          <div class="tag" data-group="severity">Blocking road</div>
-        </div>
-
-        <div class="divider"></div>
-
-        <label class="field-label" style="margin-top: 1.5rem"
-          >Notes <span class="opt">optional</span></label
-        >
-        <textarea
-          id="notes"
-          placeholder="Smell, duration, any hazard…"
-        ></textarea>
-
-        <label class="field-label">Photos <span class="req">*</span></label>
-        <div class="upload-area" id="upload-area">
-          <input type="file" id="photo-input" accept="image/*" multiple />
-          <div class="upload-icon">📷</div>
-          <p>Tap to add photos</p>
-          <small>1 to 6 · JPG, PNG, WEBP</small>
-        </div>
-        <div id="preview-grid" class="preview-grid" style="display: none"></div>
-        <div id="upload-count" class="upload-count"></div>
 
         <button class="submit-btn" onclick="submitReport()">
           Submit Report
@@ -788,10 +1145,10 @@
       </div>
 
       <div class="success-screen" id="success-screen">
-        <div class="success-icon">📍</div>
+        <div style="font-size: 2.5rem; margin-bottom: 1rem">📍</div>
         <h2>Pinned.</h2>
         <p>
-          Your report is on the map.<br />Share DumpSpot — more eyes, more
+          Your report is live on the map.<br />Share DumpSpot — more eyes, more
           pressure.
         </p>
         <button class="report-again" onclick="resetForm()">
@@ -801,10 +1158,31 @@
     </div>
 
     <script>
-      const selectedTags = { type: [], garbage: [], severity: [] };
+      // ── CATEGORY CONFIG ──
+      const CAT_ICONS = {
+        "Plastic waste": "🧴",
+        "Food waste": "🍱",
+        "Construction debris": "🧱",
+        "Nala / Sewage": "💧",
+        "Burning garbage": "🔥",
+        "Animal carcass": "🦴",
+        "Medical waste": "🩺",
+        "E-waste": "🔌",
+        "Mixed / general": "🗑️",
+      };
+
+      function getCatIcon(cats) {
+        if (!cats || !cats.length) return "📍";
+        return CAT_ICONS[cats[0]] || "🗑️";
+      }
+
+      // ── STATE ──
+      const selectedTags = { type: [], severity: [] };
+      const selectedCats = [];
       const files = [];
       let reports = [];
       let map, markersLayer;
+      let currentView = "map";
 
       const seedReports = [
         {
@@ -814,7 +1192,7 @@
           area: "Pune",
           specific: "FC Road near Goodluck Café",
           type: ["Road"],
-          garbage: ["Plastic", "Food waste"],
+          cats: ["Plastic waste", "Food waste"],
           severity: ["Moderate"],
           notes: "Overflowing since 3 days",
           photos: [],
@@ -829,7 +1207,7 @@
           area: "Bengaluru",
           specific: "Koramangala 5th Block drain",
           type: ["Nala / Drain"],
-          garbage: ["Sewage"],
+          cats: ["Nala / Sewage"],
           severity: ["Severe"],
           notes: "Black water on road",
           photos: [],
@@ -844,7 +1222,7 @@
           area: "Chennai",
           specific: "Anna Nagar market back lane",
           type: ["Market"],
-          garbage: ["Food waste", "Mixed / general"],
+          cats: ["Food waste", "Mixed / general"],
           severity: ["Moderate"],
           notes: "",
           photos: [],
@@ -859,7 +1237,7 @@
           area: "Shahdara",
           specific: "Near Govt school gate",
           type: ["Near school"],
-          garbage: ["Plastic"],
+          cats: ["Plastic waste"],
           severity: ["Minor"],
           notes: "Kids walk through this daily",
           photos: [],
@@ -874,7 +1252,7 @@
           area: "Hyderabad",
           specific: "Begumpet footpath",
           type: ["Footpath"],
-          garbage: ["Construction debris"],
+          cats: ["Construction debris"],
           severity: ["Blocking road"],
           notes: "Cannot walk",
           photos: [],
@@ -889,7 +1267,7 @@
           area: "Kolkata",
           specific: "Park Street side lane",
           type: ["Footpath"],
-          garbage: ["Mixed / general"],
+          cats: ["Mixed / general"],
           severity: ["Moderate"],
           notes: "",
           photos: [],
@@ -897,8 +1275,39 @@
           lng: 88.3554,
           date: "2026-03-16",
         },
+        {
+          id: 7,
+          reporter: "Kiran B.",
+          state: "Rajasthan",
+          area: "Jaipur",
+          specific: "Sindhi Camp bus stand back",
+          type: ["Road"],
+          cats: ["Burning garbage"],
+          severity: ["Severe"],
+          notes: "Burning since morning",
+          photos: [],
+          lat: 26.9124,
+          lng: 75.7873,
+          date: "2026-03-20",
+        },
+        {
+          id: 8,
+          reporter: "Meena T.",
+          state: "Gujarat",
+          area: "Ahmedabad",
+          specific: "Maninagar nala overflow",
+          type: ["Nala / Drain"],
+          cats: ["Nala / Sewage"],
+          severity: ["Severe"],
+          notes: "",
+          photos: [],
+          lat: 22.995,
+          lng: 72.6031,
+          date: "2026-03-19",
+        },
       ];
 
+      // ── PAGE SWITCH ──
       function switchPage(id) {
         document
           .querySelectorAll(".page")
@@ -909,11 +1318,12 @@
         document.getElementById(id).classList.add("active");
         document
           .querySelectorAll(".nav-tab")
-          [id === "map-page" ? 0 : 1].classList.add("active");
-        if (id === "map-page" && map)
+          [id === "feed-page" ? 0 : 1].classList.add("active");
+        if (id === "feed-page" && map)
           setTimeout(() => map.invalidateSize(), 50);
       }
 
+      // ── MAP INIT ──
       function initMap() {
         map = L.map("map", {
           zoomControl: true,
@@ -926,7 +1336,7 @@
         markersLayer = L.layerGroup().addTo(map);
         reports = [...seedReports];
         populateStateFilter();
-        renderMarkers(reports);
+        renderAll(reports);
       }
 
       function populateStateFilter() {
@@ -960,31 +1370,36 @@
           });
         if (prevArea) areaEl.value = prevArea;
         const area = areaEl.value;
-        const type = document.getElementById("filter-type").value;
         const final = reports.filter((r) => {
           if (state && r.state !== state) return false;
           if (area && r.area !== area) return false;
-          if (type && !r.type.includes(type)) return false;
           return true;
         });
-        renderMarkers(final);
+        renderAll(final);
       }
 
-      function makeIcon() {
+      function renderAll(data) {
+        document.getElementById("count-num").textContent = data.length;
+        renderMarkers(data);
+        renderList(data);
+      }
+
+      // ── MAP MARKERS ──
+      function makePin(icon) {
         return L.divIcon({
           className: "",
-          html: '<div class="dump-marker"><div class="dump-marker-inner">🗑</div></div>',
-          iconSize: [26, 26],
-          iconAnchor: [13, 26],
-          popupAnchor: [0, -28],
+          html: `<div class="dump-pin">${icon}</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -34],
         });
       }
 
       function renderMarkers(data) {
         markersLayer.clearLayers();
-        document.getElementById("count-num").textContent = data.length;
         data.forEach((r) => {
-          L.marker([r.lat, r.lng], { icon: makeIcon() })
+          const icon = getCatIcon(r.cats);
+          L.marker([r.lat, r.lng], { icon: makePin(icon) })
             .addTo(markersLayer)
             .bindPopup(buildPopup(r), { maxWidth: 280, minWidth: 240 });
         });
@@ -997,12 +1412,17 @@
                 .slice(0, 4)
                 .map((s) => `<img class="popup-photo" src="${s}">`)
                 .join("")}</div>`
-            : `<div class="popup-placeholder">📍</div>`;
-        const tags = [...r.type, ...r.garbage, ...r.severity].filter(Boolean);
+            : `<div class="popup-no-photo">${getCatIcon(r.cats)}</div>`;
+        const cats = (r.cats || [])
+          .map(
+            (c) =>
+              `<span class="popup-cat" title="${c}">${CAT_ICONS[c] || "🗑️"}</span>`,
+          )
+          .join("");
         return `<div>${top}<div class="popup-body">
     <div class="popup-location">${r.specific}</div>
     <div class="popup-area">${r.area}, ${r.state}</div>
-    ${tags.length ? `<div class="popup-tags">${tags.map((t) => `<span class="popup-tag">${t}</span>`).join("")}</div>` : ""}
+    ${cats ? `<div class="popup-cats">${cats}</div>` : ""}
     ${r.notes ? `<div class="popup-notes">${r.notes}</div>` : ""}
     <div class="popup-meta">
       <div class="popup-reporter">by ${r.reporter}</div>
@@ -1011,6 +1431,73 @@
   </div></div>`;
       }
 
+      // ── LIST VIEW ──
+      function renderList(data) {
+        const el = document.getElementById("list-inner");
+        if (!data.length) {
+          el.innerHTML =
+            '<div class="list-empty">No reports match this filter.</div>';
+          return;
+        }
+        el.innerHTML = data
+          .map((r) => {
+            const photoEl =
+              r.photos && r.photos.length
+                ? `<img src="${r.photos[0]}" style="width:100%;height:100%;object-fit:cover;">`
+                : `<span style="font-size:1.8rem;">${getCatIcon(r.cats)}</span>`;
+            const chips = (r.cats || [])
+              .map(
+                (c) =>
+                  `<span class="list-cat-chip"><span>${CAT_ICONS[c] || "🗑️"}</span><span>${c}</span></span>`,
+              )
+              .join("");
+            return `<div class="list-card">
+      <div class="list-card-photo">${photoEl}</div>
+      <div class="list-card-body">
+        <div class="list-card-location">${r.specific}</div>
+        <div class="list-card-area">${r.area}, ${r.state}</div>
+        <div class="list-card-cats">${chips}</div>
+        <div class="list-card-footer">
+          <div class="list-card-reporter">by ${r.reporter}</div>
+          <div class="list-card-date">${r.date}</div>
+        </div>
+      </div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      // ── VIEW TOGGLE ──
+      function setView(v) {
+        currentView = v;
+        document.getElementById("map-view").style.display =
+          v === "map" ? "flex" : "none";
+        document.getElementById("list-view").style.display =
+          v === "list" ? "block" : "none";
+        document
+          .getElementById("btn-map")
+          .classList.toggle("active", v === "map");
+        document
+          .getElementById("btn-list")
+          .classList.toggle("active", v === "list");
+        if (v === "map" && map) setTimeout(() => map.invalidateSize(), 50);
+      }
+
+      // ── STEP ACCORDION ──
+      function toggleStep(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle("open");
+      }
+      function nextStep(cur, next) {
+        document.getElementById(cur).classList.add("done");
+        document.getElementById(cur).classList.remove("open");
+        document.getElementById(next).classList.add("open");
+        document
+          .getElementById(next)
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ── TAG SELECTION ──
       document.querySelectorAll(".tag").forEach((tag) => {
         tag.addEventListener("click", () => {
           const g = tag.dataset.group;
@@ -1021,6 +1508,20 @@
         });
       });
 
+      // ── CAT CARD SELECTION ──
+      document.querySelectorAll(".cat-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          card.classList.toggle("active");
+          const v = card.dataset.cat;
+          if (card.classList.contains("active")) selectedCats.push(v);
+          else {
+            const i = selectedCats.indexOf(v);
+            if (i > -1) selectedCats.splice(i, 1);
+          }
+        });
+      });
+
+      // ── UPLOAD ──
       const uploadArea = document.getElementById("upload-area");
       const photoInput = document.getElementById("photo-input");
       const previewGrid = document.getElementById("preview-grid");
@@ -1081,6 +1582,7 @@
         uploadArea.style.pointerEvents = full ? "none" : "";
       }
 
+      // ── SUBMIT ──
       function submitReport() {
         const name = document.getElementById("reporter-name").value.trim();
         const state = document.getElementById("state").value.trim();
@@ -1101,7 +1603,7 @@
           area,
           specific,
           type: [...selectedTags.type],
-          garbage: [...selectedTags.garbage],
+          cats: [...selectedCats],
           severity: [...selectedTags.severity],
           notes: document.getElementById("notes").value.trim(),
           photos: files.map((f) => URL.createObjectURL(f)),
@@ -1129,17 +1631,37 @@
         document
           .querySelectorAll(".tag.active")
           .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".cat-card.active")
+          .forEach((c) => c.classList.remove("active"));
         Object.keys(selectedTags).forEach((k) => (selectedTags[k] = []));
+        selectedCats.length = 0;
         files.length = 0;
         renderPreviews();
         document.getElementById("form-screen").style.display = "";
         document.getElementById("success-screen").classList.remove("visible");
+        document.querySelectorAll(".step").forEach((s, i) => {
+          s.classList.remove("open", "done");
+          if (i === 0) s.classList.add("open");
+        });
         photoInput.disabled = false;
         uploadArea.style.opacity = "1";
         uploadArea.style.pointerEvents = "";
       }
 
-      window.addEventListener("load", initMap);
+      // ── MAP VIEW SIZING ──
+      function sizeMapView() {
+        const toolbar = document.querySelector(".feed-toolbar");
+        const h =
+          window.innerHeight - 52 - (toolbar ? toolbar.offsetHeight : 40);
+        document.getElementById("map-view").style.height = h + "px";
+        document.getElementById("list-view").style.height = h + "px";
+      }
+      window.addEventListener("resize", sizeMapView);
+      window.addEventListener("load", () => {
+        sizeMapView();
+        initMap();
+      });
     </script>
   </body>
 </html>
