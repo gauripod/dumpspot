@@ -1477,3 +1477,20 @@ textarea {
   font-size: .7rem !important;
   border-radius: var(--r) !important;
 }
+
+#pin-confirm-map .leaflet-container {
+  background: #0d140d;
+}
+
+#pin-confirm-map {
+  cursor: crosshair;
+}
+
+#pin-digipin {
+  font-family: var(--fm);
+  font-size: .55rem;
+  color: var(--mu);
+  margin-top: .35rem;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
