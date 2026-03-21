@@ -1,150 +1,91 @@
 # DumpSpot
 
-**Post your dump here.**
-A civic garbage-reporting tool. No accounts, no friction — a name, a location, a photo. Reports go live on the map immediately.
+A civic reporting tool for public hazards. See garbage, sewage overflow, road encroachment, burning waste, debris — pin it on the map. No account, no login. A name, a location, a photo.
+
+Built for India, works anywhere.
 
 ---
 
-## What's built
+## What it does
 
-**Feed — Map view**
+Anyone can open DumpSpot and file a report in under a minute. Reports appear live on a shared map. Every pin is a real location with photos, coordinates, and a timestamp. The more reports, the more pressure on civic bodies to act.
 
-- Interactive map, country-level default zoom, auto-centers to viewer's location via silent IP lookup
-- Category SVG pins per garbage type, popup with photo + details + link to full report
-- Filters by state, area, category — updates map and list simultaneously
+No accounts. No bureaucracy. Just evidence.
 
-**Feed — List view**
+---
 
-- Chronological grouping: Today / Yesterday / This Week / older by month
-- Alternating left/right headings per group
-- Row cards with location, area, category chips, reporter name, local timestamp
+## Features
+
+**Map feed**
+
+- Interactive map centered to your country on load — no permission asked, silent IP lookup
+- Each report is a category pin (garbage, sewage, fire, debris etc) with a popup showing photo, location, reporter, timestamp
+- Click any pin to open the full report
+- Filter by state, area, or garbage category — map and list update simultaneously
+
+**List feed**
+
+- Chronological view: Today / Yesterday / This Week / older months
+- Group headings alternate left and right
+- Each row shows location, area, category chips, reporter name, local time
+- Hover slides the row right with an underline crawl on the title
 
 **Report form**
 
-- 3-column layout on desktop, single column on mobile
-- Location autocomplete via Nominatim (OpenStreetMap), no API key required
-- 9 garbage category icon cards + type of site tags + severity tags
-- Photo upload — drag/drop, up to 6, auto-compressed to WebP 1280px 82% quality in browser before upload
+- Search location via autocomplete (OpenStreetMap Nominatim, no key required)
+- After picking a location, a draggable pin map appears — drag or tap to exact spot
+- DigiPin code shown live as pin moves (India only)
+- Plus Code shown live as pin moves (global)
+- Reverse geocode confirmation updates the location field as pin moves
+- 9 garbage category cards, type of site tags, severity tags
+- Notes field
+- Upload up to 6 photos — compressed to WebP 1280px 82% quality in browser before upload
+- State and area fields validated on blur — warns if you enter a city as a state or vice versa
+
+**Spam protection**
+
+- Text: abuse list (English + Hindi + Hinglish), gibberish detection, leet-speak bypass normalisation
+- Images: blank/solid colour blocked, low-detail blocked, illustration/artwork detected and warned, face detection via face-api.js
+- Warn-then-remove flow for images: first attempt warns, second attempt removes flagged photos automatically
 
 **Detail page**
 
-- Mirrors report form layout exactly
-- Mini map with location circle highlight
-- Report ID, submitted time in viewer's local timezone (original IST shown in brackets for non-India viewers)
+- Full report layout mirroring the form
+- Dark Leaflet mini-map with pink area highlight circle
+- Photos in a responsive grid
+- Report ID, timestamp in viewer's local timezone (IST shown in brackets for non-India viewers)
+
+**Timestamps**
+
+- Stored as UTC, displayed in viewer's local timezone
+- India viewers see IST
+- Everyone else sees their local time with `[IST]` in brackets
 
 ---
 
-## Stack
+## Pages
 
-| Layer           | What                                          |
-| --------------- | --------------------------------------------- |
-| Frontend        | HTML + CSS + JS — no framework, no build step |
-| Maps            | Leaflet.js v1.9.4                             |
-| Map tiles       | CartoDB Voyager                               |
-| Location search | Nominatim (OpenStreetMap)                     |
-| IP geolocation  | ipapi.co — silent, no prompt                  |
-| Fonts           | Playfair Display · Space Mono · DM Sans       |
-| Backend         | Postgres + object storage                     |
-| Hosting         | Netlify                                       |
+| Page   | Route                      | What it is                             |
+| ------ | -------------------------- | -------------------------------------- |
+| Feed   | default                    | Map + list toggle, filters, live count |
+| Report | + Report tab               | Form to file a new report              |
+| Detail | opens from pin or list row | Full report view with mini-map         |
 
 ---
 
-## Design system
+## How it's built
 
-### Palette
+No framework. No build step. Three files that run directly in a browser.
 
-```
---bg    #070c07   base
---s1    #0d140d   nav / card surface
---s2    #111a11   inputs / fields
---b1    #1a2a1a   border subtle
---b2    #243624   border default
---b3    #2e452e   border emphasis
---tx    #ddeedd   text primary
---mu    #527052   text muted
---fa    #2e422e   text faint
---pk    #ff2d78   accent pink
-```
+- `index.html` — all markup, page structure, script imports
+- `style.css` — all styles, design tokens, layout, components
+- `app.js` — all logic: map, list, form, upload, submit, spam checks, location encoding
+- `config.js` — credentials only, gitignored, never pushed
+- `build.js` — Node script run at deploy time, generates `config.js` from env vars
+- `netlify.toml` — one line: `node build.js`
+- `favicon.svg` — fairy with a trash bag
 
-### Typography
-
-| Role                              | Font             | Style     |
-| --------------------------------- | ---------------- | --------- |
-| Logo · headings · submit button   | Playfair Display | Italic    |
-| Labels · tags · meta · timestamps | Space Mono       | Regular   |
-| Body · inputs                     | DM Sans          | 400 / 500 |
-
-### Section label colors
-
-- Location / Notes → `#6a9a8a`
-- Type of site → `#8a7a4a`
-- Severity → `#8a5a6a`
-- Garbage category → `#4a7a8a`
-
----
-
-## Files
-
-```
-index.html       markup + script imports
-style.css        all styles
-app.js           all logic
-config.js        credentials — gitignored, never pushed
-favicon.svg      bin icon
-netlify.toml     build command
-.gitignore
-```
-
----
-
-## Database schema
-
-Two tables:
-
-```sql
-create table reports (
-  id          text primary key,
-  reporter    text not null,
-  state       text not null,
-  area        text not null,
-  specific    text not null,
-  type        text[],
-  cats        text[],
-  sev         text[],
-  notes       text,
-  lat         float8,
-  lng         float8,
-  ts          timestamptz default now()
-);
-
-create table report_photos (
-  id          uuid primary key default gen_random_uuid(),
-  report_id   text references reports(id) on delete cascade,
-  url         text not null,
-  position    int
-);
-```
----
-
-## Config
-
-`config.js` — create locally, never commit:
-
-```js
-const DB_URL = "your_db_url";
-const DB_KEY = "your_publishable_key";
-const LOCK_INSPECT_ENV = false;
-```
-
-Set `LOCK_INSPECT_ENV = true` on production to disable right-click and devtools.
-
-### Netlify env vars
-
-- `DB_URL`
-- `DB_KEY`
-- `LOCK_INSPECT_ENV` → `true`
-
-`netlify.toml` generates `config.js` from these at build time.
+Everything loads from CDN. No npm, no bundler, no local install required.
 
 ---
 
@@ -152,22 +93,48 @@ Set `LOCK_INSPECT_ENV = true` on production to disable right-click and devtools.
 
 ```bash
 python3 -m http.server 8080
+# or
+npx serve .
 ```
 
-Open `http://localhost:8080`.
+Open `http://localhost:8080`. Make sure `config.js` has your real credentials.
 
 ---
 
-## Report ID format
+## Deploying
 
-`DS-YYYYMMDD-HHMMSS-XXXX` — date, time, 4-char hex. Unique, immutable, shown on success screen and detail page.
+1. Push `index.html`, `style.css`, `app.js`, `build.js`, `netlify.toml`, `favicon.svg` to GitHub
+2. Connect repo to Netlify
+3. Set environment variables in Netlify → Site settings → Environment variables:
+   - `DB_URL` — your database project URL
+   - `DB_KEY` — your publishable API key
+   - `LOCK_INSPECT_ENV` — `true` (disables devtools on production)
+4. Deploy — Netlify runs `node build.js`, generates `config.js`, serves the site
+
+---
+
+## Config
+
+`config.js` — create locally, never commit:
+
+```js
+const DB_URL = "https://your-project.example.com";
+const DB_KEY = "your_publishable_key";
+const LOCK_INSPECT_ENV = false;
+```
+
+---
+
+## Report ID
+
+Every report gets `DS-YYYYMMDD-HHMMSS-XXXX` — date, time, 4-char hex. Immutable after creation. Shown on success screen and detail page.
 
 ---
 
 ## What's not built yet
 
-- No auth — reporter name is a plain text field
-- No report moderation or flagging
-- No map clustering for dense areas
+- No authentication — reporter name is a plain text field
+- No moderation dashboard or report flagging
+- No map clustering for dense report areas
 - No editing or deleting reports after submit
-- Coordinates fall back to random if location is typed manually without selecting from autocomplete
+- No push notifications for new reports near a location
