@@ -222,8 +222,10 @@ function initMap() {
 }
 
 async function locateUser() {
+  const isLocal =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1";
   const providers = [
-    {
+    !isLocal && {
       url: "https://ipapi.co/json/",
       parse: (d) => ({ lat: d.latitude, lng: d.longitude }),
     },
@@ -234,7 +236,7 @@ async function locateUser() {
         lng: parseFloat(d.longitude),
       }),
     },
-  ];
+  ].filter(Boolean);
   for (const p of providers) {
     try {
       const res = await fetch(p.url);
