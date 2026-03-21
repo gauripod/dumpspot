@@ -1195,6 +1195,32 @@ const ABUSE = [
   "sala kutta",
   "suar",
   "suwar",
+  "shiz",
+  "shiit",
+  "fuuk",
+  "fuk",
+  "fck",
+  "azz",
+  "a55",
+  "b1tch",
+  "fvck",
+  "wtf",
+  "wth",
+  "shut up",
+  "shutup",
+  "idgaf",
+  "idfc",
+  "stfu",
+  "gtfo",
+  "kys",
+  "tf",
+  "bs",
+  "pos",
+  "nonsense",
+  "rubbish",
+  "this is stupid",
+  "not real",
+  "doesnt exist",
 ];
 
 const GIBBERISH_PATTERNS = [
@@ -1251,11 +1277,11 @@ function checkTextSpam(name, state, area, specific, notes) {
   if (notes) {
     const notesAbuse = containsAbuse(notes);
     if (notesAbuse) errors.push("notes contain inappropriate language");
-    const noteWords = notes.trim().split(/s+/);
-    const gibWords = noteWords.filter((w) => w.length > 3 && isGibberish(w));
-    if (gibWords.length >= 2)
+    const noteWords = notes.trim().split(/\s+/);
+    const gibWords = noteWords.filter((w) => w.length > 2 && isGibberish(w));
+    if (gibWords.length >= 1)
       errors.push(
-        "notes appear to contain gibberish — please describe the issue clearly",
+        "notes appear to contain gibberish — please describe what you see clearly",
       );
   }
   return errors;
@@ -1319,10 +1345,15 @@ async function analyseImage(file) {
       }
       const avgSat =
         saturations.reduce((a, b) => a + b, 0) / saturations.length;
-      const highSatPx = saturations.filter((s) => s > 0.7).length / total;
-      if (avgSat > 0.45 && highSatPx > 0.35 && variance > 500) {
+      const highSatPx = saturations.filter((s) => s > 0.6).length / total;
+      const veryHighSatPx = saturations.filter((s) => s > 0.85).length / total;
+      const lowSatPx = saturations.filter((s) => s < 0.1).length / total;
+      const isIllustration =
+        (avgSat > 0.38 && highSatPx > 0.28 && variance > 300) ||
+        (veryHighSatPx > 0.25 && lowSatPx > 0.3);
+      if (isIllustration) {
         issues.push(
-          "photo looks like an illustration or screenshot — please upload a real photo of the location",
+          "photo looks like an illustration or artwork — please upload a real photo of the location",
         );
       }
       resolve({ ok: issues.length === 0, issues: issues });
@@ -1337,33 +1368,44 @@ async function analyseImage(file) {
 
 let faceApiReady = false;
 async function loadFaceApi() {
-  if (faceApiReady || typeof faceapi === "undefined") return;
+  if (faceApiReady || typeof faceapi === "undefined") return false;
   try {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(
-      "https://justadudewhohacks.github.io/face-api.js/models",
-    );
+    await Promise.race([
+      faceapi.nets.tinyFaceDetector.loadFromUri(
+        "https://justadudewhohacks.github.io/face-api.js/models",
+      ),
+      new Promise((_, rej) =>
+        setTimeout(() => rej(new Error("timeout")), 8000),
+      ),
+    ]);
     faceApiReady = true;
-  } catch (e) {}
+    return true;
+  } catch (e) {
+    console.warn("[DumpSpot] face-api models failed to load:", e.message);
+    return false;
+  }
 }
 
 async function checkFaceInImage(file) {
   if (typeof faceapi === "undefined") return { ok: true };
-  await loadFaceApi();
-  if (!faceApiReady) return { ok: true };
+  const loaded = await loadFaceApi();
+  if (!loaded) return { ok: true };
   try {
     const img = await faceapi.bufferToImage(file);
     const det = await faceapi.detectAllFaces(
       img,
-      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.55 }),
+      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.45 }),
     );
     if (det.length > 0)
       return {
         ok: false,
         issues: [
-          "photo appears to show a person — please upload a photo of the spot, not people",
+          "photo appears to show a person — please upload a photo of the location, not people",
         ],
       };
-  } catch (e) {}
+  } catch (e) {
+    console.warn("[DumpSpot] face detection error:", e.message);
+  }
   return { ok: true };
 }
 
