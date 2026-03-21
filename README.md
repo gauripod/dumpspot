@@ -1,25 +1,51 @@
 # DumpSpot
 
-**Post your dump here.**  
-A civic garbage-reporting tool. No accounts, no friction — a name, a location, a photo.
+**Post your dump here.**
+A civic garbage-reporting tool. No accounts, no friction — a name, a location, a photo. Reports go live on the map immediately.
 
 ---
 
-## What this is
+## What's built
 
-DumpSpot lets anyone pin a garbage spot on a map. People report what they see: a burning heap on the road, a blocked nala, plastic dumped near a school. Reports show up on a live map and a filterable list. The goal is visibility — more reports, more pressure on civic bodies to act.
+**Feed — Map view**
+
+- Interactive map, country-level default zoom, auto-centers to viewer's location via silent IP lookup
+- Category SVG pins per garbage type, popup with photo + details + link to full report
+- Filters by state, area, category — updates map and list simultaneously
+
+**Feed — List view**
+
+- Chronological grouping: Today / Yesterday / This Week / older by month
+- Alternating left/right headings per group
+- Row cards with location, area, category chips, reporter name, local timestamp
+
+**Report form**
+
+- 3-column layout on desktop, single column on mobile
+- Location autocomplete via Nominatim (OpenStreetMap), no API key required
+- 9 garbage category icon cards + type of site tags + severity tags
+- Photo upload — drag/drop, up to 6, auto-compressed to WebP 1280px 82% quality in browser before upload
+
+**Detail page**
+
+- Mirrors report form layout exactly
+- Mini map with location circle highlight
+- Report ID, submitted time in viewer's local timezone (original IST shown in brackets for non-India viewers)
 
 ---
 
-## Tech stack
+## Stack
 
-| Layer          | Tool                                          | Why                                        |
-| -------------- | --------------------------------------------- | ------------------------------------------ |
-| Frontend       | Vanilla HTML/CSS/JS                           | No build step, no framework, runs anywhere |
-| Maps           | [Leaflet.js](https://leafletjs.com/) v1.9.4   | Open source, lightweight, works offline    |
-| Map tiles      | OpenStreetMap standard                        | Free, English labels, neutral grey         |
-| Fonts          | Google Fonts (Unbounded, Space Mono, DM Sans) |                                            |
-| Backend (next) | [Supabase](https://supabase.com)              | Postgres + Storage + Auth, free tier       |
+| Layer           | What                                          |
+| --------------- | --------------------------------------------- |
+| Frontend        | HTML + CSS + JS — no framework, no build step |
+| Maps            | Leaflet.js v1.9.4                             |
+| Map tiles       | CartoDB Voyager                               |
+| Location search | Nominatim (OpenStreetMap)                     |
+| IP geolocation  | ipapi.co — silent, no prompt                  |
+| Fonts           | Playfair Display · Space Mono · DM Sans       |
+| Backend         | Postgres + object storage                     |
+| Hosting         | Netlify                                       |
 
 ---
 
@@ -28,88 +54,56 @@ DumpSpot lets anyone pin a garbage spot on a map. People report what they see: a
 ### Palette
 
 ```
---bg   #07090a   Near-black with a hint of blue-grey (base)
---s1   #0e1114   Surface 1 (nav, cards)
---s2   #141820   Surface 2 (inputs, thumbnails)
---s3   #1a1f28   Surface 3 (dark fills)
---b1   #1e2530   Border subtle
---b2   #28333f   Border default
---b3   #334050   Border emphasis
---tx   #dde4ee   Text primary
---mu   #5a6878   Text muted
---fa   #303b48   Text faint / placeholder
---pk   #ff2d78   Accent — neon pink (logos, highlights, CTAs only)
+--bg    #070c07   base
+--s1    #0d140d   nav / card surface
+--s2    #111a11   inputs / fields
+--b1    #1a2a1a   border subtle
+--b2    #243624   border default
+--b3    #2e452e   border emphasis
+--tx    #ddeedd   text primary
+--mu    #527052   text muted
+--fa    #2e422e   text faint
+--pk    #ff2d78   accent pink
 ```
 
 ### Typography
 
-| Role                       | Font       | Weight  | Size        |
-| -------------------------- | ---------- | ------- | ----------- |
-| Logo, page titles          | Unbounded  | 900     | 1–2.1rem    |
-| Labels, tags, dates, meta  | Space Mono | 400/700 | 0.56–0.7rem |
-| Body, inputs, descriptions | DM Sans    | 400/500 | 0.82–0.9rem |
+| Role                              | Font             | Style     |
+| --------------------------------- | ---------------- | --------- |
+| Logo · headings · submit button   | Playfair Display | Italic    |
+| Labels · tags · meta · timestamps | Space Mono       | Regular   |
+| Body · inputs                     | DM Sans          | 400 / 500 |
 
-### Interaction rules
+### Section label colors
 
-- **Hover**: border lifts from `--b1` → `--b2`, no background flash
-- **Selected / active**: `--pk10` background + `--pk35` border
-- **Focus ring**: `box-shadow: 0 0 0 3px var(--pk10)`
-- **Button press**: `scale(0.99)` on primary buttons only
-- **Pink glow**: only on the submit button and the logo title — nowhere else
-
-### Icons
-
-All icons are inline SVG, `stroke="currentColor"`, `fill="none"`, `stroke-width="1.5"`.
-
-| Category               | Icon shape       |
-| ---------------------- | ---------------- |
-| Plastic / Food / Mixed | Bin (trash can)  |
-| Burning garbage        | Flame            |
-| Nala / Sewage          | Water drop       |
-| Construction debris    | Brick stack      |
-| E-waste                | Bolt / lightning |
-| Medical waste          | Cross            |
-| Animal waste           | Bone             |
+- Location / Notes → `#6a9a8a`
+- Type of site → `#8a7a4a`
+- Severity → `#8a5a6a`
+- Garbage category → `#4a7a8a`
 
 ---
 
-## File structure
+## Files
 
 ```
-dumpspot/
-├── index.html      # Shell: nav, all page containers, script/style imports
-├── global.css      # Design tokens, reset, nav, shared components (tags, chips, buttons)
-├── feed.css        # Feed page: toolbar, map pins, popups, list cards
-├── report.css      # Report page: step accordion, upload area
-├── detail.css      # Detail page: photo grid, report layout
-├── main.js         # Icons, categories, seed data, page routing, anti-copy
-├── feed.js         # Map init, markers, list render, filters, view toggle
-├── detail.js       # renderDetail() — builds the full report view
-└── report.js       # Steps, tags, category cards, upload, submit, reset
+index.html       markup + script imports
+style.css        all styles
+app.js           all logic
+config.js        credentials — gitignored, never pushed
+favicon.svg      bin icon
+netlify.toml     build command
+.gitignore
 ```
 
-**Load order in index.html**: `main.js` → `detail.js` → `feed.js` → `report.js`  
-(main.js must be first — everything else depends on `ICONS`, `CATS`, `reports`, `goPage`)
-
 ---
 
-## What's mocked right now
+## Database schema
 
-- `reports` array in `main.js` is in-memory seed data
-- Photos are `blob:` URLs (created from local files, gone on refresh)
-- `lat/lng` on new submissions are random (near India)
-- No persistence — refresh = back to seed data
-
----
-
-## Supabase integration (next step)
-
-### Tables needed
+Two tables:
 
 ```sql
--- reports
 create table reports (
-  id          uuid primary key default gen_random_uuid(),
+  id          text primary key,
   reporter    text not null,
   state       text not null,
   area        text not null,
@@ -120,40 +114,60 @@ create table reports (
   notes       text,
   lat         float8,
   lng         float8,
-  created_at  timestamptz default now()
+  ts          timestamptz default now()
 );
 
--- photos (linked to reports)
-create table photos (
+create table report_photos (
   id          uuid primary key default gen_random_uuid(),
-  report_id   uuid references reports(id) on delete cascade,
+  report_id   text references reports(id) on delete cascade,
   url         text not null,
-  created_at  timestamptz default now()
+  position    int
 );
 ```
+---
 
-### Storage bucket
+## Config
 
-- Bucket name: `report-photos`
-- Public read access: yes
-- Upload via: `supabase.storage.from('report-photos').upload(path, file)`
+`config.js` — create locally, never commit:
 
-### What to swap in code
+```js
+const DB_URL = "your_db_url";
+const DB_KEY = "your_publishable_key";
+const LOCK_INSPECT_ENV = false;
+```
 
-1. **`main.js`** — replace `SEED` fetch with `supabase.from('reports').select('*, photos(*)')`
-2. **`report.js` `submitReport()`** — POST to `reports` table, upload photos to storage, insert rows into `photos`
-3. **`feed.js` `buildStateFilter()`** — derive states from live data instead of seed
+Set `LOCK_INSPECT_ENV = true` on production to disable right-click and devtools.
+
+### Netlify env vars
+
+- `DB_URL`
+- `DB_KEY`
+- `LOCK_INSPECT_ENV` → `true`
+
+`netlify.toml` generates `config.js` from these at build time.
 
 ---
 
-## Anti-copy
+## Running locally
 
-Right-click, Ctrl+U, Ctrl+S, Ctrl+A, and F12 are blocked via JS in `main.js`.  
-Text selection is disabled globally via CSS (`user-select: none`) except in form inputs.
+```bash
+python3 -m http.server 8080
+```
+
+Open `http://localhost:8080`.
 
 ---
 
-## Notes
+## Report ID format
 
-- Map tiles are from OpenStreetMap, English labels only. Language switching is not implemented yet — planned for a later version.
-- Coordinates for new reports are currently randomised. Real implementation needs either browser geolocation (`navigator.geolocation`) or a geocoding API (Nominatim is free, no key needed).
+`DS-YYYYMMDD-HHMMSS-XXXX` — date, time, 4-char hex. Unique, immutable, shown on success screen and detail page.
+
+---
+
+## What's not built yet
+
+- No auth — reporter name is a plain text field
+- No report moderation or flagging
+- No map clustering for dense areas
+- No editing or deleting reports after submit
+- Coordinates fall back to random if location is typed manually without selecting from autocomplete

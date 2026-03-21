@@ -13,7 +13,7 @@ if (LOCK_INSPECT) {
   });
 }
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window._db.createClient(DB_URL, DB_KEY);
 
 function maybeShowWelcome() {
   if (sessionStorage.getItem("ds_welcomed")) return;
@@ -205,7 +205,7 @@ function setFeedLoading(on) {
 function initMap() {
   map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView(
     [20.5937, 78.9629],
-    5,
+    3,
   );
   L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
@@ -222,14 +222,29 @@ function initMap() {
 }
 
 async function locateUser() {
-  try {
-    const res = await fetch("https://ipapi.co/json/");
-    const data = await res.json();
-    if (data && data.latitude && data.longitude) {
-      map.setView([data.latitude, data.longitude], 10);
-    }
-  } catch (e) {
-    // silent — map stays on India default
+  const providers = [
+    {
+      url: "https://ipapi.co/json/",
+      parse: (d) => ({ lat: d.latitude, lng: d.longitude }),
+    },
+    {
+      url: "https://get.geojs.io/v1/ip/geo.json",
+      parse: (d) => ({
+        lat: parseFloat(d.latitude),
+        lng: parseFloat(d.longitude),
+      }),
+    },
+  ];
+  for (const p of providers) {
+    try {
+      const res = await fetch(p.url);
+      const data = await res.json();
+      const loc = p.parse(data);
+      if (loc.lat && loc.lng && !isNaN(loc.lat) && !isNaN(loc.lng)) {
+        map.setView([loc.lat, loc.lng], 4);
+        return;
+      }
+    } catch (e) {}
   }
 }
 
@@ -731,16 +746,16 @@ async function submitReport() {
     for (let i = 0; i < upFiles.length; i++) {
       const file = upFiles[i];
       const path = `${id}/${i + 1}.webp`;
-      const { error: upErr } = await sb.storage
+      const { error: upErr } = await db.storage
         .from("report-photos")
         .upload(path, file, { contentType: "image/webp", upsert: false });
       if (upErr) throw upErr;
-      const { data: urlData } = sb.storage
+      const { data: urlData } = db.storage
         .from("report-photos")
         .getPublicUrl(path);
       photoUrls.push({ url: urlData.publicUrl, position: i + 1 });
     }
-    const { error: repErr } = await sb.from("reports").insert({
+    const { error: repErr } = await db.from("reports").insert({
       id,
       reporter: name,
       state,
@@ -750,20 +765,18 @@ async function submitReport() {
       cats: selCats,
       sev: selTags.sev,
       notes: document.getElementById("rnotes").value.trim(),
-      lat: locLat !== null ? locLat : 20.5937 + (Math.random() - 0.5) * 14,
-      lng: locLng !== null ? locLng : 78.9629 + (Math.random() - 0.5) * 14,
+      lat: resolvedLat,
+      lng: resolvedLng,
       ts: new Date().toISOString(),
     });
     if (repErr) throw repErr;
-    const { error: photoErr } = await sb
-      .from("report_photos")
-      .insert(
-        photoUrls.map((p) => ({
-          report_id: id,
-          url: p.url,
-          position: p.position,
-        })),
-      );
+    const { error: photoErr } = await db.from("report_photos").insert(
+      photoUrls.map((p) => ({
+        report_id: id,
+        url: p.url,
+        position: p.position,
+      })),
+    );
     if (photoErr) throw photoErr;
     await fetchReports();
     document.getElementById("form-screen").style.display = "none";

@@ -1,3 +1,3 @@
 [build]
-  command = "printf \"const SUPABASE_URL='%s';\\nconst SUPABASE_KEY='%s';\\nconst LOCK_INSPECT_ENV=%s;\" \"$SUPABASE_URL\" \"$SUPABASE_KEY\" \"${LOCK_INSPECT_ENV:-true}\" > config.js"
+  command = "printf \"const DB_URL='%s';\\nconst DB_KEY='%s';\\nconst LOCK_INSPECT_ENV=%s;\" \"$DB_URL\" \"$DB_KEY\" \"${LOCK_INSPECT_ENV:-false}\" > config.js"
   publish = "."
