@@ -960,9 +960,27 @@ function encodeDigipin(lat, lng) {
 }
 
 function encodePlusCode(lat, lng) {
-  if (typeof OpenLocationCode === "undefined") return null;
   try {
-    return OpenLocationCode.encode(lat, lng, 10);
+    const A = "23456789CFGHJMPQRVWX";
+    const BASE = 20;
+    lat = Math.max(-90, Math.min(90, lat));
+    lng = Math.max(-180, Math.min(180, lng));
+    if (lat === 90) lat -= 1e-7;
+    const latV = Math.floor((lat + 90) * 8000);
+    const lngV = Math.floor((lng + 180) * 8000);
+    let latCode = "",
+      lngCode = "";
+    let av = latV,
+      lv = lngV;
+    for (let i = 0; i < 5; i++) {
+      latCode = A[av % BASE] + latCode;
+      av = Math.floor(av / BASE);
+      lngCode = A[lv % BASE] + lngCode;
+      lv = Math.floor(lv / BASE);
+    }
+    let code = "";
+    for (let i = 0; i < 5; i++) code += latCode[i] + lngCode[i];
+    return code.slice(0, 8) + "+" + code.slice(8, 13);
   } catch (e) {
     return null;
   }
