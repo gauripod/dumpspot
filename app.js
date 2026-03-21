@@ -13,7 +13,15 @@ if (LOCK_INSPECT) {
   });
 }
 
-const db = window._db.createClient(DB_URL, DB_KEY);
+let db = null;
+function getDb() {
+  if (!db)
+    db = window._db.createClient(
+      window.DB_URL || DB_URL,
+      window.DB_KEY || DB_KEY,
+    );
+  return db;
+}
 
 function maybeShowWelcome() {
   if (sessionStorage.getItem("ds_welcomed")) return;
@@ -177,7 +185,7 @@ function openDetail(id) {
 async function fetchReports() {
   setFeedLoading(true);
   try {
-    const { data, error } = await sb
+    const { data, error } = await getDb()
       .from("reports")
       .select("*, report_photos(url, position)")
       .order("ts", { ascending: false });
@@ -583,6 +591,7 @@ function pickLoc(name, lat, lng) {
   const box = document.getElementById("loc-results");
   box.classList.remove("open");
   box.innerHTML = "";
+  initPinMap(locLat, locLng);
 }
 
 function openGoogleMaps() {
@@ -650,6 +659,7 @@ function compressImage(file) {
 }
 
 const upFiles = [];
+const flaggedImageIndices = new Set();
 
 function initUpload() {
   const ua = document.getElementById("uparea"),
@@ -729,56 +739,140 @@ async function submitReport() {
     toast("Add at least one photo.", true);
     return;
   }
+
+  const notes = document.getElementById("rnotes").value.trim();
+  const textErrors = checkTextSpam(name, state, area, specific, notes);
+  if (textErrors.length > 0) {
+    textErrors.forEach((msg) => toast(msg, true));
+    return;
+  }
   if (looksLikeAbbr(document.getElementById("rstate").value.trim()))
     toast(
-      "Looks like an abbreviation for state — consider writing the full name.",
-      false,
+      "State looks like an abbreviation — write the full state name.",
+      true,
     );
   if (looksLikeAbbr(document.getElementById("rarea").value.trim()))
-    toast(
-      "Looks like an abbreviation for area — consider writing the full name.",
-      false,
-    );
+    toast("Area looks like an abbreviation — write the full area name.", true);
+
   const btn = document.querySelector(".sub-btn");
-  btn.textContent = "Uploading…";
+
+  btn.textContent = "Checking photos…";
   btn.disabled = true;
+  const imgResults = await checkAllImages(upFiles);
+  const newFlags = imgResults.filter(
+    (r) => !flaggedImageIndices.has(r.index - 1),
+  );
+  if (newFlags.length > 0) {
+    newFlags.forEach((r) => {
+      flaggedImageIndices.add(r.index - 1);
+      toast(
+        "Photo " +
+          r.index +
+          ": " +
+          r.issues[0] +
+          " — remove it or submit again to override.",
+        true,
+      );
+    });
+    btn.textContent = "Submit Report";
+    btn.disabled = false;
+    return;
+  }
+  if (flaggedImageIndices.size > 0) {
+    const stillFlagged = [...flaggedImageIndices].filter(
+      (i) => i < upFiles.length,
+    );
+    if (stillFlagged.length > 0) {
+      stillFlagged
+        .slice()
+        .reverse()
+        .forEach((i) => {
+          upFiles.splice(i, 1);
+          flaggedImageIndices.delete(i);
+        });
+      renderPreviews();
+      toast("Flagged photos removed. Submitting remaining photos.", false);
+    }
+  }
+  if (!upFiles.length) {
+    toast("No valid photos remaining. Please add at least one.", true);
+    btn.textContent = "Submit Report";
+    btn.disabled = false;
+    return;
+  }
+
+  btn.textContent = "Uploading…";
   try {
     const id = genId();
     const photoUrls = [];
     for (let i = 0; i < upFiles.length; i++) {
       const file = upFiles[i];
       const path = `${id}/${i + 1}.webp`;
-      const { error: upErr } = await db.storage
-        .from("report-photos")
+      const { error: upErr } = await getDb()
+        .storage.from("report-photos")
         .upload(path, file, { contentType: "image/webp", upsert: false });
       if (upErr) throw upErr;
-      const { data: urlData } = db.storage
-        .from("report-photos")
+      const { data: urlData } = getDb()
+        .storage.from("report-photos")
         .getPublicUrl(path);
       photoUrls.push({ url: urlData.publicUrl, position: i + 1 });
     }
-    const { error: repErr } = await db.from("reports").insert({
-      id,
-      reporter: name,
-      state,
-      area,
-      specific,
-      type: selTags.type,
-      cats: selCats,
-      sev: selTags.sev,
-      notes: document.getElementById("rnotes").value.trim(),
-      lat: resolvedLat,
-      lng: resolvedLng,
-      ts: new Date().toISOString(),
-    });
+    let resolvedLat = locLat;
+    let resolvedLng = locLng;
+    if (resolvedLat === null || resolvedLng === null) {
+      const query = [specific, area, state].filter(Boolean).join(", ");
+      try {
+        const gRes = await fetch(
+          "https://nominatim.openstreetmap.org/search?q=" +
+            encodeURIComponent(query) +
+            "&format=json&limit=1&accept-language=en",
+        );
+        const gData = await gRes.json();
+        if (gData && gData.length) {
+          resolvedLat = parseFloat(gData[0].lat);
+          resolvedLng = parseFloat(gData[0].lon);
+        }
+      } catch (e) {}
+    }
+    if (resolvedLat === null || resolvedLng === null) {
+      toast(
+        "Could not determine coordinates — please search and select your location from the dropdown.",
+        true,
+      );
+      btn.textContent = "Submit Report";
+      btn.disabled = false;
+      return;
+    }
+    if (!locLat || !locLng) initPinMap(resolvedLat, resolvedLng);
+    const codes = getLocationCode(resolvedLat, resolvedLng);
+    const { error: repErr } = await getDb()
+      .from("reports")
+      .insert({
+        id,
+        reporter: name,
+        state,
+        area,
+        specific,
+        type: selTags.type,
+        cats: selCats,
+        sev: selTags.sev,
+        notes: document.getElementById("rnotes").value.trim(),
+        lat: resolvedLat,
+        lng: resolvedLng,
+        digipin: codes.digipin || null,
+        pluscode: codes.pluscode || null,
+        ts: new Date().toISOString(),
+      });
     if (repErr) throw repErr;
-    const { error: photoErr } = await db.from("report_photos").insert(
-      photoUrls.map((p) => ({
-        report_id: id,
-        url: p.url,
-        position: p.position,
-      })),
-    );
+    const { error: photoErr } = await getDb()
+      .from("report_photos")
+      .insert(
+        photoUrls.map((p) => ({
+          report_id: id,
+          url: p.url,
+          position: p.position,
+        })),
+      );
     if (photoErr) throw photoErr;
     await fetchReports();
     document.getElementById("form-screen").style.display = "none";
@@ -805,6 +899,16 @@ function resetForm() {
   upFiles.length = 0;
   locLat = null;
   locLng = null;
+  flaggedImageIndices.clear();
+  const pw = document.getElementById("pin-confirm-wrap");
+  if (pw) pw.style.display = "none";
+  if (pinMap) {
+    try {
+      pinMap.remove();
+    } catch (e) {}
+    pinMap = null;
+    pinMarker = null;
+  }
   renderPreviews();
   document.getElementById("form-screen").style.display = "";
   document.getElementById("succ").classList.remove("on");
@@ -827,3 +931,449 @@ window.addEventListener("load", () => {
   maybeShowWelcome();
 });
 window.addEventListener("resize", sizeViews);
+const DP_CHARS = "FCJ9RELEEBEMG8D7VT6KH5LNQP4SZ3Y2X1W0";
+
+function encodeDigipin(lat, lng) {
+  if (lat < 2.5 || lat > 38.5 || lng < 63.5 || lng > 99.5) return null;
+  const ROWS = 4,
+    COLS = 4;
+  let minLat = 2.5,
+    maxLat = 38.5,
+    minLng = 63.5,
+    maxLng = 99.5;
+  let pin = "";
+  for (let level = 0; level < 8; level++) {
+    const dLat = (maxLat - minLat) / ROWS;
+    const dLng = (maxLng - minLng) / COLS;
+    const row = Math.min(ROWS - 1, Math.floor((lat - minLat) / dLat));
+    const col = Math.min(COLS - 1, Math.floor((lng - minLng) / dLng));
+    const gridRow = ROWS - 1 - row;
+    const charIdx = gridRow * COLS + col;
+    pin += DP_CHARS[charIdx];
+    minLat = minLat + row * dLat;
+    maxLat = minLat + dLat;
+    minLng = minLng + col * dLng;
+    maxLng = minLng + dLng;
+    if (level === 2 || level === 5) pin += "-";
+  }
+  return pin;
+}
+
+function encodePlusCode(lat, lng) {
+  if (typeof OpenLocationCode === "undefined") return null;
+  try {
+    return OpenLocationCode.encode(lat, lng, 10);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getLocationCode(lat, lng) {
+  const dp = encodeDigipin(lat, lng);
+  const pc = encodePlusCode(lat, lng);
+  return { digipin: dp, pluscode: pc };
+}
+
+let pinMap = null,
+  pinMarker = null,
+  revGeoTimer = null;
+
+function initPinMap(lat, lng) {
+  const wrap = document.getElementById("pin-confirm-wrap");
+  wrap.style.display = "block";
+  if (pinMap) {
+    try {
+      pinMap.remove();
+    } catch (e) {}
+    pinMap = null;
+    pinMarker = null;
+  }
+  setTimeout(() => {
+    pinMap = L.map("pin-confirm-map", {
+      zoomControl: true,
+      scrollWheelZoom: false,
+    }).setView([lat, lng], 16);
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        subdomains: "abcd",
+        maxZoom: 19,
+      },
+    ).addTo(pinMap);
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="dpin" style="cursor:grab;">${ICONS.drop}</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+    });
+    pinMarker = L.marker([lat, lng], { icon, draggable: true }).addTo(pinMap);
+    pinMarker.on("dragend", () => {
+      const p = pinMarker.getLatLng();
+      locLat = p.lat;
+      locLng = p.lng;
+      updatePinInfo(p.lat, p.lng);
+    });
+    pinMap.on("click", (e) => {
+      pinMarker.setLatLng(e.latlng);
+      locLat = e.latlng.lat;
+      locLng = e.latlng.lng;
+      updatePinInfo(e.latlng.lat, e.latlng.lng);
+    });
+    updatePinInfo(lat, lng);
+    pinMap.invalidateSize();
+  }, 80);
+}
+
+function updatePinInfo(lat, lng) {
+  const codes = getLocationCode(lat, lng);
+  const dpEl = document.getElementById("pin-digipin");
+  if (dpEl) {
+    const parts = [];
+    if (codes.digipin) parts.push("DigiPin: " + codes.digipin);
+    if (codes.pluscode) parts.push("Plus Code: " + codes.pluscode);
+    dpEl.textContent = parts.join("  ·  ");
+  }
+  clearTimeout(revGeoTimer);
+  revGeoTimer = setTimeout(() => reverseGeocode(lat, lng), 600);
+}
+
+async function reverseGeocode(lat, lng) {
+  const el = document.getElementById("pin-revgeo");
+  if (!el) return;
+  el.textContent = "Locating…";
+  try {
+    const res = await fetch(
+      "https://nominatim.openstreetmap.org/reverse?lat=" +
+        lat +
+        "&lon=" +
+        lng +
+        "&format=json&accept-language=en",
+    );
+    const d = await res.json();
+    if (!d || !d.address) {
+      el.textContent = "";
+      return;
+    }
+    const a = d.address;
+    const parts = [
+      a.road || a.pedestrian || a.footway || a.path,
+      a.suburb || a.neighbourhood || a.quarter,
+      a.city || a.town || a.village || a.county,
+      a.state,
+      a.country,
+    ].filter(Boolean);
+    const label = parts.length ? parts.slice(0, 4).join(", ") : "";
+    el.textContent = label ? "📍 " + label : "";
+    if (label) {
+      const rspec = document.getElementById("rspec");
+      if (rspec) rspec.value = normLocation(parts.slice(0, 2).join(", "));
+    }
+  } catch (e) {
+    el.textContent = "";
+  }
+}
+
+async function validateLocationField(val, fieldType) {
+  if (!val || val.trim().length < 3) return;
+  try {
+    const res = await fetch(
+      "https://nominatim.openstreetmap.org/search?q=" +
+        encodeURIComponent(val.trim()) +
+        "&format=json&addressdetails=1&limit=1&accept-language=en",
+    );
+    const data = await res.json();
+    if (!data || !data.length) return;
+    const a = data[0].address;
+    if (fieldType === "state") {
+      const isCity = !!(a.city || a.town || a.village || a.suburb);
+      const isState = !!(a.state && !a.city && !a.town);
+      if (isCity && !isState) {
+        const stateHint = a.state ? ' Did you mean "' + a.state + '"?' : "";
+        toast(
+          'State field: "' + val.trim() + '" looks like a city.' + stateHint,
+          true,
+        );
+      }
+    } else if (fieldType === "area") {
+      const isState =
+        !!a.state && !(a.city || a.town || a.village || a.suburb || a.county);
+      if (isState) {
+        const cityHint = a.county
+          ? ' Try a district like "' + a.county + '".'
+          : "";
+        toast(
+          'Area field: "' + val.trim() + '" looks like a state.' + cityHint,
+          true,
+        );
+      }
+    }
+  } catch (e) {}
+}
+
+const ABUSE = [
+  "fuck",
+  "shit",
+  "bitch",
+  "asshole",
+  "bastard",
+  "cunt",
+  "dick",
+  "cock",
+  "pussy",
+  "whore",
+  "slut",
+  "nigger",
+  "nigga",
+  "faggot",
+  "retard",
+  "rape",
+  "raping",
+  "raped",
+  "molest",
+  "ur mom",
+  "your mom",
+  "yo mama",
+  "yo momma",
+  "teri maa",
+  "teri ma",
+  "teri behen",
+  "teri behan",
+  "madarchod",
+  "madarjaat",
+  "bhenchod",
+  "bhen ke",
+  "bhenke",
+  "behenchod",
+  "chutiya",
+  "chutiye",
+  "chut",
+  "lund",
+  "gaand",
+  "randi",
+  "haramzada",
+  "haramzadi",
+  "haramkhor",
+  "sala",
+  "saala",
+  "saali",
+  "kamina",
+  "kamine",
+  "kaminey",
+  "kutte",
+  "kutiya",
+  "mc",
+  "bc",
+  "mf",
+  "stfu",
+  "gtfo",
+  "kys",
+  "nsfw",
+  "boobs",
+  "tits",
+  "naked",
+  "nude",
+  "porn",
+  "sex",
+  "sexy",
+  "sexi",
+  "horny",
+  "boner",
+  "lmao lmfao",
+  "fake report",
+  "nothing here",
+  "bakwaas",
+  "bekar",
+  "faltu",
+  "jhoot",
+  "jhoothi",
+  "jhootha",
+  "bewakoof",
+  "pagal",
+  "ullu",
+  "ulloo",
+  "harami",
+  "sala kutta",
+  "suar",
+  "suwar",
+];
+
+const GIBBERISH_PATTERNS = [
+  /^(.)\1{3,}$/,
+  /^[qwrtypsdfghjklzxcvbnm]{5,}$/i,
+  /^[aeiou]{4,}$/i,
+  /^(asdf|qwer|zxcv|hjkl|uiop|1234|abcd|wxyz)/i,
+];
+
+function containsAbuse(str) {
+  if (!str) return null;
+  const s = str
+    .toLowerCase()
+    .replace(/[*@#!$%^&]/g, "")
+    .replace(/0/g, "o")
+    .replace(/3/g, "e")
+    .replace(/1/g, "i")
+    .replace(/4/g, "a");
+  for (const w of ABUSE) {
+    if (s.includes(w)) return w;
+  }
+  return null;
+}
+
+function isGibberish(str) {
+  if (!str) return true;
+  const s = str.trim();
+  if (s.length <= 2) return true;
+  for (const r of GIBBERISH_PATTERNS) {
+    if (r.test(s)) return true;
+  }
+  const clean = s.toLowerCase().replace(/\s/g, "");
+  if (clean.length > 6 && new Set(clean).size <= 2) return true;
+  return false;
+}
+
+function checkTextSpam(name, state, area, specific, notes) {
+  const errors = [];
+  const required = [
+    { label: "reporter name", val: name },
+    { label: "state", val: state },
+    { label: "area", val: area },
+    { label: "location", val: specific },
+  ];
+  for (const f of required) {
+    const abuse = containsAbuse(f.val);
+    if (abuse) {
+      errors.push(f.label + " contains inappropriate language");
+      continue;
+    }
+    if (isGibberish(f.val))
+      errors.push(f.label + " does not look like a real value");
+  }
+  if (notes) {
+    const notesAbuse = containsAbuse(notes);
+    if (notesAbuse) errors.push("notes contain inappropriate language");
+    const noteWords = notes.trim().split(/s+/);
+    const gibWords = noteWords.filter((w) => w.length > 3 && isGibberish(w));
+    if (gibWords.length >= 2)
+      errors.push(
+        "notes appear to contain gibberish — please describe the issue clearly",
+      );
+  }
+  return errors;
+}
+
+async function analyseImage(file) {
+  return new Promise(function (resolve) {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      const W = 80,
+        H = 80;
+      const c = document.createElement("canvas");
+      c.width = W;
+      c.height = H;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, W, H);
+      const d = ctx.getImageData(0, 0, W, H).data;
+      const total = W * H;
+
+      const buckets = {};
+      const greys = [];
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i],
+          g = d[i + 1],
+          b = d[i + 2];
+
+        const grey = Math.round((r + g + b) / 3);
+        greys.push(grey);
+        const key =
+          Math.round(r / 32) * 32 +
+          "," +
+          Math.round(g / 32) * 32 +
+          "," +
+          Math.round(b / 32) * 32;
+        buckets[key] = (buckets[key] || 0) + 1;
+      }
+      const topBucket = Math.max.apply(null, Object.values(buckets));
+      const dominance = topBucket / total;
+      const mean =
+        greys.reduce(function (a, b) {
+          return a + b;
+        }, 0) / greys.length;
+      const variance =
+        greys.reduce(function (a, v) {
+          return a + Math.pow(v - mean, 2);
+        }, 0) / greys.length;
+      const issues = [];
+      if (dominance > 0.75)
+        issues.push("appears to be a blank or solid-colour image");
+      if (variance < 100) issues.push("appears to have no real detail");
+      const saturations = [];
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i],
+          g = d[i + 1],
+          b = d[i + 2];
+        const mx = Math.max(r, g, b),
+          mn = Math.min(r, g, b);
+        saturations.push(mx === 0 ? 0 : (mx - mn) / mx);
+      }
+      const avgSat =
+        saturations.reduce((a, b) => a + b, 0) / saturations.length;
+      const highSatPx = saturations.filter((s) => s > 0.7).length / total;
+      if (avgSat > 0.45 && highSatPx > 0.35 && variance > 500) {
+        issues.push(
+          "photo looks like an illustration or screenshot — please upload a real photo of the location",
+        );
+      }
+      resolve({ ok: issues.length === 0, issues: issues });
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      resolve({ ok: true, issues: [] });
+    };
+    img.src = url;
+  });
+}
+
+let faceApiReady = false;
+async function loadFaceApi() {
+  if (faceApiReady || typeof faceapi === "undefined") return;
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(
+      "https://justadudewhohacks.github.io/face-api.js/models",
+    );
+    faceApiReady = true;
+  } catch (e) {}
+}
+
+async function checkFaceInImage(file) {
+  if (typeof faceapi === "undefined") return { ok: true };
+  await loadFaceApi();
+  if (!faceApiReady) return { ok: true };
+  try {
+    const img = await faceapi.bufferToImage(file);
+    const det = await faceapi.detectAllFaces(
+      img,
+      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.55 }),
+    );
+    if (det.length > 0)
+      return {
+        ok: false,
+        issues: [
+          "photo appears to show a person — please upload a photo of the spot, not people",
+        ],
+      };
+  } catch (e) {}
+  return { ok: true };
+}
+
+async function checkAllImages(files) {
+  const results = [];
+  for (let i = 0; i < files.length; i++) {
+    const analysis = await analyseImage(files[i]);
+    const face = await checkFaceInImage(files[i]);
+    const issues = analysis.issues.concat(face.issues || []);
+    if (issues.length) results.push({ index: i + 1, issues: issues });
+  }
+  return results;
+}
