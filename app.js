@@ -106,19 +106,28 @@ function genId() {
 
 function fmtTs(iso) {
   const d = new Date(iso);
-  return (
-    d.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }) +
-    " · " +
-    d.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    })
-  );
+  const localDate = d.toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const localTime = d.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const viewerTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isIST = viewerTz === "Asia/Calcutta" || viewerTz === "Asia/Kolkata";
+  if (isIST) {
+    return localDate + " · " + localTime + " IST";
+  }
+  const istTime = d.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  });
+  return localDate + " · " + localTime + " [" + istTime + " IST]";
 }
 
 function normLocation(str) {
@@ -126,7 +135,12 @@ function normLocation(str) {
   return str
     .trim()
     .toLowerCase()
-    .replace(/\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function looksLikeAbbr(str) {
+  const s = str.trim();
+  return s.length <= 4 && s === s.toUpperCase() && /^[A-Z]+$/.test(s);
 }
 
 let reports = [],
@@ -204,6 +218,19 @@ function initMap() {
   mLayer = L.layerGroup().addTo(map);
   buildCatFilter();
   fetchReports();
+  locateUser();
+}
+
+async function locateUser() {
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    const data = await res.json();
+    if (data && data.latitude && data.longitude) {
+      map.setView([data.latitude, data.longitude], 10);
+    }
+  } catch (e) {
+    // silent — map stays on India default
+  }
 }
 
 function makePinIcon(cats) {
@@ -440,16 +467,16 @@ function renderDetail(r) {
     <div class="det-timestamp">Submitted ${fmtTs(r.ts)} &nbsp;&middot;&nbsp; by ${r.reporter}</div>
     <div class="form-grid" style="margin-top:1.25rem;">
       <div class="form-col">
-        <div class="det-sec-label" style="margin-bottom:.45rem;">Location</div>
+        <div class="det-sec-label sl-loc" style="margin-bottom:.45rem;">Location</div>
         <div style="font-family:var(--fb);font-size:.85rem;color:#8ab08a;font-weight:500;">${r.state} &middot; ${r.area}</div>
-        ${r.notes ? `<div class="det-sec-label" style="margin-top:1.1rem;margin-bottom:.45rem;">Notes</div><div class="det-notes">${r.notes}</div>` : ""}
+        ${r.notes ? `<div class="det-sec-label sl-loc" style="margin-top:1.1rem;margin-bottom:.45rem;">Notes</div><div class="det-notes">${r.notes}</div>` : ""}
       </div>
       <div class="form-col">
-        ${types ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Type of site</div><div class="det-tags" style="margin-bottom:.85rem;">${types}</div>` : ""}
-        ${sevs ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Severity</div><div class="det-tags">${sevs}</div>` : ""}
+        ${types ? `<div class="det-sec-label sl-site" style="margin-bottom:.45rem;">Type of site</div><div class="det-tags" style="margin-bottom:.85rem;">${types}</div>` : ""}
+        ${sevs ? `<div class="det-sec-label sl-sev" style="margin-bottom:.45rem;">Severity</div><div class="det-tags">${sevs}</div>` : ""}
       </div>
       <div class="form-col">
-        ${cats ? `<div class="det-sec-label" style="margin-bottom:.45rem;">Garbage category</div><div class="det-cats">${cats}</div>` : ""}
+        ${cats ? `<div class="det-sec-label sl-cat" style="margin-bottom:.45rem;">Garbage category</div><div class="det-cats">${cats}</div>` : ""}
       </div>
     </div>`;
   const mm = document.getElementById("det-mini-map");
@@ -528,7 +555,12 @@ async function searchLoc(q) {
 }
 
 function pickLoc(name, lat, lng) {
-  document.getElementById("rspec").value = name;
+  const parts = name
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const short = parts.slice(0, 2).join(", ");
+  document.getElementById("rspec").value = short;
   locLat = parseFloat(lat);
   locLng = parseFloat(lng);
   const box = document.getElementById("loc-results");
@@ -680,6 +712,16 @@ async function submitReport() {
     toast("Add at least one photo.", true);
     return;
   }
+  if (looksLikeAbbr(document.getElementById("rstate").value.trim()))
+    toast(
+      "Looks like an abbreviation for state — consider writing the full name.",
+      false,
+    );
+  if (looksLikeAbbr(document.getElementById("rarea").value.trim()))
+    toast(
+      "Looks like an abbreviation for area — consider writing the full name.",
+      false,
+    );
   const btn = document.querySelector(".sub-btn");
   btn.textContent = "Uploading…";
   btn.disabled = true;
@@ -713,13 +755,15 @@ async function submitReport() {
       ts: new Date().toISOString(),
     });
     if (repErr) throw repErr;
-    const { error: photoErr } = await sb.from("report_photos").insert(
-      photoUrls.map((p) => ({
-        report_id: id,
-        url: p.url,
-        position: p.position,
-      })),
-    );
+    const { error: photoErr } = await sb
+      .from("report_photos")
+      .insert(
+        photoUrls.map((p) => ({
+          report_id: id,
+          url: p.url,
+          position: p.position,
+        })),
+      );
     if (photoErr) throw photoErr;
     await fetchReports();
     document.getElementById("form-screen").style.display = "none";
